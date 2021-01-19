@@ -1,0 +1,16 @@
+{
+"tenement": 
+    {
+        "Exploration_and_production_permits_Queensland": "http://qldspatial.information.qld.gov.au/DownloadService/Download.aspx?token=S2s1xtzMNXOopAg%2BcR7CwTeRdI9vaqv%2BoyRe%2BvrmH29mRMa3Ru2lV7q1Acb5Swj5g%2FCbhQO%2Fd6aq%0AwoYMB6xUIGOs0Th%2ByuTotvPICvbtMZvWsU9JpBdgxFEGMHxBGZGjJxkZApoK8B3zOXihAZm3uhxW%0Ar9%2F61SYGNSwinfjGIUAwNrcydPDMiYo5xahlLFcldsSwg1Rk4euRzwCdQh8vdk87qcXpb0QLusTC%0AwIQBrWo921e2jdpTH%2B3ZK1L5NHPo5NvUvq%2BAyZX2mFM43y%2BhEjveMeGGJbUrDk7mDClmxrWaIGxT%0A1DApwxvMEOmsQyV2QR3tQSGt%2BXugvTaeQ5SedLoGs8pche6tvEy30RB0IBQRiLMNGWKcn43LLWvG%0AiG41O9miNAip6YKyYsXfLLujBWArEh7yFd2N3Owdw%2Fm%2BwuziCPVS1usO8pdOKUiSvADR0oOCZjAw%0A8ihT60Vo5etQT26FlfEC7f%2Bube9nP9J1zRxp7zM5nJw%2FlSYZ1yDhcKyJSw82G2F0XsY8wzauDYLa%0AXV5gvXRfeTf3K5IVC1%2F2c1cSluCLQMUAzuzML6GF8qReJJI8C5kvadc2YJFsX85rVe45Cwji9kvJ%0Amf6NciOcM2GpsC4yXVVB3rWmBqx4gUtYPVaETUrworbVnHav29g9BNnrd9dQLGOiRn4fTRuO%2F3Q%3D%0A",
+        "Vic minerals": "http://services.land.vic.gov.au/SpatialDatamart/publicAccessOrderDownload.html?fileName=SDM813626.zip&orderId=813902",
+        "Vic petroleum": "http://services.land.vic.gov.au/SpatialDatamart/publicAccessOrderDownload.html?fileName=SDM813605.zip&orderId=813903"
+    },
+"occurrence": 
+    {
+        "NSW_Occurrences": "https://dwh2.geoscience.nsw.gov.au/fme/fmedatadownload/results/FME_68185551_1611009386612_6808.zip",
+        "NSW_Drillholes": "https://dwh2.geoscience.nsw.gov.au/fme/fmedatadownload/results/FME_68185551_1611009495645_6808.zip",
+        "QLD_All": "https://gisservices2.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20210119_083545646000-84312.zip",
+        "VIC_Occurrences": "http://services.land.vic.gov.au/SpatialDatamart/publicAccessOrderDownload.html?fileName=SDM813608.zip&orderId=813905",
+        "VIC_Petroleum": "http://services.land.vic.gov.au/SpatialDatamart/publicAccessOrderDownload.html?fileName=SDM813609.zip&orderId=813906"
+    }
+}

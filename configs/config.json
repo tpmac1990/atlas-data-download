@@ -1,0 +1,1253 @@
+{
+"tenement": {
+    "Data_Import": 
+        [
+            {
+                "name":"nsw_titles",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://gs.geoscience.nsw.gov.au/geoserver/gsnsw/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=gsnsw:bl_title&outputFormat=shape-zip",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"NSW_1",
+                            "crs": "EPSG:4326",
+                            "files":["bl_title"]
+                        }
+                    ]
+            },
+            {
+                "name":"nsw_application",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://gs.geoscience.nsw.gov.au/geoserver/gsnsw/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=gsnsw:bl_titleappl&outputFormat=shape-zip",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"NSW_2",
+                            "crs": "EPSG:4326",
+                            "files":["bl_titleappl"]
+                        }
+                    ]
+            },
+            {
+                "name":"nt_mineral",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"http://geoscience.nt.gov.au/contents/prod/Downloads/NT_MineralTitles_shape.zip",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"NT_1",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "MIN_TITLE_EMEL_GRNT",
+                                "MIN_TITLE_EXPL_GRNT",
+                                "MIN_TITLE_PROD_GRNT"
+                            ]
+                        },
+                        {
+                            "type":"merge",
+                            "output":"NT_2",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "MIN_TITLE_EMEL_APPL",
+                                "MIN_TITLE_EXPL_APPL",
+                                "MIN_TITLE_PROD_APPL"
+                            ]
+                        },
+                        {
+                            "type":"none",
+                            "output":"NT_3",
+                            "crs": "EPSG:4283",
+                            "files":["MIN_TITLE_EXPL_ALRA"]
+                        },
+                        {
+                            "type":"none",
+                            "output":"NT_4",
+                            "crs": "EPSG:4283",
+                            "files":["MIN_TITLE_EXPL_CESS"]
+                        }
+                    ]
+            },
+            {
+                "name":"nt_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"http://geoscience.nt.gov.au/contents/prod/Downloads/NT_PetroleumPipelineTitles_shape.zip",
+                "extension":"nt_petroleum",
+                "created_extension":"nt_petroleum", 
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"NT_5",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "PETRO_TITLE_EXPL_GRNT",
+                                "PETRO_TITLE_PROD_GRNT",
+                                "PETRO_TITLE_RETN_GRNT"
+                            ]
+                        },
+                        {
+                            "type":"merge",
+                            "output":"NT_6",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "PETRO_TITLE_EXPL_APPL",
+                                "PETRO_TITLE_RETN_APPL"
+                            ]
+                        },
+                        {
+                            "type":"none",
+                            "output":"NT_7",
+                            "crs": "EPSG:4283",
+                            "files":["PETRO_ACREAGE_RELEASE_AREAS"]
+                        },
+                        {
+                            "type":"none",
+                            "output":"NT_8",
+                            "crs": "EPSG:4283",
+                            "files":["PETRO_TITLE_EXPL_ALRA"]
+                        }
+                    ]
+            },
+            {
+                "name":"qld_titles",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"Exploration_and_production_permits_Queensland",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"QLD_1",
+                            "crs": "EPSG:7844",
+                            "files":[
+                                "Exploration_permits_for_mineral",
+                                "Exploration_permits_for_coal",
+                                "Exploration_permits_for_petroleum",
+                                "Petroleum_leases",
+                                "Mining_leases",
+                                "Mining_claims",
+                                "Mineral_development_licence"
+                            ]
+                        },
+                        {
+                            "type":"merge",
+                            "output":"QLD_2",
+                            "crs": "EPSG:7844",
+                            "files":[
+                                "Advertised_areas_for_coal",
+                                "Advertised_areas_for_petroleum"
+                            ]
+                        },
+                        {
+                            "type":"none",
+                            "output":"QLD_3",
+                            "crs": "EPSG:7844",
+                            "files":["Moratorium_areas_for_minerals"]
+                        }
+                    ]
+            },
+            {
+                "name":"SA_titles",
+                "data_source":"WFS",
+                "import_style":"wfs",
+                "link":"https://services.sarig.sa.gov.au/vector/mineral_tenements/wfs?version=1.1.0",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"SA_1",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "mineral_tenements:mineral_claims",
+                                "mineral_tenements:mineral_leases",
+                                "mineral_tenements:extractive_mineral_leases",
+                                "mineral_tenements:private_mines",
+                                "mineral_tenements:retention_leases",
+                                "mineral_tenements:olympic_dam_sml",
+                                "mineral_tenements:miscellaneous_purposes_leases"
+                            ]
+                        },
+                        {
+                            "type":"none",
+                            "output":"SA_2",
+                            "crs": "EPSG:4283",
+                            "files":["mineral_tenements:mineral_and_or_opal_exploration_licence"]
+                        },
+                        {
+                            "type":"none",
+                            "output":"SA_3",
+                            "crs": "EPSG:4283",
+                            "files":["mineral_tenements:exploration_release_areas_released"]
+                        },
+                        {
+                            "type":"none",
+                            "output":"SA_4",
+                            "crs": "EPSG:4283",
+                            "files":["mineral_tenements:mining_and_production_tenement_applications"]
+                        },
+                        {
+                            "type":"none",
+                            "output":"SA_5",
+                            "crs": "EPSG:4283",
+                            "files":["mineral_tenements:mining_and_production_lease_applications"]
+                        },
+                        {
+                            "type":"none",
+                            "output":"SA_6",
+                            "crs": "EPSG:4283",
+                            "files":["mineral_tenements:mineral_and_or_opal_exploration_licence_applications"]
+                        }
+                    ]
+            },
+            {
+                "name":"SA_Petroleum",
+                "data_source":"WFS",
+                "import_style":"wfs",
+                "link":"https://services.sarig.sa.gov.au/vector/petroleum_tenements/wfs?",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"SA_7",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "petroleum_tenements:petroleum_retention_licences_leases",
+                                "petroleum_tenements:petroleum_production_licences",
+                                "petroleum_tenements:petroleum_exploration_licences_permits"
+                            ]
+                        },
+                        {
+                            "type":"merge",
+                            "output":"SA_8",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "petroleum_tenements:petroleum_production_licence_applications",
+                                "petroleum_tenements:petroleum_retention_licence_lease_applications",
+                                "petroleum_tenements:petroleum_exploration_licence_permit_applications"
+                            ]
+                        },
+                        {
+                            "type":"none",
+                            "output":"SA_9",
+                            "crs": "EPSG:4283",
+                            "files":["petroleum_tenements:petroleum_public_calls__gazettal_acreage"]
+                        }
+                    ]
+            },
+            {
+                "name":"vic_mineral",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"Vic minerals",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"VIC_1",
+                            "crs": "EPSG:4283",
+                            "files":["minten"]
+                        }
+                    ]
+            },
+            {
+                "name":"vic_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"Vic petroleum",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"VIC_2",
+                            "crs": "EPSG:4283",
+                            "files":["petrol"]
+                        }
+                    ]
+            },
+            {
+                "name":"tas_titles",
+                "data_source":"WFS",
+                "import_style":"wfs",
+                "link":"http://www.mrt.tas.gov.au/web-services/ows",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"TAS_1",
+                            "crs": "EPSG:4283",
+                            "files":["mt:MineralTenement"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_current_tenements",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/2056",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_1",
+                            "crs": "EPSG:7844",
+                            "files":["CurrentTenements"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_Tenements_Release_Pending",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/2066",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_2",
+                            "crs": "EPSG:7844",
+                            "files":["Tenements_Release_Pending"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_Tenements_Amalgamation_Pending",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/2051",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_3",
+                            "crs": "EPSG:7844",
+                            "files":["Tenements_Amalgamation_Pending"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_Tenement_Restorations_Pending",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/2070",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_4",
+                            "crs": "EPSG:7844",
+                            "files":["Tenement_Restorations_Pending"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_waptitle",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/76",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_5",
+                            "crs": "EPSG:4283",
+                            "files":["waptitle"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_wapapplication",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/59",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_6",
+                            "crs": "EPSG:4283",
+                            "files":["wapapplication"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_waprelease",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/68",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_7",
+                            "crs": "EPSG:4283",
+                            "files":["waprelease"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_wapspaao",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/2027",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_8",
+                            "crs": "EPSG:4283",
+                            "files":["wapspaao"]
+                        }
+                    ]
+            },
+            {
+                "name":"OS_petroleum_titles",
+                "data_source":"WFS",
+                "import_style":"wfs",
+                "link":"https://arcgis.nopta.gov.au/arcgis/services/Public/PetroleumTitles_Company/MapServer/WFSServer",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"AUS_OSPET_1",
+                            "crs": "EPSG:4283",
+                            "files":["Public_PetroleumTitles_Company:Petroleum_Titles_Company"]
+                        }
+                    ]
+            }
+        ],
+    "Primary_Format": {
+            "AUS_OSPET_1": {
+                "required_fields": ["WKT", "TITLE_NAME", "TITLE_TYPE", "INITIALEXP_DATE", "LASTRENEWAL", "CURRENTEXP_DATE", "EXPIRY_DATE_NEATS", "GRANT_DATE_NEATS", "STATUS_NEATS", "TITLE_HOLDERS_NEATS", "NEW_IDENTIFIER"],
+                "unique_column": 3,
+                "field_filter": [
+                    {"name": "OFFSHORE_AREA", "type": "include", "vals": ["Territory of Ashmore and Cartier Islands", "Victoria", "Northern Territory", "Queensland", "Tasmania", "Western Australia"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NSW_1": {
+                "required_fields": ["WKT", "tas_id","title","holder","grant_date","expiry_dat","last_renew","title_code","operation","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NSW_2": {
+                "required_fields": ["WKT", "tas_id","applicatio","appl_code","applicant","appl_date","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NT_1": {
+                "required_fields": ["WKT", "TITLEID","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","PTY_NAME","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 1,"val_index": 12,"extra":{"name": "percent","index":13}},
+                "sort_values": {"index": 12, "separator": ";"}
+            },
+            "NT_2": {
+                "required_fields": ["WKT", "TITLEID", "STATUS", "TS_TYPE", "DT_EFFECT", "DT_CONSENT", "DT_VT_STRT", "DT_VT_FINL", "PTY_NAME", "HLD_TYPE", "NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["A"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 1,"val_index": 11,"extra":{"name": "percent","index":12}},
+                "sort_values": {"index": 11, "separator": ";"}
+            },
+            "NT_3": {
+                "required_fields": ["WKT", "TITLEID","DT_VT_STRT","DT_VT_FINL","DT_APPL","ACTIVE","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NT_4": {
+                "required_fields": ["WKT", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_MOATORM","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 1,"val_index": 11,"extra":{"name": "percent","index":12}},
+                "sort_values": {"index": 11, "separator": ";"}
+            },
+            "NT_5": {
+                "required_fields": ["WKT", "TITLEID","SW_MEMBER","TI_TYPE_CD","TI_NUMBER","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","DT_RW_APPL","DT_RW_GRNT","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 1,"val_index": 12,"extra":{"name": "percent","index":13}},
+                "sort_values": {"index": 12, "separator": ";"}
+            },
+            "NT_6": {
+                "required_fields": ["WKT", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_CONSENT","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["A"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 1,"val_index": 11,"extra":{"name": "percent","index":12}},
+                "sort_values": {"index": 11, "separator": ";"}
+            },
+            "NT_7": {
+                "required_fields": ["WKT", "ID","OPEN_DATE","CLOSE_DATE","STATUS","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NT_8": {
+                "required_fields": ["WKT", "MORA_ID","TITLEID","DT_APPL","DT_VT_STRT","DT_VT_FINL","NEW_IDENTIFIER"],
+                "unique_column": 3,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "QLD_1": {
+                "required_fields": ["WKT", "PERMITTY_1","PERMITTY_2","PERMITMINE","LODGEDATE","APPROVEDAT","EXPIRYDATE","NONCURRENT","AUTHORIS_1","NEW_IDENTIFIER"],					
+                "unique_column": 2,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "QLD_2": {
+                "required_fields": ["NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "QLD_3": {
+                "required_fields": ["WKT", "TENURE", "EFFECTIVED", "NEW_IDENTIFIER"],
+                "unique_column": 3,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": {
+                    "name": "add_multipolygon",
+                    "index": [33,34]
+                },
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_1": {
+                "required_fields": ["WKT", "TENEMENT_LABEL","TENEMENT_STATUS","TENEMENT_HOLDERS","REGISTRATION_GRANT_DATE","SURRENDER_DATE","EXPIRY_DATE","RENEWAL_RECEIVED_DATE","TRANSFER_RECEIVED_DATE","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_2": {
+                "required_fields": ["WKT", "TENEMENT_LABEL","TENEMENT_STATUS","LICENCEES","TENEMENT_START_DATE","TENEMENT_SURRENDER_DATE","TENEMENT_EXPIRY_DATE","RENEWAL_APPLICATION_DATE","TRANSFER_APPLICATION_DATE","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_3": {
+                "required_fields": ["WKT", "AREA_TYPE","PUBLISH_DATE","AREA_START_DATE","APPLICATION_CLOSE_DATE","AREA_STATUS","ERA_NUMBER","APPLICANTS","APPLICATION_OPEN_DATE","RELATED_TENEMENTS","NEW_IDENTIFIER"],
+                "unique_column": 14,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_4": {
+                "required_fields": ["WKT", "APPLICATION_LABEL","APPLICANTS","PEGGING_DATE","APPLICATION_RECEIVED_DATE","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_5": {
+                "required_fields": ["WKT", "DATE_RECEIVED","LEASE_TYPE","FILE_REFERENCE","APPLICANTS","RELATED_TENEMENTS","DATE_REQUIREMENTS_COMPLETE","NATIVE_TITLE","ASSESSMENT_STATUS","DATE_ASSESSMENT_COMPLETED","NEW_IDENTIFIER"],
+                "unique_column": 5,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_6": {
+                "required_fields": ["WKT", "APPLICATION_TYPE","FILE_REFERENCE","APPLICANTS","APPLICATION_RECEIVED_DATE","DATE_OFFERED","DATE_ACCEPTED","OUTCOME","OUTCOME_DATE","RESULTING_TENEMENT","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_7": {
+                "required_fields": ["WKT", "FILE_REFERENCE","LICENSEE","GRANTED_DATE","EXPIRY_DATE","TENEMENT_NO","NEW_IDENTIFIER"],
+                "unique_column": 12,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_8": {
+                "required_fields": ["WKT", "FILE_REFERENCE","APPLICANT","APPLICATION_DATE","DATE_TO","TENEMENT_NO","NEW_IDENTIFIER"],
+                "unique_column": 12,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_9": {
+                "required_fields": ["WKT", "CALL_NO","FILE_REFERENCE","DATE_FROM","DATE_TO","NEW_IDENTIFIER"],
+                "unique_column": 3,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "TAS_1": {
+                "required_fields": ["WKT", "name","tenementType","owner","status","applicationDate","grantDate","expireDate","fileID","NEW_IDENTIFIER"],
+                "unique_column": 12,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "VIC_1": {
+                "required_fields": ["WKT", "TNO","STATUS","TYPEDESCM","TYPEDESC","RENEW_APP","OWN_NAME","APPREC_DTI","GRANT1_DTI","GRANTL_DTI","EXPL_DTI","STATUSSDSC","STATUSLDSC","ACTIVE","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "VIC_2": {
+                "required_fields": ["WKT", "TNO","COVER","AUTH_TYPE","AUTH_TYPEL","NO","STATUSS","STATUSSDSC","TEN_HOLD1","ISSUE_DT","ISSUE_DTI","EXPIRE_DT","EXPIRE_DTI","APP_DT","APP_DTI","TERM_DT","TERM_DTI","NEW_IDENTIFIER"],
+                "unique_column": 2,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_1": {
+                "required_fields": ["WKT", "TENID","TYPE","TENSTATUS","STARTDATE","ENDDATE","GRANTDATE","FMT_TENID","ALL_HOLDER","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_2": {
+                "required_fields": ["WKT", "TENID","TEN_TYPE","RLESID","RLES_STATU","RLES_STAMP","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_3": {
+                "required_fields": ["WKT", "TENID","AMALGID","END_STAMP","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_4": {
+                "required_fields": ["WKT", "TENID","RESTNID","RESTN_STAT","START_STAM","END_STAMP","NEW_IDENTIFIER"],
+                "unique_column": 4,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_5": {
+                "required_fields": ["WKT", "TITLE_ID","TYPE","ISSUED","EXPIRY","STATUS","ALL_HOLDER","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": [""]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_6": {
+                "required_fields": ["WKT", "TITLE_ID","TYPE","LODGED","STATUS","APPLNT_1","APPLNT_2","APPLNT_3","APPLNT_4","APPLNT_5","APPLNT_6","APPLNT_7","APPLNT_8","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_7": {
+                "required_fields": ["WKT", "TITLE_ID","TYPE","GAZETTED","CLOSING","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_8": {
+                "required_fields": ["WKT", "TITLE_ID","TYPE","LODGED","ISSUED","SPA_EXPIRY","AO_EXPIRY","STATUS","HOLDER_1","HOLDER_2","HOLDER_3","HOLDER_4","HOLDER_5","HOLDER_6","HOLDER_7","HOLDER_8","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            }
+        }
+    },
+"occurrence": {
+    "Data_Import": 
+        [
+            {   
+                "name":"nsw_occurrence",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"NSW_Occurrences",
+                "extension":"GSNSWDataset/",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"NSW_1",
+                            "crs": "EPSG:4283",
+                            "files":["MI_FLAT_TABLE"]
+                        }
+                    ]
+            },
+            {
+                "name":"nsw_drillholes",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"NSW_Drillholes",
+                "extension":"GSNSWDataset/",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"NSW_2",
+                            "crs": "EPSG:4283",
+                            "files":["DrillHoles-in-Area"]
+                        }
+                    ]
+            },
+            {
+                "name":"nt_minerals",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"http://geoscience.nt.gov.au/contents/prod/Downloads/NT_MineralDpts_shape.zip",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"NT_1",
+                            "crs": "EPSG:4283",
+                            "files":[
+                                "MINERALOCCURRENCES",
+                                "MINESITES"
+                            ]
+                        }
+                    ]
+            },
+            {
+                "name":"nt_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"http://geoscience.nt.gov.au/contents/prod/Downloads/Drilling/PETROLEUM_WELLS_shp.zip",
+                "extension":"nt_petroleum/",
+                "created_extension":"nt_petroleum/",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"NT_2",
+                            "crs":"EPSG:4283",
+                            "files":["PETROLEUM_WELLS"]
+                        }
+                    ]
+            },
+            {
+                "name":"qld_all",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"QLD_All",
+                "extension":"in_temp_link",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"merge",
+                            "output":"QLD_1",
+                            "crs":"EPSG:7844",
+                            "files":[
+                                "Coal_resource_sites",
+                                "Mineral_resource_sites"
+                            ]
+                        },
+                        {
+                            "type":"none",
+                            "output":"QLD_2",
+                            "crs":"EPSG:7844",
+                            "files":["Petroleum_resource_sites"]
+                        }
+                    ]
+            },
+            {
+                "name":"sa_occurrences",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://data.sarig.sa.gov.au/Map/Download/layerDownload?layeId=520&formatLovId=20",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"SA_1",
+                            "crs":"EPSG:4283",
+                            "files":["mines_and_mineral_occurrences_all"]
+                        }
+                    ]
+            },
+            {
+                "name":"sa_mines",
+                "data_source":"ogr",
+                "import_style":"manual",
+                "link":"Mineral_Major_Mines_GDA2020_shp",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"SA_2",
+                            "crs":"EPSG:7844",
+                            "files":["Mineral_Major_Mines"]
+                        }
+                    ]
+            },
+            {
+                "name":"sa_petroleum",
+                "data_source":"ogr",
+                "import_style":"manual",
+                "link":"Petroleum wells_GDA2020_shp",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"SA_3",
+                            "crs":"EPSG:7844",
+                            "files":["Petroleum wells"]
+                        }
+                    ]
+            },
+            {
+                "name":"vic_mines_occurrences",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"VIC_Occurrences",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer/",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"VIC_1",
+                            "crs":"EPSG:4283",
+                            "files":["minsite"]
+                        }
+                    ]
+            },
+            {
+                "name":"vic_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"VIC_Petroleum",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer/",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"VIC_2",
+                            "crs":"EPSG:4283",
+                            "files":["pet_wells"]
+                        }
+                    ]
+            },
+            {
+                "name":"tas_mineral",
+                "data_source":"ogr",
+                "import_style":"manual",
+                "link":"deposits",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"TAS_1",
+                            "crs":"EPSG:4283",
+                            "files":["deposits"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_titles",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/142",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_1",
+                            "crs": "EPSG:4283",
+                            "files":["Minedex"]
+                        }
+                    ]
+            },
+            {
+                "name":"wa_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"https://dasc.dmp.wa.gov.au/DASC/Download/File/2007",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"WA_2",
+                            "crs": "EPSG:7844",
+                            "files":["Petroleum_Wells"]
+                        }
+                    ]
+            },
+            {
+                "name":"OS_petroleum_wells",
+                "data_source":"WFS",
+                "import_style":"wfs",
+                "link":"https://arcgis.nopta.gov.au/arcgis/services/Public/PetroleumWells_NOPTA/MapServer/WFSServer",
+                "extension":"",
+                "created_extension":"",
+                "groups":
+                    [
+                        {
+                            "type":"none",
+                            "output":"AUS_OSPET_1",
+                            "crs": "EPSG:4283",
+                            "files":["Public_PetroleumWells_NOPTA:Petroleum_Wells"]
+                        }
+                    ]
+            }
+        ],
+    "Primary_Format": {
+            "AUS_OSPET_1": {
+                "required_fields": ["WKT", "HoleName","Title","Operator","SpudDate","WellPurpose","NEW_IDENTIFIER"],
+                "unique_column": 2,
+                "field_filter": [
+                    {"name": "WellPurpose", "type": "include", "vals": ["exploration", "appraisal", "development"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NSW_1": {
+                "required_fields": ["WKT", "OCCURRENCE","METAL_NO","DEPOSIT_NA","ALL_NAMES","OPERATION","OP_STATE","OP_STATUS","WORK_DESC","SUMMARY_DE","SIZE_CODE","MAJOR_COMM","MINOR_COMM","ORE_MIN","GS_NUMBER","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NSW_2": {
+                "required_fields": ["WKT", "HOLE_NAME","HOLEPURPOS","BUS_PURPOS","TITLEREF","COMMENCED_","COMPLETED_","HOLE_STATU","PLUG_DATE","TOPSTRAT","CSGSTATUS","REPORTS","OPENFILE_D","COMMENTS","GSNSW_DRIL","NEW_IDENTIFIER"],
+                "unique_column": 2,
+                "field_filter": [
+                    {"name": "BUS_PURPOS", "type": "include", "vals": ["Petroleum", "Coal seam methane"]},
+                    {"name": "HOLEPURPOS", "type": "include", "vals": ["Exploration", "Production"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NT_1": {
+                "required_fields": ["WKT", "MODAT_ID","NAME","MIN_CATGRY","COM_MAJOR","COM_MINOR","STATUS","OCCUR_SIZE","COMMENTS1","COMMENTS2","COMMENTS3","PROD_COMME","MIN_METHOD","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": ["Feasibility", "Care and maintenance", "Operating mine"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "NT_2": {
+                "required_fields": ["WKT", "WELLNAME","PURPOSE","CLASS_POST","TITLE_ID","STATUS","DT_SPUD","DT_DEPTH","DT_RELEASE","HCSHOWS","BASICSTAT","INTERPSTAT","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "QLD_1": {
+                "required_fields": ["WKT", "SITE_NO","OCCUR_NAME","DATE_CURRE","DATE_RECOR","SITE_TYPE","MINE_STATU","EXPLORE_ST","EXPOSURE_T","DEPOSIT_SI","MAIN_COMMO","MAIN_COM_1","MAIN_OCCUR","MAIN_OCC_1","ALL_COMMOD","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "QLD_2": {
+                "required_fields": ["WKT", "SITE_NO","OCCUR_NAME","DATE_CURRE","DATE_RECOR","SITE_TYPE","DEPOSIT_SI","MAIN_COMMO","MAIN_COM_1","MAIN_OCCUR","MAIN_OCC_1","ALL_COMMOD","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_1": {
+                "required_fields": ["WKT", "MINDEP_NO","DEP_NAME","REFERENCE","COMM_CODE","COMMODS","COMMOD_MAJ","COMM_SPECS","CLASS_CODE","OPER_TYPE","MAP_SYMB","STATUS_VAL","SIZE_VAL","SRCE_CNTRE","COMMENTS","O_MAP_SYMB","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": 1,
+                "create_unique_key": {
+                    "name": "add_xy",
+                    "index": [33,34]
+                },
+                "merge_file": {
+                    "file": "SA_2",
+                    "key": {"this_file": 44, "other_file": 32},
+                    "index": [[0,0],[2,17],[10,2],[13,3]]
+                },
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_2": {
+                "unrequired_fields": "",
+                "required_fields": [],
+                "unique_column": "",
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": {
+                    "name": "add_xy",
+                    "index": [12,13]
+                },
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "SA_3": {
+                "required_fields": ["WKT", "WELLDISPLA","WELL_ID","CLASS","TYPE","STATUSRR","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "CLASS", "type": "include", "vals": ["Exploration", "Appraisal", "Development"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "TAS_1": {
+                "required_fields": ["WKT", "GID","DEPOSIT_ID","NAME","ALIAS","TYPE","COMM_TYPE","COMMODITYS","DESCRIPT","STATUS","DEP_SIZE","RESOURCES","REF","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "VIC_1": {
+                "required_fields": ["WKT", "FEATURE","SITEID","MINE_TYPE","SIZE_CAT","ADIT","IN_SITU","OPEN_CUT","SHAFT","DECLINE","SLUICING","DREDGING","PROD_COMM","PRI_COMM","SEC_COMM","MIN_ASS","MININGMETH","PLOTTYPE","SITE_TYPE","NEW_IDENTIFIER"],
+                "unique_column": 2,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "VIC_2": {
+                "required_fields": ["WKT", "SITEID","WELL_NAME","CURRNTSTAT","SYMBOLDESC","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "SYMBOLDESC", "type": "exclude", "vals": ["Location", "Proposed well - COORDINATES ARE NOT ACTUAL"]},
+                    {"name": "PRVNCSTATE", "type": "include", "vals": ["VIC"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_1": {
+                "required_fields": ["WKT", "SITE_CODE","SITE_TITLE","SHORT_NAME","SITE_COMMO","SITE_TYPE_","SITE_SUB_T","SITE_STAGE","TARGET_COM","COMMODITY","PROJ_CODE","NEW_IDENTIFIER"],
+                "unique_column": 1,
+                "field_filter": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            },
+            "WA_2": {
+                "required_fields": ["WKT", "WELL_NAME","UWI","CLASS","STATUS","NEW_IDENTIFIER"],
+                "unique_column": 2,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": ["Water", "Service"]}
+                ],
+                "duplicate_rows_key": 1,
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": ""
+            }
+        }
+    }
+}

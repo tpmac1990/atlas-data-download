@@ -1,0 +1,11 @@
+
+# spatial files
+*.gfs
+*.gml
+
+# excel, csv files
+*.csv
+*.xlsm
+
+# database access keys
+db_access_configs.json

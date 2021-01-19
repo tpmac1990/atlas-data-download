@@ -1,0 +1,72 @@
+{
+    "files":[
+        {
+            "file_name": "occurrence",
+            "data_group": "occurrence",
+            "type": "one2many",
+            "index": false,
+            "groups": [
+                {
+                    "region": "local_government",
+                    "merge_on": "OCCID",
+                    "header": "LOCALGOV"
+                },
+                {
+                    "region": "government_region",
+                    "merge_on": "OCCID",
+                    "header": "GOVREGION"
+                }
+            ]
+        },
+        {
+            "file_name": "tenement_localgov",
+            "data_group": "tenement",
+            "type": "many2many",
+            "index": true,
+            "region": "local_government",
+            "merge_on": "TENID",
+            "headers": ["LGOV_ID", "TEN_ID"]
+        },
+        {
+            "file_name": "tenement_govregion",
+            "data_group": "tenement",
+            "type": "many2many",
+            "index": true,
+            "region": "government_region",
+            "merge_on": "TENID",
+            "headers": ["GREG_ID", "TEN_ID"]
+        },
+        {
+            "file_name": "tenement_geoprovince",
+            "data_group": "tenement",
+            "type": "many2many",
+            "index": true,
+            "region": "geological_province",
+            "merge_on": "TENID",
+            "headers": ["GPROV_ID", "TEN_ID"]
+        },
+        {
+            "file_name": "occurrence_geoprovince",
+            "data_group": "occurrence",
+            "type": "many2many",
+            "index": true,
+            "region": "geological_province",
+            "merge_on": "OCCID",
+            "headers": ["GPROV_ID", "OCC_ID"]
+        }
+    ],
+    "shapes":[
+        {
+            "file_name": "GeologicalProvince",
+            "columns": ["_ID", "NAME", "TYPE", "RANK"]
+        },
+        {
+            "file_name": "GovernmentRegion",
+            "columns": ["_ID", "NAME"]
+        },
+        {
+            "file_name": "LocalGovernment",
+            "columns": ["_ID", "NAME"]
+        }
+    ]
+}
