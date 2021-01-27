@@ -1,4 +1,4 @@
-from .directories_files import copyDirectory, getJSON, fileExist
+from .directory_files import copyDirectory, getJSON, fileExist
 from .preformat import singleColumnDfToList
 
 import sqlalchemy
@@ -177,14 +177,32 @@ def build_update_and_change_files(self):
         # Add the REMOVE updates to the update df
         final_updates_df = concat_to_update_df(final_updates_df,datagroup_remove_df,"REMOVE",data_group)
 
-    # drop any duplicates and write to csv
-    drop_duplicates_write_to_csv(final_changes_df,self.changes_path)
-    drop_duplicates_write_to_csv(final_updates_df,self.updates_path)
+    # add the ID and DATE fields, write and append to core file
+    add_id_date_fields_and_write_files(self,final_changes_df,self.changes_path,self.core_changes_path)
+    add_id_date_fields_and_write_files(self,final_updates_df,self.updates_path,self.core_updates_path)
 
 
-def drop_duplicates_write_to_csv(df,path):
+
+def add_id_date_fields_and_write_files(self,df,file_path,core_file_path):
+    # drop any duplicates
     df.drop_duplicates(inplace=True)
-    df.to_csv(path,index=False)
+    # add date field
+    df["date"] = self.tDate
+    # concat to core file
+    if fileExist(core_file_path):
+        core_file_df = pd.read_csv(core_file_path)
+        # core_changes_df = pd.read_csv(self.core_changes_path)
+        next_id = core_file_df["_ID"].max() + 1
+        df["_ID"] = np.arange(next_id, len(df) + next_id)
+        core_file_df = pd.concat((core_file_df,df))
+    else:
+        df["_ID"] = np.arange(1, len(df) + 1)
+        core_file_df = df
+    # write to csv
+    df.to_csv(file_path,index=False)
+    # write updated core file to the core directory
+    core_file_df.to_csv(core_file_path,index=False)
+
 
 
 def concat_to_update_df(main_df,join_df,typ,data_group):
@@ -271,8 +289,8 @@ def make_core_file_and_db_changes(self):
                 edit_core_df = pd.concat((edit_core_df,to_add_df))
 
                 # Write to core csv and change csv
-                edit_core_df.to_csv(core_path)
-                to_add_df.to_csv(change_file_path)
+                edit_core_df.to_csv(core_path,index=False)
+                to_add_df.to_csv(change_file_path,index=False)
 
                 # delete all rows from the db
                 field = update_configs[file]["columns"][key]
@@ -340,7 +358,7 @@ def compare_base_tables_add_new(self):
                 # concat new rows to the core_df
                 new_core_df = pd.concat((core_df,new_ids_df))
                 # save new core_df
-                new_core_df.to_csv(core_path)
+                new_core_df.to_csv(core_path,index=False)
 
                 # append new rows to the database table
                 new_ids_df.rename(columns=update_configs[file]["columns"],inplace=True)

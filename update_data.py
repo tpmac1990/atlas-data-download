@@ -1,4 +1,5 @@
 import time
+import datetime
 import os
 # from base_functions import *
 # from project_functions import *
@@ -12,6 +13,8 @@ class UpdateData():
     def __init__(self):
         # BASE_DIR in this instance is the RAW_DATASETS
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # set the date
+        self.tDate = datetime.datetime.now().strftime("%y%m%d")
         # scripts directory
         self.scripts_dir = os.path.join(BASE_DIR,'scripts')
         # configs directory
@@ -45,8 +48,8 @@ class UpdateData():
         find_changes_update_core_and_database(self)
 
 
-UpdateData().download_format()
-# UpdateData().add_relations()
+# UpdateData().download_format()
+UpdateData().add_relations()
 
 
 

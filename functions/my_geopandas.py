@@ -111,6 +111,7 @@ def create_tenement_occurrence_file(self):
         ids_df = self.occ_gdf[~self.occ_gdf["OCCID"].isin(df["OCCID"].values.tolist())]
         # concatenate this to the core df so it contains all the occurrences
         concat_df = pd.concat((df,ids_df),ignore_index=True)
+        concat_df['WKT'] = concat_df['WKT'].astype(str) # need make sure the WKT dtype is string.
         concat_df['WKT'] = concat_df['WKT'].apply(wkt.loads)
         self.occ_gdf = gpd.GeoDataFrame(concat_df,geometry="WKT",crs="EPSG:4202")
 

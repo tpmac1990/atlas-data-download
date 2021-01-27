@@ -12,6 +12,7 @@ def copyDirectory(src_directory,dest_directory):
         shutil.copy(os.path.join(src_directory,file), dest_directory)
         
 
+
 def adjustDirectoryFilenames(**kwargs):
     from_val = kwargs['from_val']
     to_val = kwargs['to_val']
@@ -96,11 +97,11 @@ def download_unzip_link_manual(self,data_import_group):
         except:
             # If the link fails then add the name, data_source and link to the download_fail.csv. This will be used later to determine whether to format the data or not.
             success = False
-            df = pd.DataFrame(columns={'NAME': [data_import_group['name']],'DATA_SOURCE': [data_import_group['data_source']],'LINK': [data_import_group['link']]})
-            if fileExist(download_fail_path):
-                existing_df = pd.read_csv(download_fail_path)
+            df = pd.DataFrame({'NAME': [data_import_group['name']],'DATA_SOURCE': [data_import_group['data_source']],'LINK': [data_import_group['link']]})
+            if fileExist(self.download_fail_path):
+                existing_df = pd.read_csv(self.download_fail_path)
                 df.concat((existing_df,df))
-            df.to_csv(download_fail_path)
+            df.to_csv(self.download_fail_path,index=False)
             print("Download was unsuccessful. Check the link.")
     return success
 

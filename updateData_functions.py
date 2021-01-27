@@ -11,34 +11,42 @@ def download_data_to_csv(self):
     # expected time: 8min 30sec
     func_start = time.time()
 
+    # loops over the occurrence and then tenement datagroups
     for data_group in self.data_groups:
         # set directories and open config files
         self.data_group_dir = os.path.join(self.input_dir,data_group)
-        configs = getJSON(os.path.join(self.configs_dir,'config.json'))[data_group]
-        self.Data_Import = configs['Data_Import']
+        configs = getJSON(os.path.join(self.configs_dir,'download_config.json'))[data_group]
+        # self.Data_Import = configs['Data_Import']
+        self.Data_Import = configs
         self.temp_links = getJSON(os.path.join(self.configs_dir,'temp_links_config.json'))[data_group]
-        self.count = 0
+        self.count = 0 # used when creating the merge file. prevents an error
         self.manual_dir = os.path.join(self.data_group_dir,'manual')
         self.wkt_csv_dir = os.path.join(self.data_group_dir,'new')
         self.unzipped_dir = os.path.join(self.data_group_dir,'unzipped')
         self.merged_file_dir = os.path.join(self.data_group_dir,'merged')
         self.zip_file_path = os.path.join(self.data_group_dir,'spatial_download.zip')
+        self.download_fail_path = os.path.join(self.data_group_dir,'download_fail.csv')
         self.data_group = data_group
 
         # delete all the files in the new directory
         delete_files_in_directory(self.wkt_csv_dir)
+        # delete the download_fail file if it exists
+        if fileExist(self.download_fail_path):
+            os.remove(self.download_fail_path)
 
+        # loops through each of the groups in the configs.json file for the current data_group
         for data_import_group in self.Data_Import:
-            # if data_import_group['name'] in ["vic_petroleum","vic_mineral"]:
+            # if data_import_group['name'] in ["nt_mineral"]:
 
-            unzipped_dir = os.path.join(self.unzipped_dir, data_import_group['created_extension'])
-            download_unzip_link_manual(self,data_import_group)
+            # unzipped_dir = os.path.join(self.unzipped_dir, data_import_group['created_extension']) # gets the location of the required file
+            # downloads and extracts the data for all the zip files. If the link fails, then it will be added to the download_fail.csv and the formatting will be skipped.
+            if download_unzip_link_manual(self,data_import_group):
 
-            for group in data_import_group['groups']:
-                print('working: ' + group['output'])
-                self.count += 1
-                merge_and_export_to_csv(self,data_import_group,group)
-                print('complete: ' + group['output'])
+                for group in data_import_group['groups']:
+                    print("working on: %s"%(group['output']))
+                    self.count += 1
+                    # Merges the files where necessary and export to csv with WKT
+                    merge_and_export_to_csv(self,data_import_group,group)
 
     print('Data Download time: %s' %(time_past(func_start,time.time())))
 
@@ -46,7 +54,6 @@ def download_data_to_csv(self):
 def preformat_file(self):
     func_start = time.time()
     csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
-    self.tDate = datetime.datetime.now().strftime("%y%m%d")
 
     for data_group in self.data_groups:
         # set directories and open config files
@@ -62,8 +69,11 @@ def preformat_file(self):
         createMultipleDirectories(self.archive_dir,['change','core','update'])
         self.output_archive_dir = os.path.join(self.output_dir,'archive',self.tDate)
         createMultipleDirectories(self.output_archive_dir,['change','core','update'])
-        self.configs = getJSON(os.path.join(self.configs_dir,'config.json'))[data_group]['Primary_Format']
+        self.configs = getJSON(os.path.join(self.configs_dir,'formatting_config.json'))[data_group]
+        self.download_configs = configs = getJSON(os.path.join(self.configs_dir,'download_config.json'))[data_group]
+        self.download_fail_path = os.path.join(self.data_group_dir,'download_fail.csv')
         self.data_group = data_group
+        self.ignore_files = getIgnoreFiles(self)
 
         archiveRemoveOldFiles(self)
         archiveRemoveOutputFiles(self)
@@ -156,6 +166,8 @@ def find_changes_update_core_and_database(self):
     # paths
     self.updates_path = os.path.join(self.update_dir,"update.csv")
     self.changes_path = os.path.join(self.update_dir,"change.csv")
+    self.core_updates_path = os.path.join(self.core_dir,'update.csv')
+    self.core_changes_path = os.path.join(self.core_dir,'change.csv')
     # configs
     self.update_configs = getJSON(os.path.join(self.configs_dir,'db_update_configs.json'))
     self.access_configs = getJSON(os.path.join(self.configs_dir,'db_access_configs.json'))

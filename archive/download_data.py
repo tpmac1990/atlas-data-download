@@ -31,7 +31,6 @@ class Functions():
       self.WkbTypes = QgsWkbTypes.MultiPolygon
 
 
-
   def downloadAndExportShpToCsv(self):
     # expected time: 4min 20sec
     start = time.time()

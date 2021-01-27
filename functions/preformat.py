@@ -4,10 +4,9 @@ import csv
 import ctypes
 import pandas as pd
 import shutil
-import datetime
 from collections import Counter
 
-from .directories_files import *
+from .directory_files import *
 from .csv_manipulation import *
 
 
@@ -17,108 +16,104 @@ def combinePolygonsWithSameID_VIC(self):
         files = ["VIC_1_WKT","VIC_2_WKT"] 
 
         for file in files:
-            print("Combining polygon data of duplicate ID's in %s" %(file))       
+            if not file.replace("_WKT","") in self.ignore_files:
+                print("Combining polygon data of duplicate ID's in %s" %(file))       
 
-            file_path = os.path.join(self.new_dir,file+'.csv')
+                file_path = os.path.join(self.new_dir,file+'.csv')
 
-            with open(file_path, 'r', encoding="utf8") as inFile:
+                with open(file_path, 'r', encoding="utf8") as inFile:
 
-                # Get the file headers
-                with open(file_path, 'r', encoding="utf8") as tFile:
-                    tReader = csv.reader(tFile)
-                    headers = next(tReader)
+                    # Get the file headers
+                    with open(file_path, 'r', encoding="utf8") as tFile:
+                        tReader = csv.reader(tFile)
+                        headers = next(tReader)
 
-                # Filter the dataset for only the active tenements
-                if file == "VIC_1_WKT":
-                    reader = pd.read_csv(inFile,low_memory=False)
-                    fReader = reader[reader['ACTIVE'] == "Current"].values.tolist()
-                    hectaresCol = 60
-                else:
-                    reader = pd.read_csv(inFile,low_memory=False)
-                    fReader = reader[reader['DBSOURCE'] == "rram_sf"].values.tolist()
-                    hectaresCol = 30
-
-                # Clear all the duplicate ids by duplicate area values
-                noDups = []
-                seen = set() # set for fast O(1) amortized lookup
-                for line in fReader: # Create a set of all the duplicate IDs
-                    polyID = "%s%s" %(line[1],line[hectaresCol])
-                    if polyID not in seen: 
-                        noDups.append(line)
-                        seen.add(polyID)
-
-                # Finds the duplicate IDs to Combine The polygon data for the duplicate ID's
-                seenTwice = set()
-                seen = set() # set for fast O(1) amortized lookup
-                for line in noDups: # Create a set of all the duplicate IDs
-                    polyID = line[1]
-                    if polyID in seen: 
-                        seenTwice.add(polyID)
+                    # Filter the dataset for only the active tenements
+                    if file == "VIC_1_WKT":
+                        reader = pd.read_csv(inFile,low_memory=False)
+                        fReader = reader[reader['ACTIVE'] == "Current"].values.tolist()
+                        hectaresCol = 60
                     else:
-                        seen.add(polyID)
+                        reader = pd.read_csv(inFile,low_memory=False)
+                        fReader = reader[reader['DBSOURCE'] == "rram_sf"].values.tolist()
+                        hectaresCol = 30
 
-                # Creates a list of the duplicate ID's and combines the polygon data
-                seen = set()
-                data = []
-                for line in noDups:
-                    polyID = line[1]
-                    WKT_val = line[0]
-                    if polyID in seenTwice:
-                        if polyID in seen:
-                            i = 0
-                            for data_row in data:
-                                if data_row['ID'] == polyID:
-                                    WKT = WKT_val
-                                    WKT = WKT[14:]
-                                    data[i]['WKT'] = data[i]['WKT'][-0:-1] + "," + WKT
-                                i += 1
+                    # Clear all the duplicate ids by duplicate area values
+                    noDups = []
+                    seen = set() # set for fast O(1) amortized lookup
+                    for line in fReader: # Create a set of all the duplicate IDs
+                        polyID = "%s%s" %(line[1],line[hectaresCol])
+                        if polyID not in seen: 
+                            noDups.append(line)
+                            seen.add(polyID)
+
+                    # Finds the duplicate IDs to Combine The polygon data for the duplicate ID's
+                    seenTwice = set()
+                    seen = set() # set for fast O(1) amortized lookup
+                    for line in noDups: # Create a set of all the duplicate IDs
+                        polyID = line[1]
+                        if polyID in seen: 
+                            seenTwice.add(polyID)
                         else:
                             seen.add(polyID)
-                            data.append({'WKT': WKT_val,'ID': polyID})
 
-                # Replace the duplicate IDs WKT field with the combined WKT field from the 'data' list created above
-                all = []
-                seenTwice = set()
-                seen = set() # set for fast O(1) amortized lookup
-                for line in noDups: # Create a set of all the duplicate IDs
-                    polyID = line[1]
-                    if polyID not in seen: 
-                        all.append(line)
-                        seen.add(polyID)
-                    else:
-                        if polyID not in seenTwice:
-                            for data_row in data:
-                                if data_row['ID'] == polyID:
-                                    saved_WKT = data_row['WKT']
-                                    break
+                    # Creates a list of the duplicate ID's and combines the polygon data
+                    seen = set()
+                    data = []
+                    for line in noDups:
+                        polyID = line[1]
+                        WKT_val = line[0]
+                        if polyID in seenTwice:
+                            if polyID in seen:
+                                i = 0
+                                for data_row in data:
+                                    if data_row['ID'] == polyID:
+                                        WKT = WKT_val
+                                        WKT = WKT[14:]
+                                        data[i]['WKT'] = data[i]['WKT'][-0:-1] + "," + WKT
+                                    i += 1
+                            else:
+                                seen.add(polyID)
+                                data.append({'WKT': WKT_val,'ID': polyID})
 
-                            i = 0
-                            for reader_row in all:
-                                if reader_row[1] == polyID:
-                                    all[i][0] = saved_WKT
-                                i += 1
+                    # Replace the duplicate IDs WKT field with the combined WKT field from the 'data' list created above
+                    all = []
+                    seenTwice = set()
+                    seen = set() # set for fast O(1) amortized lookup
+                    for line in noDups: # Create a set of all the duplicate IDs
+                        polyID = line[1]
+                        if polyID not in seen: 
+                            all.append(line)
+                            seen.add(polyID)
                         else:
-                            seenTwice.add(polyID)
+                            if polyID not in seenTwice:
+                                for data_row in data:
+                                    if data_row['ID'] == polyID:
+                                        saved_WKT = data_row['WKT']
+                                        break
 
-                # Delete values in COVER that aren't strings
-                if file == "VIC_2_WKT":
-                    x=-1
-                    covers = {"petrola","petrolb","petrole"}
-                    for cover in all:
-                        x += 1
-                        if cover[5] not in covers:
-                            all[x][5] = ""                        
+                                i = 0
+                                for reader_row in all:
+                                    if reader_row[1] == polyID:
+                                        all[i][0] = saved_WKT
+                                    i += 1
+                            else:
+                                seenTwice.add(polyID)
 
-                all.insert(0,headers)
-                df = pd.DataFrame(all).fillna("")
-                lOutFile = df.values.tolist()
-            
+                    # Delete values in COVER that aren't strings
+                    if file == "VIC_2_WKT":
+                        x=-1
+                        covers = {"petrola","petrolb","petrole"}
+                        for cover in all:
+                            x += 1
+                            if cover[5] not in covers:
+                                all[x][5] = ""                        
 
-            writeToFile(file_path, lOutFile)
-            print("%s completed" %(file))
-
-        print("VIC_1_WKT and VIC_2_WKT files have been formatted successfully!")
-
+                    all.insert(0,headers)
+                    df = pd.DataFrame(all).fillna("")
+                    lOutFile = df.values.tolist()
+                
+                writeToFile(file_path, lOutFile)
 
 
 
@@ -127,38 +122,37 @@ def deleteSecondofDuplicate_QLD_1(self):
     if self.data_group == 'tenement':
         fInput = "QLD_1_WKT"
 
-        print("Deleting duplicate rows in %s" %(fInput))
-        
-        file_path = os.path.join(self.new_dir,fInput+'.csv')
+        if not fInput.replace("_WKT","") in self.ignore_files:
+            print("Deleting duplicate rows in %s" %(fInput))
+            
+            file_path = os.path.join(self.new_dir,fInput+'.csv')
 
-        # Create a set of all the duplicate ID's
-        with open(file_path,'r') as in_file:
-            reader = csv.reader(in_file)
-            seen = set() # set for fast O(1) amortized lookup
-            seenTwice = set()
-            for line in reader: # Create a set of all the duplicate IDs
-                polyID = line[1]
-                if polyID in seen: 
-                    seenTwice.add(polyID)
-                else:
-                    seen.add(polyID)
+            # Create a set of all the duplicate ID's
+            with open(file_path,'r') as in_file:
+                reader = csv.reader(in_file)
+                seen = set() # set for fast O(1) amortized lookup
+                seenTwice = set()
+                for line in reader: # Create a set of all the duplicate IDs
+                    polyID = line[1]
+                    if polyID in seen: 
+                        seenTwice.add(polyID)
+                    else:
+                        seen.add(polyID)
 
-        # Add all files to the outfile except for the first of the duplicate values (known from the seenTwice created above)
-        with open(file_path,'r') as in_file:
-            reader = csv.reader(in_file)
-            all = []
+            # Add all files to the outfile except for the first of the duplicate values (known from the seenTwice created above)
+            with open(file_path,'r') as in_file:
+                reader = csv.reader(in_file)
+                all = []
 
-            dbleDeleted = set()
-            for line in reader: # Write all lines to the output file except the first of the dupicate values
-                polyID = line[1]
-                if polyID not in seenTwice or polyID in dbleDeleted:
-                    all.append(line)
-                else:
-                    dbleDeleted.add(polyID)
+                dbleDeleted = set()
+                for line in reader: # Write all lines to the output file except the first of the dupicate values
+                    polyID = line[1]
+                    if polyID not in seenTwice or polyID in dbleDeleted:
+                        all.append(line)
+                    else:
+                        dbleDeleted.add(polyID)
 
-        writeToFile(file_path, all)
-
-        print("%s formatting completed" %(fInput))
+            writeToFile(file_path, all)
 
 
 # Add a unique ID for each tenement
@@ -192,8 +186,6 @@ def addIdentifierField(self):
                         i +=1
 
                 writeToFile(file_path, lst)
-
-                print("%s completed successfully" %(fName)) 
 
     print("NEW_IDENTIFIER and NEW_ID fields have been added successfully for all files!")
 
@@ -236,7 +228,6 @@ def deletingInvalidWktRowsAllFiles(self):
                     lst.append(line)
 
         writeToFile(file_path, lst)
-        print('Complete.')
 
 
 
@@ -312,43 +303,44 @@ def archiveRemoveOutputFiles(self):
 
 def combineSameNameWellsAusOS(self):
     if self.data_group == 'occurrence':
-        print('Combining wells with the same name for Aus OS Wells.')
-        file_path = os.path.join(self.new_dir,"AUS_OSPET_1_WKT.csv")
-        val_lst = ["development","appraisal","exploration"]
-        dic = {}
+        if not "AUS_OSPET_1" in self.ignore_files:
+            print('Combining wells with the same name for Aus OS Wells.')
+            file_path = os.path.join(self.new_dir,"AUS_OSPET_1_WKT.csv")
+            val_lst = ["development","appraisal","exploration"]
+            dic = {}
 
-        with open(file_path, 'r') as t1:
-            reader = csv.reader(t1)
-            next(reader)
-            for line in reader:
-                key = line[2]
-                val = line[10]
-                if key in dic:
-                    for item in val_lst:
-                        if dic[key] != item:
-                            if val == item:
-                                dic[key] = item
+            with open(file_path, 'r') as t1:
+                reader = csv.reader(t1)
+                next(reader)
+                for line in reader:
+                    key = line[2]
+                    val = line[10]
+                    if key in dic:
+                        for item in val_lst:
+                            if dic[key] != item:
+                                if val == item:
+                                    dic[key] = item
+                                    break
+                            else:
                                 break
-                        else:
-                            break
-                else:
-                    dic[key] = val
+                    else:
+                        dic[key] = val
 
 
-        with open(file_path, 'r') as t1:
-            reader = csv.reader(t1)
-            headers = next(reader)
-            id_dic = {}
-            lst = []
-            lst.append(headers)
-            for line in reader:
-                key = line[2]
-                if key not in id_dic.keys():
-                    id_dic[key] = 1
-                    line[10] = dic[key]
-                    lst.append(line)
-        
-        writeToFile(file_path,lst)
+            with open(file_path, 'r') as t1:
+                reader = csv.reader(t1)
+                headers = next(reader)
+                id_dic = {}
+                lst = []
+                lst.append(headers)
+                for line in reader:
+                    key = line[2]
+                    if key not in id_dic.keys():
+                        id_dic[key] = 1
+                        line[10] = dic[key]
+                        lst.append(line)
+            
+            writeToFile(file_path,lst)
 
 
 
@@ -370,7 +362,7 @@ def filterAllFilesForRelevantData(self):
     print('Filtering csv files for relevant data.')
     for key in self.configs.keys():
         filter_vals_lst = self.configs[key]['field_filter']
-        if filter_vals_lst != '':
+        if filter_vals_lst != '' and not key in self.ignore_files:
             print('Working on: ' + key)
             path = os.path.join(self.new_dir,key+'_WKT.csv')
             filterRelevantData(path,filter_vals_lst)
@@ -381,18 +373,17 @@ def removeDuplicateRowsByKeyAllFiles(self):
     print('Removing duplicate rows of data.')  
     for key in self.configs.keys():
         index = self.configs[key]['duplicate_rows_key']
-        if index != '':
+        if index != '' and not key in self.ignore_files:
             print('Working on: ' + key)
             path = os.path.join(self.new_dir,key+'_WKT.csv')
             removeDuplicateRowsByKey(path,index)
-            print('Complete.')
 
 
 def combineFilesAllFiles(self):
     print('Combininig relevant files.')  
     for key in self.configs.keys():
         merge_file = self.configs[key]['merge_file']
-        if merge_file != '':
+        if merge_file != '' and not key in self.ignore_files:
             print('Working on: ' + key)
 
             file_path = os.path.join(self.new_dir,key+'_WKT.csv')
@@ -410,29 +401,26 @@ def combineFilesAllFiles(self):
                             line[field_index_lst[0]] = dic[this_file_key][field_index_lst[1]]
                     lst.append(line)
             writeToFile(file_path, lst)
-            print('Complete.')
 
 
 def createUniqueKeyFieldAllFiles(self):
     print('Creating unique key field.')  
     for key in self.configs.keys():
         unique_dic = self.configs[key]['create_unique_key']
-        if unique_dic != '':
+        if unique_dic != '' and not key in self.ignore_files:
             print('Working on: ' + key)
             path = os.path.join(self.new_dir,key+'_WKT.csv')
             createUniqueKeyField(path,unique_dic)
-            print('Complete.')
 
 
 def mergeRowsAllFiles(self):
     print('Merging row data for unique key.')  
     for key in self.configs.keys():
         merge_rows = self.configs[key]['merge_rows']
-        if merge_rows != '':
+        if merge_rows != '' and not key in self.ignore_files:
             print('Working on: ' + key)
             path = os.path.join(self.new_dir,key+'_WKT.csv')
             mergeRows(path,merge_rows)
-            print('Complete.')
 
 
 def buildRowMerge(line,merge_rows):
@@ -781,7 +769,7 @@ def createUpdateFile_updateCore(self):
 def sortMultipleValuesString(self):
     configs = self.configs
     for key in configs.keys():
-        if configs[key]['sort_values'] != "":
+        if configs[key]['sort_values'] != "" and not key in self.ignore_files:
             print("Sorting values for " + key)
             separator = configs[key]['sort_values']['separator']
             ind = configs[key]['sort_values']['index']
@@ -1070,3 +1058,20 @@ def addNewToCoreFiles(self,file_name,update_lst):
         core_df = core_df.append(new_line, ignore_index=True)
         
     # core_df.to_csv(core_path, index=False)
+
+
+# Find all the output files that belong to the groups that failed to download and recorded in the download_fails.csv
+# This list is used to skip over formmating files that weren't downloaded
+def getIgnoreFiles(self):
+    lst = []
+    if fileExist(self.download_fail_path):
+        df = pd.read_csv(self.download_fail_path)
+        group_lst = df["NAME"].values.tolist()
+        for batch in self.download_configs:
+            if batch['name'] in group_lst:
+                for group in batch["groups"]:
+                    lst.append(group["output"])
+    return lst
+
+
+

@@ -1,6 +1,6 @@
 import csv
 import pandas as pd
-from .directories_files import writeToFile
+from .directory_files import writeToFile
 
 
 def convertCsvToDic(reader,col):
