@@ -1,0 +1,68 @@
+{
+    "files":[
+        {
+            "file_name": "Occurrence",
+            "data_group": "occurrence",
+            "type": "one2many",
+            "groups": [
+                {
+                    "region": "local_government",
+                    "merge_on": "ind",
+                    "header": "localgov_id"
+                },
+                {
+                    "region": "government_region",
+                    "merge_on": "ind",
+                    "header": "govregion_id"
+                }
+            ]
+        },
+        {
+            "file_name": "tenement_localgov",
+            "data_group": "tenement",
+            "type": "many2many",
+            "region": "local_government",
+            "merge_on": "ind",
+            "headers": ["localgovernment_id","tenement_id"]
+            
+        },
+        {
+            "file_name": "tenement_govregion",
+            "data_group": "tenement",
+            "type": "many2many",
+            "region": "government_region",
+            "merge_on": "ind",
+            "headers": ["governmentregion_id","tenement_id"]
+        },
+        {
+            "file_name": "tenement_geoprovince",
+            "data_group": "tenement",
+            "type": "many2many",
+            "region": "geological_province",
+            "merge_on": "ind",
+            "headers": ["geologicalprovince_id","tenement_id"]
+        },
+        {
+            "file_name": "occurrence_geoprovince",
+            "data_group": "occurrence",
+            "type": "many2many",
+            "region": "geological_province",
+            "merge_on": "ind",
+            "headers": ["geologicalprovince_id","occurrence_id"]
+        }
+    ],
+    "shapes":[
+        {
+            "file_name": "GeologicalProvince",
+            "columns": ["_id", "name", "ptype", "rank"]
+        },
+        {
+            "file_name": "GovernmentRegion",
+            "columns": ["_id", "name"]
+        },
+        {
+            "file_name": "LocalGovernment",
+            "columns": ["_id", "name"]
+        }
+    ]
+}

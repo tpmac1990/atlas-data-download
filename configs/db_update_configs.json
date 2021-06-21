@@ -1,0 +1,736 @@
+{
+    "Exchange": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "GeologicalProvince": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "GovernmentRegion": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "Holder": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["HolderType"],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": "replace",
+        "db_to_core_transfer": {
+            "pk": "_id",
+            "related_field": ["holder_id","name_id","child_id"],
+            "is_geospatial": false,
+            "table_lst": ["holder_listed", "Parent"]
+        },
+        "is_base_table": true
+    },
+    "holder_listed": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["Holder","Listed"],
+        "inactive_ids": null,
+        "index": "holder_id",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "HolderType": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "original",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "Listed": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["Exchange"],
+        "inactive_ids": null,
+        "index": "ticker",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "LocalGovernment": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "Material": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "material_category": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["Material","MaterialCategory"],
+        "inactive_ids": null,
+        "index": "material_id",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "MaterialCategory": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccName": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": "replace",
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccOriginalID": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": "replace",
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccSize": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccStatus": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["OccStatusSimp"],
+        "inactive_ids": null,
+        "index": "original",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccStatusSimp": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccType": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["OccTypeSimp"],
+        "inactive_ids": null,
+        "index": "original",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "OccTypeSimp": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "Occurrence": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "status_id": "new-edits-changes-single",
+                    "size_id": "edits-new-single"
+                }
+            },
+            "drop_fields": ["geom","user_name","valid_relations","valid_instance","user_edit","date_modified","date_created"],
+            "key": "ind",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["OccStatus","OccSize","State","LocalGovernment","GovernmentRegion"],
+        "inactive_ids": {
+            "type": "keep"
+        },
+        "index": "ind",
+        "file_type": "update",
+        "db_to_core_transfer": {
+            "pk": "ind",
+            "related_field": ["occurrence_id"],
+            "is_geospatial": true,
+            "table_lst": ["occurrence_geoprovince", "occurrence_majmat", "occurrence_minmat", "occurrence_name", "occurrence_oid", "occurrence_typ"]
+        },
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "OccurrenceAddition": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "occurrence"
+        },
+        "related_tables": ["Occurrence"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "OccurrenceRemoval": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "occurrence"
+        },
+        "related_tables": ["Occurrence"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "OccurrenceChange": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "occurrence"
+        },
+        "related_tables": ["Occurrence","OccType","OccStatus","OccOriginalID","OccName","Material"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "ACTION": "action", "FIELD": "field", "TYPE": "typeval_id", "STATUS": "statusval_id", "RELATEDID": "oidval_id", "NAME": "nameval_id", "MATERIAL_MAJ": "majmatval_id", "MATERIAL_MIN": "minmatval_id", "GEOPROVINCE": "geoprovinceval_id", "DATE": "date_created", "USER": "user" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "occurrence_geoprovince": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "geologicalprovince_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "occurrence_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence","GeologicalProvince"],
+        "inactive_ids": null,
+        "index": "occurrence_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "occurrence_majmat": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "material_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "occurrence_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence","Material"],
+        "inactive_ids": null,
+        "index": "occurrence_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "occurrence_minmat": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "material_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "occurrence_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence","Material"],
+        "inactive_ids": null,
+        "index": "occurrence_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "occurrence_name": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "occname_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "occurrence_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence","OccName"],
+        "inactive_ids": null,
+        "index": "occurrence_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "occurrence_oid": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "occoriginalid_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "occurrence_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence","OccOriginalID"],
+        "inactive_ids": null,
+        "index": "occurrence_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "occurrence_typ": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": {
+                "actions": {
+                    "occtype_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "occurrence_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence","OccType"],
+        "inactive_ids": null,
+        "index": "occurrence_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
+    "Parent": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["Holder"],
+        "inactive_ids": null,
+        "index": "name_id",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "Shore": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "State": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "TenAct": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "Tenement": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": true,
+            "user_edits": {
+                "actions": {
+                    "status_id": "new-edits-changes-single",
+                    "typ_id": "new-edits-changes-single" 
+                }
+            },
+            "drop_fields": ["geom","valid_relations","user_edit","date_modified"],
+            "key": "ind",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["TenType","TenStatus","State","Shore"],
+        "inactive_ids": {
+            "type": "update",
+            "value": 20
+        },
+        "index": "ind",
+        "file_type": "update",
+        "db_to_core_transfer": {
+            "pk": "ind",
+            "related_field": ["tenement_id"],
+            "is_geospatial": true,
+            "table_lst": ["tenement_geoprovince", "tenement_majmat", "tenement_minmat", "tenement_occurrence", "tenement_oid", "TenHolder"]
+        },
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "TenementChange": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "tenement"
+        },
+        "related_tables": ["Tenement","TenType","TenStatus","TenOriginalID","TenHolder","Material"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "ACTION": "action", "FIELD": "field", "LODGEDATE": "lodgedateval", "STARTDATE": "startdateval", "ENDDATE": "enddateval", "HOLDER_ID": "holderval_id", "TYPE": "typeval_id", "STATUS": "statusval_id", "RELATEDID": "oidval_id", "GEOPROVINCE": "geoprovinceval_id", "HOLDER_PERC": "holderperc", "DATE": "date_created", "USER": "user" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "TenementAddition": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "tenement"
+        },
+        "related_tables": ["Tenement"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "TenementRemoval": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "tenement"
+        },
+        "related_tables": ["Tenement"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "tenement_geoprovince": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": true,
+            "user_edits": {
+                "actions": {
+                    "geologicalprovince_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","GeologicalProvince"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "tenement_govregion": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": true,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","GovernmentRegion"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "tenement_localgov": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": true,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","LocalGovernment"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "tenement_majmat": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": false,
+            "relation_update": false,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","Material"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "tenement_minmat": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": false,
+            "relation_update": false,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","Material"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "tenement_occurrence": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": false,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": {
+                "data_group": "occurrence",
+                "drop_fields": [],
+                "key": "occurrence_id"
+            }
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","Occurrence"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    },
+    "tenement_oid": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": true,
+            "user_edits": {
+                "actions": {
+                    "tenoriginalid_id": "new-edits-changes-multi" 
+                }
+            },
+            "drop_fields": [],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement","TenOriginalID"],
+        "inactive_ids": null,
+        "index": "tenement_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "TenHolder": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": true,
+            "relation_update": true,
+            "user_edits": {
+                "actions": {
+                    "name_id": "new-edits-changes-tenholder" 
+                }
+            },
+            "drop_fields": ["_id","percown"],
+            "key": "tenement_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Holder","Tenement"],
+        "inactive_ids": null,
+        "index": "name_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
+    "TenOriginalID": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": "replace",
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "TenStatus": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["TenStatusSimp"],
+        "inactive_ids": null,
+        "index": "original",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "TenStatusSimp": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "TenType": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": ["TenTypeSimp"],
+        "inactive_ids": null,
+        "index": "original",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "TenTypeSimp": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "HolderChange": {
+        "record_changes": null,
+        "update_table": {
+            "data_group": "holder"
+        },
+        "related_tables": ["Holder","Listed"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": null,
+        "columns": { "_ID": "_id", "IND": "ind_id", "ACTION": "action", "FIELD": "field", "CHILD": "childval_id", "PARENT": "parentval_id", "LISTED": "listedval_id", "PARENT_PERC": "parentperc", "CHILD_PERC": "childperc", "USER": "user", "DATE": "date_created" },
+        "db_to_core_transfer": null,
+        "is_base_table": false
+    }
+}
