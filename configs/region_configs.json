@@ -8,14 +8,23 @@
                 {
                     "region": "local_government",
                     "merge_on": "ind",
-                    "header": "localgov_id"
+                    "header": "localgov_id",
+                    "edit_column": false
                 },
                 {
                     "region": "government_region",
                     "merge_on": "ind",
-                    "header": "govregion_id"
+                    "header": "govregion_id",
+                    "edit_column": false
+                },
+                {
+                    "region": "state",
+                    "merge_on": "ind",
+                    "header": null,
+                    "edit_column": true
                 }
-            ]
+            ],
+            "check_shore": false
         },
         {
             "file_name": "tenement_localgov",
@@ -23,8 +32,8 @@
             "type": "many2many",
             "region": "local_government",
             "merge_on": "ind",
-            "headers": ["localgovernment_id","tenement_id"]
-            
+            "headers": ["localgovernment_id","tenement_id"],
+            "check_shore": true            
         },
         {
             "file_name": "tenement_govregion",
@@ -32,7 +41,8 @@
             "type": "many2many",
             "region": "government_region",
             "merge_on": "ind",
-            "headers": ["governmentregion_id","tenement_id"]
+            "headers": ["governmentregion_id","tenement_id"],
+            "check_shore": true
         },
         {
             "file_name": "tenement_geoprovince",
@@ -40,7 +50,8 @@
             "type": "many2many",
             "region": "geological_province",
             "merge_on": "ind",
-            "headers": ["geologicalprovince_id","tenement_id"]
+            "headers": ["geologicalprovince_id","tenement_id"],
+            "check_shore": false
         },
         {
             "file_name": "occurrence_geoprovince",
@@ -48,21 +59,26 @@
             "type": "many2many",
             "region": "geological_province",
             "merge_on": "ind",
-            "headers": ["geologicalprovince_id","occurrence_id"]
+            "headers": ["geologicalprovince_id","occurrence_id"],
+            "check_shore": false
         }
     ],
     "shapes":[
         {
             "file_name": "GeologicalProvince",
-            "columns": ["_id", "name", "ptype", "rank"]
+            "columns": ["_id","name","ptype","rank","geometry"]
         },
         {
             "file_name": "GovernmentRegion",
-            "columns": ["_id", "name"]
+            "columns": ["_id","name","geometry"]
         },
         {
             "file_name": "LocalGovernment",
-            "columns": ["_id", "name"]
+            "columns": ["_id","name","geometry"]
+        },
+        {
+            "file_name": "State",
+            "columns": ["name","code","geometry"]
         }
     ]
 }

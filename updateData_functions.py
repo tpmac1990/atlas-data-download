@@ -35,7 +35,7 @@ def download_data_to_csv(self):
 
         # loops through each of the groups in the configs.json file for the current data_group
         for data_import_group in self.Data_Import:
-            # if data_import_group['name'] in ["nt_mineral"]:
+            # if data_import_group['name'] in ["tas_mineral"]:
 
             # unzipped_dir = os.path.join(self.unzipped_dir, data_import_group['created_extension']) # gets the location of the required file
             # downloads and extracts the data for all the zip files. If the link fails, then it will be added to the download_fail.csv and the formatting will be skipped.
@@ -83,6 +83,8 @@ def preformat_file(self):
         deleteSecondofDuplicate_QLD_1(self)
         removeDuplicateRowsByKeyAllFiles(self)
         filterAllFilesForRelevantData(self)
+        filterOutBlanksForMultipleColumns(self)
+        filterOutByKeyWord(self)
         createUniqueKeyFieldAllFiles(self)
         combineFilesAllFiles(self)
         mergeRowsAllFiles(self)
@@ -133,6 +135,7 @@ def create_spatial_relation_files(self):
     self.local_gov_gdf = gpd.read_file(os.path.join(self.regions_dir,'LocalGovernment.shp'))
     self.gov_region_gdf = gpd.read_file(os.path.join(self.regions_dir,'GovernmentRegion.shp'))
     self.geo_province_gdf = gpd.read_file(os.path.join(self.regions_dir,'GeologicalProvince.shp'))
+    self.geo_state_gdf = gpd.read_file(os.path.join(self.regions_dir,'State.shp'))
 
     # get congif files
     self.region_configs = getJSON(os.path.join(self.configs_dir,'region_configs.json'))
@@ -144,7 +147,7 @@ def create_spatial_relation_files(self):
         create_tenement_materials_files(self)
         # create the tenement and occurrence regions relations files
         create_region_relation_files(self)
-        # create region files like GeologicalProvince from the shapefiles. Only done if not an update
+        # create region wkt files like GeologicalProvince from the shapefiles. Only done if not an update
         create_regions_files(self)
     except Exception as e:
         print(str(e))
@@ -200,6 +203,8 @@ def find_changes_update_core_and_database(self):
         print('No update.csv file in the change directory. Creating core & change files from new directory.')
         # copy relevant files from the new folder to the core and ss folders
         copy_new_files_to_core(self)
+        # create qgis compatible files for tenement & occurrence files
+        create_qgis_spatial_files(self)
         # delete all content in tables and copy all files to the db
         commit_all_files_to_db(self) 
         # create empty change file. This will tell the script to update rather than renew everything the next time it is run.
@@ -227,6 +232,8 @@ def find_changes_update_core_and_database(self):
         make_core_file_and_db_changes(self) 
         # create the change, add and remove tables and update them in the core files and database 
         build_update_tables_update_db(self)
+        # create qgis compatible files for tenement & occurrence files
+        create_qgis_spatial_files(self)
 
     print('Find changes and updates: %s' %(time_past(func_start,time.time())))
 

@@ -68,7 +68,7 @@ def orderTables(configs,input_lst,carry_lst,temp_lst):
 
 def commit_all_files_to_db(self):
     print('Clearing rows from database.')
-    db_keys = self.access_configs['local']
+    db_keys = self.access_configs[self.db_location]
     con = sqlalchemy_engine(db_keys).connect()
     conn = connect_psycopg2(db_keys)
     # print(engine.table_names()) # print all tables in the database
@@ -81,7 +81,14 @@ def commit_all_files_to_db(self):
     # delete all data in all tables in order
     for table in ordered_tables[::-1]: 
         table_name = "gp_%s"%(table.lower())
-        clearDatabaseTable(conn,table_name)
+        try:
+            clearDatabaseTable(conn,table_name)
+        except OperationalError:
+            print('This is a delete rows, server close error: %s'%(table))
+        except Exception as e:
+            print(str(e))
+            print('This is a delete rows other error: %s'%(table))
+
 
     # drop all table names that are to do with updating. These Won't be added on the initial table creation.
     update_tables_lst = [x for x in configs if configs[x]["update_table"] != None]
@@ -101,8 +108,11 @@ def commit_all_files_to_db(self):
 
         try:
             df.to_sql(table_name,con,if_exists='append',index=False, method='multi')
+        except OperationalError:
+            print('This is a enter rows, server close error: %s'%(table))
         except Exception as e:
             print(str(e))
+            print('This is a enter rows error: %s'%(table))
 
     con.close()
     print('Complete.')
@@ -468,8 +478,8 @@ def make_core_file_and_db_changes(self):
     update_configs = self.update_configs
     access_configs = self.access_configs
     # db connections
-    sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
-    psycopg2_con = connect_psycopg2(access_configs["local"])
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+    psycopg2_con = connect_psycopg2(access_configs[self.db_location])
     
     # loop through the datagroups i.e. occurrence and tenements
     for data_group in self.data_groups:
@@ -607,7 +617,7 @@ def compare_base_tables_add_new(self):
     access_configs = self.access_configs
 
     # db connections
-    sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
 
     file_lst = [x for x in update_configs if update_configs[x]["is_base_table"]]
     
@@ -666,10 +676,9 @@ def update_db_for_manually_handled_core(self):
     print("Updating db for manually managed core files.")
     # Configs
     access_configs = self.access_configs
-
     # db connections
-    sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
-    psycopg2_con = connect_psycopg2(access_configs["local"])
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+    psycopg2_con = connect_psycopg2(access_configs[self.db_location])
 
     # put Holder.csv into a df
     core_path = os.path.join(self.core_dir,'Holder.csv')
@@ -843,7 +852,7 @@ def delete_updating_rows_from_updating_db_tables(self):
     update_configs = self.update_configs
     access_configs = self.access_configs
     # db connections
-    psycopg2_con = connect_psycopg2(access_configs["local"])
+    psycopg2_con = connect_psycopg2(access_configs[self.db_location])
 
     # loop through the datagroups i.e. occurrence and tenements
     for data_group in self.data_groups:
@@ -877,7 +886,7 @@ def build_update_tables_update_db(self):
     self.update_df = pd.read_csv(self.updates_path)
     self.change_df = pd.read_csv(self.changes_path)
     # db connection
-    self.sqlalchemy_con = sqlalchemy_engine(self.access_configs["local"]).connect()
+    self.sqlalchemy_con = sqlalchemy_engine(self.access_configs[self.db_location]).connect()
     
     for data_group in self.data_groups:
         self.data_group = data_group
@@ -1083,7 +1092,7 @@ def backup_new_useredit_file(self):
 #     update_configs = self.update_configs
 
 #     # db connections
-#     sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
+#     sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
 
 #     # loop through Tenement and Occurrence
 #     for data_group in self.data_groups:
@@ -1231,7 +1240,7 @@ def transfer_user_edits_to_core(self):
     update_configs = self.update_configs
 
     # db connections
-    sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
 
     # this will create a list with 'Holder','Occurrence','Tenement'
     creation_tables = [x for x in update_configs if update_configs[x]['db_to_core_transfer'] != None]
@@ -1357,7 +1366,7 @@ def transfer_user_creations_to_core(self):
     update_configs = self.update_configs
 
     # db connections
-    sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
 
     for table in ['OccName','OccOriginalID','TenOriginalID','Listed','Holder']:
         print("Updating: %s"%(table))
@@ -1399,7 +1408,7 @@ def transfer_changes_to_core(self):
     update_configs = self.update_configs
 
     # db connections
-    sqlalchemy_con = sqlalchemy_engine(access_configs["local"]).connect()
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
 
     for table in ['OccurrenceChange','TenementChange','HolderChange']:
         # if table == 'HolderChange':

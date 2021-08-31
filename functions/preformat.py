@@ -3,6 +3,7 @@ import sys
 import csv
 import ctypes
 import pandas as pd
+import numpy as np
 import shutil
 from collections import Counter
 
@@ -382,7 +383,55 @@ def filterAllFilesForRelevantData(self):
         if filter_vals_lst != '' and not key in self.ignore_files:
             print('Working on: ' + key)
             path = os.path.join(self.new_dir,key+'_WKT.csv')
-            filterRelevantData(path,filter_vals_lst)        
+            filterRelevantData(path,filter_vals_lst)    
+
+
+def filterOutBlanksForMultipleColumns(self):
+    ''' drops rows in the df where each field in 'multi_blank_filter' list is blank '''
+    print('Filtering out csv files for irrelavent blank rows.')
+    for key in self.configs.keys():
+        filter_fields = self.configs[key]['multi_blank_filter']
+        if filter_fields != '' and not key in self.ignore_files:
+            print('Working on: ' + key)
+            path = os.path.join(self.new_dir,key+'_WKT.csv')
+            filterMultiColBlanks(path,filter_fields)
+
+def filterMultiColBlanks(path,filter_fields):
+    df1 = pd.read_csv(path,low_memory=False)
+    df2 = filterDataframeForMultipleBlanks(df1,filter_fields)
+    df2.to_csv(path,index=False,encoding='utf-8',line_terminator='\n')
+
+def filterDataframeForMultipleBlanks(df,filter_fields):
+    df['temp_col'] = df[filter_fields].apply(lambda x: any(["%s"%(i) != "nan" for i in x]), axis=1)
+    df = df[df['temp_col'] == True].copy()
+    df.drop(columns=["temp_col"],inplace=True)
+    return(df)
+
+
+def filterOutByKeyWord(self):
+    ''' drops the row if any of the keyword exist in each row in a given field '''
+    print('Dropping rows by keywords.')
+    for key in self.configs.keys():
+        filter_vals_lst = self.configs[key]['keyword_drop']
+        if filter_vals_lst != '' and not key in self.ignore_files:
+            print('Working on: ' + key)
+            path = os.path.join(self.new_dir,key+'_WKT.csv')
+            df1 = pd.read_csv(path,low_memory=False)
+            df2 = filterColKeyword(df1,filter_vals_lst)
+            df2.to_csv(path,index=False,encoding='utf-8',line_terminator='\n')
+
+
+def filterColKeyword(df,filter_vals_lst):
+    for dic in filter_vals_lst:
+        df[dic["field"]] = df[dic["field"]].fillna('')
+        df['temp_col'] = df[dic["field"]].apply(lambda x: any([k.lower() in x.lower() for k in dic["keywords"]]))
+        df[dic["field"]].replace("", np.nan, inplace=True)
+        if dic["type"] == "include":
+            df = df[df['temp_col'] == True].copy()
+        else:
+            df = df[df['temp_col'] == False].copy()
+    df.drop(columns=["temp_col"],inplace=True)
+    return(df)
 
 
 def removeDuplicateRowsByKeyAllFiles(self): 

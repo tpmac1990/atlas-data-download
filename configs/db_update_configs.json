@@ -19,7 +19,27 @@
         "db_to_core_transfer": null,
         "is_base_table": true
     },
+    "GeologicalProvinceSpatial": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
     "GovernmentRegion": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "GovernmentRegionSpatial": {
         "record_changes": null,
         "update_table": null,
         "related_tables": [],
@@ -75,6 +95,16 @@
         "is_base_table": true
     },
     "LocalGovernment": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "name",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "LocalGovernmentSpatial": {
         "record_changes": null,
         "update_table": null,
         "related_tables": [],
@@ -413,6 +443,16 @@
         "is_base_table": true
     },
     "State": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "code",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "StateSpatial": {
         "record_changes": null,
         "update_table": null,
         "related_tables": [],

@@ -162,6 +162,7 @@
             {
                 "name":"SA_titles",
                 "data_source":"WFS",
+                "wfs_version": "1.1.0",
                 "import_style":"wfs",
                 "link":"https://services.sarig.sa.gov.au/vector/mineral_tenements/wfs?version=1.1.0",
                 "extension":"",
@@ -217,6 +218,7 @@
             {
                 "name":"SA_Petroleum",
                 "data_source":"WFS",
+                "wfs_version": "1.1.0",
                 "import_style":"wfs",
                 "link":"https://services.sarig.sa.gov.au/vector/petroleum_tenements/wfs?",
                 "extension":"",
@@ -288,6 +290,7 @@
             {
                 "name":"tas_titles",
                 "data_source":"WFS",
+                "wfs_version": "1.1.0",
                 "import_style":"wfs",
                 "link":"http://www.mrt.tas.gov.au/web-services/ows",
                 "extension":"",
@@ -441,6 +444,7 @@
             {
                 "name":"OS_petroleum_titles",
                 "data_source":"WFS",
+                "wfs_version": "2.0.0",
                 "import_style":"wfs",
                 "link":"https://arcgis.nopta.gov.au/arcgis/services/Public/PetroleumTitles_Company/MapServer/WFSServer",
                 "extension":"",
@@ -693,6 +697,7 @@
             {
                 "name":"OS_petroleum_wells",
                 "data_source":"WFS",
+                "wfs_version": "2.0.0",
                 "import_style":"wfs",
                 "link":"https://arcgis.nopta.gov.au/arcgis/services/Public/PetroleumWells_NOPIMS/MapServer/WFSServer",
                 "extension":"",

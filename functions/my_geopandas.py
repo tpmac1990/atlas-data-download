@@ -27,7 +27,7 @@ def convert_data_to_df(self,data_import_group,group,file):
         file_path = os.path.join(self.unzipped_dir,extension,file+'.shp')
         gdf = gpd.read_file(file_path)
     elif data_import_group['data_source'] == 'WFS':
-        wfs = WebFeatureService(url=url,version='1.1.0')
+        wfs = WebFeatureService(url=url,version=data_import_group['wfs_version'])
         response = wfs.getfeature(typename=file)
         xml_data = response.read()
         with open('data.gml', 'wb') as f1:
@@ -44,11 +44,7 @@ def merge_and_export_to_csv(self,data_import_group,group):
 
     for file in group['files']:
         gdf = convert_data_to_df(self,data_import_group,group,file)
-        if gdf1 is None:
-            gdf1 = gdf
-        else:
-            gdf1 = gpd.GeoDataFrame(pd.concat([gdf1, gdf], ignore_index=True))
-        # print(gdf1.head(10))
+        gdf1 = gdf if gdf1 is None else gpd.GeoDataFrame(pd.concat([gdf1, gdf], ignore_index=True))
         print(len(gdf1.index))
     
     # convert Polygon data to Multipolygon format and POINT Z to POINT
@@ -66,14 +62,10 @@ def merge_and_export_to_csv(self,data_import_group,group):
     if self.data_group == "occurrence":
         gdf1["geometry"] = [transform(lambda x, y, z: (x, y), feature) if feature.has_z else feature for feature in gdf1["geometry"]]
 
-    # print(gdf1.head())
     # Remove all null or empty geometries
     gdf1 = gdf1[~(gdf1["geometry"].is_empty | gdf1["geometry"].isna())]
     # Convert the geometries field to geom and change the header
-    if "geometry" in list(gdf1.columns):
-        df = geoDfToDf_wkt(gdf1)
-    else:
-        df = pd.DataFrame(gdf1)
+    df = geoDfToDf_wkt(gdf1) if "geometry" in list(gdf1.columns) else pd.DataFrame(gdf1)
     
     df.to_csv(os.path.join(self.wkt_csv_dir,group['output'] + '_WKT.csv'),index=False)
 
@@ -225,25 +217,42 @@ def create_tenement_materials_files(self):
 
 
 def create_regions_files(self):
-    ''' This will convert the 'local government', 'government regions' & 'geological provinces' shapefiles into tables which
-        can be pushed to the database
+    ''' convert the 'local government', 'government regions', 'geological provinces' & 'State' shapefiles into wkt files which can be pushed to the 
+        database. There a qgis version is also created.
     '''
     if self.isUpdate:
         print('No need to create region files. This is only an update!')
     else:
         print('Creating regions files.')
 
+        dic = {
+            'GeologicalProvince': self.geo_province_gdf,
+            'GovernmentRegion': self.gov_region_gdf,
+            'LocalGovernment': self.local_gov_gdf,
+            'State': self.geo_state_gdf
+        }
+
         for file in self.region_configs['shapes']:
             file_name = file['file_name']
-            if file_name == 'GeologicalProvince':
-                gdf = self.geo_province_gdf
-            elif file_name == 'GovernmentRegion':
-                gdf = self.gov_region_gdf
-            elif file_name == 'LocalGovernment':
-                gdf = self.local_gov_gdf
+            print('Working on: %s'%(file_name))
+            gdf = dic[file_name]
+            gdf = gdf[file['columns']]
+            gdf['geom'] = gdf['geometry'].apply(lambda x: formatGeomCol(x))
+            gdf.drop(columns='geometry',inplace=True)
+            gdf.to_csv(os.path.join(self.output_dir,'core',"%sSpatial.csv"%(file_name)),index=False)
+            # make a qgis compatible copy
+            gdf['geom'] = gdf['geom'].apply(lambda x: x.replace('SRID=4202;',''))
+            gdf.rename(columns={'geom': 'WKT'},inplace=True)
+            gdf.to_csv(os.path.join(self.output_dir,'core',"qgis_%sSpatial.csv"%(file_name)),index=False)
+            # save non spatial table. Using teh spatial version in the filter was too slow
+            gdf.drop(columns='WKT',inplace=True)
+            gdf.to_csv(os.path.join(self.output_dir,'core',"%s.csv"%(file_name)),index=False)
 
-            df = pd.DataFrame(gdf[file['columns']])
-            df.to_csv(os.path.join(self.output_dir,'core',"%s.csv"%(file_name)),index=False)
+# convert the polygons to multipolygons and add the srid
+def formatGeomCol(x):
+    if type(x) == Polygon:
+        x = MultiPolygon([x])
+    return "SRID=4202;%s"%(wkt.dumps(x))
 
 
 def create_region_relation_files(self):
@@ -251,52 +260,110 @@ def create_region_relation_files(self):
         spatial fields, including government regions, local government & geological provinces.
         self.occ_gdf: new data only
         self.ten_gdf: new data only
+        The first part of the one2many code is to assign the correct state to the offshore areas which are assigned as 'OS' in the vba macro
+        ??? If function terminates silently
+        The second half cleans the offshore and onshore regions so they are not mixed.
+        ??? solutions to sjoin silently failing ???
+        switch the order of the sjoin
+        re-order the dics in the region_configs.json file. The failing may have something to do with the occurrence file
     '''
     print('Creating region relation files.')
+
+    ten_df = self.ten_gdf[self.ten_gdf['shore_id']=='OFS']['ind']
+    # id of the offshore region from the LocalGovernment and GovernmentRegion table/file
+    local = 393
+    region = 60
 
     for file in self.region_configs['files']:
         print("Working on: %s"%(file['file_name']))
 
         # set the required data_group df. either 'occurrence' or 'tenement'
-        data_group_gdf = self.occ_gdf if file['data_group'] == 'occurrence' else self.ten_gdf
+        data_group_gdf = self.occ_gdf.copy() if file['data_group'] == 'occurrence' else self.ten_gdf.copy()
             
-        # if file['file_name'] == 'tenement_localgov': print('1')
         # perform the sjoin for the one-2-many fields which are appended to the existing data_group_gdf
         if file['type'] == 'one2many':
             for group in file['groups']:
-                if group['region'] == 'local_government':
-                    region_gdf = self.local_gov_gdf
+                print('Working on Occurrence sub group: %s'%(group['region']))
+                # edit columns = true is the state column to update the os values to their appropriate state
+                if group['edit_column']:
+                    region_gdf = self.geo_state_gdf.copy()
+                    gdf_temp = data_group_gdf[data_group_gdf['state_id'] == 'OS'].drop('state_id',1)
+                    gdf_trim = data_group_gdf[data_group_gdf['state_id'] != 'OS']
+                    jgdf = gpd.sjoin(gdf_temp, region_gdf, how="inner", op='intersects')[['ind','code']].rename(columns={'code': 'state_id'})
+                    gdf_temp = gdf_temp.merge(jgdf,on=group['merge_on'], how='left')
+                    data_group_gdf = pd.concat((gdf_trim,gdf_temp),ignore_index=True)
+                    
                 else:
-                    region_gdf = self.gov_region_gdf
-
-                jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',group['merge_on']]]
-                jgdf.rename(columns={'_id': group['header']},inplace=True)
-                data_group_gdf = data_group_gdf.merge(jgdf, on=group['merge_on'], how='left')
+                    region_gdf = self.local_gov_gdf.copy() if group['region'] == 'local_government' else self.gov_region_gdf.copy()
+                    jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',group['merge_on']]] 
+                    jgdf.rename(columns={'_id': group['header']},inplace=True)
+                    data_group_gdf = data_group_gdf.merge(jgdf, on=group['merge_on'], how='left')
 
             df = pd.DataFrame(data_group_gdf)
 
         # perform an sjoin for the many-2-many fields which will be outputted into another file
         elif file['type'] == 'many2many':
             if file['region'] == 'local_government':
-                region_gdf = self.local_gov_gdf
+                region_gdf = self.local_gov_gdf.copy()
             elif file['region'] == 'government_region':
-                region_gdf = self.gov_region_gdf 
+                region_gdf = self.gov_region_gdf.copy() 
             elif file['region'] == 'geological_province':
-                region_gdf = self.geo_province_gdf
+                region_gdf = self.geo_province_gdf.copy()
 
-            if file['file_name'] == 'tenement_localgov': 
-                data_group_gdf.drop(data_group_gdf.tail(1).index,inplace=True)
-                # print(len(data_group_gdf.index))
-            # if file['file_name'] == 'tenement_localgov': print(len(region_gdf.index))
+            # For some reason I get a silent error unless I remove the tail row from tenement_localgov
+            # if file['file_name'] == 'tenement_localgov': 
+            #     data_group_gdf.drop(data_group_gdf.tail(20).index,inplace=True)
+
             jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',file['merge_on']]]
-            # if file['file_name'] == 'tenement_localgov': print('3')
             df = pd.DataFrame(jgdf)
             df.columns = file['headers']
 
         else:
             print("Relation type in the config file is incorrect.")
 
+        # titles on the edge of onshore and offshore sometimes have both in their local government and regions. This fixes this
+        if file['check_shore']:
+            offshore_id = local if file['region'] == 'local_government' else region
+            field = '%s_id'%(file['region'].replace("_",""))
+            # get all the keys for offshore titles from the tenement df
+            os_reg_keys = df[df[field] == offshore_id]['tenement_id']
+            # df of all the rows that don't need any adjustments
+            remain_df = df[~df['tenement_id'].isin(os_reg_keys)]
+            # all the rows that might need adjustment
+            to_fix_df = df[df['tenement_id'].isin(os_reg_keys)]
+            # removes all local government & regions tat aren't offshore for offshore titles
+            is_os_df = to_fix_df[(to_fix_df['tenement_id'].isin(ten_df)) & (to_fix_df[field] == offshore_id)]
+            # removes offshore region for all onshore titles
+            not_os_df = to_fix_df[(~to_fix_df['tenement_id'].isin(ten_df)) & (to_fix_df[field] != offshore_id)]
+            # concatentates the three df's together to recreate the df to save
+            df = pd.concat((remain_df,is_os_df,not_os_df),ignore_index=True)
+
+            # get the area df. use copy so prevent changes being made to the region df's
+            area_df = self.local_gov_gdf.copy() if file['region'] == 'local_government' else self.gov_region_gdf.copy()
+            area_df.drop(columns=['geometry'],inplace=True)
+            # merge with the area df to get the states of each area
+            merge_reg = pd.merge(df,area_df,left_on=field,right_on='_id').drop(columns=['name','_id'])
+            # merge with the tenement df to get the state the tenement id belongs to
+            ten_merge = pd.merge(merge_reg,self.ten_gdf,left_on='tenement_id', right_on='ind',how='left')[[field,'tenement_id','state','state_id']]
+            # drop rows where the title has regions or local goverments that are outside the state the title belongs to, but keep all offshore titles
+            df = ten_merge[(ten_merge['state'] == ten_merge['state_id']) | (ten_merge['state'] == 'OS')][[field,'tenement_id']]
+
         df.to_csv(os.path.join(self.new_dir,"%s.csv"%(file['file_name'])),index=False)
+
+
+
+
+def create_qgis_spatial_files(self):
+    ''' create the qgis compatible files for the tenement & occurrence files '''
+    print("Creating qgis compatible files")
+
+    for directory in [self.core_dir,self.new_dir]:
+        for file in ['Occurrence','Tenement']:
+            df = pd.read_csv(os.path.join(directory,'%s.csv'%(file)))
+            df['geom'] = df['geom'].apply(lambda x: x.replace("SRID=4202;",""))
+            df.rename(columns={'geom': 'WKT'}, inplace=True)
+            df.to_csv(os.path.join(directory,'qgis_%s.csv'%(file)),index=False)
+
 
 
 
@@ -338,3 +405,71 @@ def create_region_relation_files(self):
     # print(gdf.head(10))
 
     # https://dasc.dmp.wa.gov.au/DASC/Download/File/2027
+
+
+
+# functions to build the local government shp files
+def build_local_gov_files(self):
+
+    # C:\Django_Projects\03_geodjango\Atlas\datasets\Raw_datasets\regions\local_government
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    # lst = [ 
+#     #     [" Shire", " Shire Council"]
+#     # ]
+
+#     # gdf = gpd.read_file(os.path.join(self.region,'local_government','local_33.shp'))
+    gdf = gpd.read_file(os.path.join(self.region,'State.shp'))
+
+#     # gdf['name'] = gdf['name'].sort_values(axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=True, key=None)
+
+    # gdf.sort_values(by=['name'],ascending=False,inplace=True)
+
+    # gdf['_id'] = np.arange(1, len(gdf.index) + 1)
+
+#     # gdf['name'] = gdf['name'].apply(lambda x: update_string(x))
+    gdf.rename(columns={'state':'code'},inplace=True)
+
+    gdf.to_file(os.path.join(self.region,'State.shp'))
+
+#     gdf.drop(columns=['geometry'],inplace=True)
+
+    # gdf.to_csv(os.path.join(self.region,'LocalGovernment.csv'),index=False)
+
+    # print(gdf.head())
+
+
+
+# def update_string(x):
+#     if x.endswith(' Shire'):
+#         x = "%s Council"%(x)
+#     return x
+#     # for i in lst:
+#     #     if x.startswith(i[0]):
+#     #         x = "%s %s"%(x.replace(i[0],''),i[1])
+
+# #     return x
+
+    # gdf_geom = gpd.read_file(os.path.join(self.standard,'NT_LOCALITY_POLYGON_shp.shp'))[['geometry','LOC_PID']]
+    # gdf_name = gpd.read_file(os.path.join(self.standard,'NT_LOCALITY_shp.dbf'))[['NAME','LOC_PID']]
+
+    # merge = gdf_geom.merge(gdf_name, on='LOC_PID').drop('LOC_PID',1)
+
+    # merge['NAME'] = merge['NAME'].apply(lambda x: x.capitalize())
+
+    # # print(merge.head())
+
+    # merge.to_file(os.path.join(self.new_local,'nt_local.shp'))
+    
+
+    # df = pd.read_csv(os.path.join(self.core,'Occurrence.csv'))
+    # # gdf = gp.read_csv(os.path.join(self.core,'Occurrence.csv'))
+
+    # df.rename(columns={'geom':'WKT'},inplace=True)
+
+    # df['WKT'] = df['WKT'].apply(lambda x: x.replace('SRID=4202;',''))
+
+    # df.to_csv(os.path.join(self.core,'qgis_Occurrence.csv'))
+
+
+    

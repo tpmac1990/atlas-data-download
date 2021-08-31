@@ -4,7 +4,8 @@ import datetime
 import os
 from updateData_functions import (download_data_to_csv, preformat_file, add_wkt_tenement, 
                                 create_spatial_relation_files, find_changes_update_core_and_database, 
-                                add_crs_to_wkt, previous_core_to_db, fileExist, extract_user_edits_to_core)
+                                add_crs_to_wkt, previous_core_to_db, fileExist, extract_user_edits_to_core,
+                                check_csvs_for_errors, build_local_gov_files)
 
 
 class UpdateData():
@@ -27,23 +28,24 @@ class UpdateData():
         self.regions_dir = os.path.join(BASE_DIR,'regions')
         # data groups
         self.data_groups = ['occurrence','tenement']
-        # self.data_groups = ['tenement']
         # update is True if there are no files in the output/core directory
-        # self.isUpdate = True if len(os.listdir(os.path.join(self.output_dir,'ds_core'))) > 0 else False
-        # self.isUpdate = True if fileExist(os.path.join(self.output_dir,'core','Tenement.csv')) else False
         self.isUpdate = True if fileExist(os.path.join(self.output_dir,'update','change.csv')) else False
+        # is this a 'local' or 'remote' database update
+        self.db_location = 'remote'
         
 
     def download_format(self):
-        # download the data and convert it to WKT in csv
-        download_data_to_csv(self)
-        # # Format required files, compare with the core and create the change files and update file.
-        # preformat_file(self)
-        # # save the frontend user edits to the core file
-        # extract_user_edits_to_core(self)
+        # # download the data and convert it to WKT in csv
+        # download_data_to_csv(self)
+        # Format required files, compare with the core and create the change files and update file.
+        preformat_file(self)
+        # save the frontend user edits to the core file
+        extract_user_edits_to_core(self)
 
 
     def add_relations(self):
+        # check the csv files for errors that will be problematic when loading to the db
+        check_csvs_for_errors(self)
         # add the wkt data back to the tenement data
         add_wkt_tenement(self)
         # add spatially related data
@@ -52,23 +54,37 @@ class UpdateData():
         add_crs_to_wkt(self)
         # Find the changes between the new and the core files and update them
         find_changes_update_core_and_database(self)
+        
 
 
-    def revert_db_to_previous(self):
-        # delete all db tables and load the previous core files from the archive to the database. This is useful if there is an arror when running the update.
-        previous_core_to_db(self)
+    # def revert_db_to_previous(self):
+    #     # delete all db tables and load the previous core files from the archive to the database. This is useful if there is an arror when running the update.
+    #     previous_core_to_db(self)
 
     # def add_user_dummy_user_edits(self):
 
 
 
-UpdateData().download_format()
-# UpdateData().add_relations()
+# UpdateData().download_format()
+UpdateData().add_relations()
 # UpdateData().revert_db_to_previous()
 
 
 
+    # def build_local_gov_datasets(self):
 
+    #     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+    #     self.standard = os.path.join(BASE_DIR,'regions','standard')
+    #     self.new_local = os.path.join(BASE_DIR,'regions','new_local')
+    #     self.region = os.path.join(BASE_DIR,'regions')
+
+    #     self.core = os.path.join(self.output_dir,'core')
+
+    #     build_local_gov_files(self)
+    
+
+# UpdateData().build_local_gov_datasets()
 
     # def update_database(self):
     #     # Find the changes between the new and the core files and update them
