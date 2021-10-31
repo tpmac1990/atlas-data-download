@@ -22,7 +22,7 @@ def  dropLastColumn(reader):
         all.append(r[:-1])
     return all
 
-
+# fName = os.fsdecode(file)
 def convertToDic(reader_lst,key_position):
     next(reader_lst)
     dic = {}
@@ -44,6 +44,22 @@ def time_past(start,end):
     minutes, seconds = divmod(rem, 60)
     return "{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds)
 
+
+# def removeDuplicateRowsByKey(file_path,col_num):
+#     print('Removing duplicates by key.')
+#     with open(file_path, 'r') as t1:
+#         reader = csv.reader(t1)
+#         lst = []
+#         unique_keys = []
+#         headers = next(reader)
+#         lst.append(headers)
+#         for line in reader:
+#             key = line[col_num]
+#             if key not in unique_keys:
+#                 unique_keys.append(key)
+#                 lst.append(line)
+#     writeToFile(file_path, lst)
+#     print('Complete.')
 
 
 def createUniqueKeyField(file_path,unique_dic):

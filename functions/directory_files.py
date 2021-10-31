@@ -6,11 +6,9 @@ import urllib.request
 import zipfile
 import pandas as pd
 
-# copy files from one directory to another
+
 def copy_directory(src_directory,dest_directory):
     ''' copy all files from one directory to another '''
-    # print(src_directory)
-    # print(dest_directory)
     for file in os.listdir(src_directory):
         shutil.copy(os.path.join(src_directory,file), dest_directory)
 
@@ -122,3 +120,9 @@ def getJSON(path):
 
 def readMultipledf(file_lst):
     return [pd.read_csv(file,engine='python') for file in file_lst]
+
+
+def createDirectory(directory):
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+

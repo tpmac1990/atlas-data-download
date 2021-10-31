@@ -2,19 +2,20 @@
     "tenement": {
             "AUS_OSPET_1": {
                 "required_fields": ["geometry", "TITLE_NAME", "TITLE_TYPE", "INITIALEXP_DATE", "LASTRENEWAL", "CURRENTEXP_DATE", "EXPIRY_DATE_NEATS", "GRANT_DATE_NEATS", "STATUS_NEATS", "TITLE_HOLDERS_NEATS", "NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TITLE_NAME",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "OFFSHORE_AREA", "type": "include", "vals": ["Territory of Ashmore and Cartier Islands", "Victoria", "Northern Territory", "Queensland", "Tasmania", "Western Australia"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 2,
+                "field_filter": [
+                    {"name": "OFFSHORE_AREA", "type": "include", "vals": ["Territory of Ashmore and Cartier Islands", "Victoria", "Northern Territory", "Queensland", "Tasmania", "Western Australia"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -37,22 +38,18 @@
             },
             "NSW_1": {
                 "required_fields": ["tas_id","title","holder","grant_date","expiry_dat","last_renew","title_code","operation","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "tas_id",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "holder", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": {"index": 2, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -72,22 +69,18 @@
             },
             "NSW_2": {
                 "required_fields": ["tas_id","applicatio","appl_code","applicant","appl_date","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "tas_id",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "applicant", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": {"index": 4, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -106,27 +99,20 @@
             },
             "NT_1": {
                 "required_fields": ["TITLEID","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","PTY_NAME","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SW_MEMBER",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "PTY_NAME", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 0,"val_index": 11,"extra":{"name": "percent","index":12}},
+                "sort_values": {"index": 11, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -146,27 +132,20 @@
             },
             "NT_2": {
                 "required_fields": ["TITLEID", "STATUS", "TS_TYPE", "DT_EFFECT", "DT_CONSENT", "DT_VT_STRT", "DT_VT_FINL", "PTY_NAME", "HLD_TYPE", "NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SW_MEMBER",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "HLD_TY_CD", "type": "include", "vals": ["A"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "PTY_NAME", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["A"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 0,"val_index": 10,"extra":{"name": "percent","index":11}},
+                "sort_values": {"index": 10, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": {"file": "NT_3","this_file": "TI_NUMBER","other_file": "TI_NUMBER","clean_up": "NT_merge_1"},
                     "format": [
@@ -186,43 +165,36 @@
             },
             "NT_3": {
                 "required_fields": ["geometry", "TITLEID","DT_VT_STRT","DT_VT_FINL","DT_APPL","ACTIVE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TITLEID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": null
             },
             "NT_4": {
                 "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_MOATORM","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SW_MEMBER",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "PTY_NAME", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 0,"val_index": 10,"extra":{"name": "percent","index":11}},
+                "sort_values": {"index": 10, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -241,27 +213,20 @@
             },
             "NT_5": {
                 "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","TI_NUMBER","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","DT_RW_APPL","DT_RW_GRNT","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SW_MEMBER",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "PTY_NAME", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["C"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 0,"val_index": 11,"extra":{"name": "percent","index":12}},
+                "sort_values": {"index": 11, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -281,27 +246,20 @@
             },
             "NT_6": {
                 "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_CONSENT","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SW_MEMBER",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "HLD_TY_CD", "type": "include", "vals": ["A"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
-                        },
-                        {
-                            "type": "sort_values", 
-                            "configs": {"field": "PTY_NAME", "separator": ";"}
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "HLD_TY_CD", "type": "include", "vals": ["A"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": {"id_index": 0,"val_index": 10,"extra":{"name": "percent","index":11}},
+                "sort_values": {"index": 10, "separator": ";"},
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": {"file": "NT_8","this_file": "TITLEID","other_file": "TITLEID","clean_up": "NT_merge_1"},
                     "format": [
@@ -321,18 +279,18 @@
             },
             "NT_7": {
                 "required_fields": ["geometry", "ID","OPEN_DATE","CLOSE_DATE","STATUS","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -352,34 +310,34 @@
             },
             "NT_8": {
                 "required_fields": ["geometry", "MORA_ID","TITLEID","DT_APPL","DT_VT_STRT","DT_VT_FINL","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "MORA_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": null
             },
             "QLD_1": {
                 "required_fields": ["geometry", "PERMITTY_1","PERMITTY_2","PERMITMINE","LODGEDATE","APPROVEDAT","EXPIRYDATE","NONCURRENT","AUTHORIS_1","NEW_IDENTIFIER"],					
-                "preformat": {
-                    "unique_column": "DISPLAYNAM",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -398,18 +356,18 @@
             },
             "QLD_2": {
                 "required_fields": ["NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": null,
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [],
@@ -426,22 +384,21 @@
             },
             "QLD_3": {
                 "required_fields": ["geometry", "TENURE", "EFFECTIVED", "NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "UNIQUE_FIELD",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "create_unique_key", 
-                            "configs": {"name": "add_multipolygon","field": "geometry"}
-                        }
-                    ]
+                "unique_column": 3,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": {
+                    "name": "add_multipolygon",
+                    "field": "geometry"
                 },
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [],
@@ -458,18 +415,18 @@
             },
             "SA_1": {
                 "required_fields": ["geometry", "TENEMENT_LABEL","TENEMENT_STATUS","TENEMENT_HOLDERS","REGISTRATION_GRANT_DATE","SURRENDER_DATE","EXPIRY_DATE","RENEWAL_RECEIVED_DATE","TRANSFER_RECEIVED_DATE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TENEMENT_LABEL",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 4,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -491,18 +448,18 @@
             },
             "SA_2": {
                 "required_fields": ["geometry", "TENEMENT_LABEL","TENEMENT_STATUS","LICENCEES","TENEMENT_START_DATE","TENEMENT_SURRENDER_DATE","TENEMENT_EXPIRY_DATE","RENEWAL_APPLICATION_DATE","TRANSFER_APPLICATION_DATE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TENEMENT_LABEL",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 4,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -526,18 +483,18 @@
             },
             "SA_3": {
                 "required_fields": ["geometry", "AREA_TYPE","PUBLISH_DATE","AREA_START_DATE","APPLICATION_CLOSE_DATE","AREA_STATUS","ERA_NUMBER","APPLICANTS","APPLICATION_OPEN_DATE","RELATED_TENEMENTS","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "ERA_NUMBER",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 13,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -557,18 +514,18 @@
             },
             "SA_4": {
                 "required_fields": ["APPLICATION_LABEL","APPLICANTS","PEGGING_DATE","APPLICATION_RECEIVED_DATE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "FILE_REFERENCE",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 3,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -589,18 +546,18 @@
             },
             "SA_5": {
                 "required_fields": ["geometry", "DATE_RECEIVED","LEASE_TYPE","FILE_REFERENCE","APPLICANTS","RELATED_TENEMENTS","DATE_REQUIREMENTS_COMPLETE","NATIVE_TITLE","ASSESSMENT_STATUS","DATE_ASSESSMENT_COMPLETED","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "FILE_REFERENCE",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 4,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -621,18 +578,18 @@
             },
             "SA_6": {
                 "required_fields": ["geometry", "APPLICATION_TYPE","FILE_REFERENCE","APPLICANTS","APPLICATION_RECEIVED_DATE","DATE_OFFERED","DATE_ACCEPTED","OUTCOME","OUTCOME_DATE","RESULTING_TENEMENT","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "FILE_REFERENCE",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 3,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -653,18 +610,18 @@
             },
             "SA_7": {
                 "required_fields": ["geometry", "FILE_REFERENCE","LICENSEE","GRANTED_DATE","EXPIRY_DATE","TENEMENT_NO","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TENEMENT_NO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 11,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -685,18 +642,18 @@
             },
             "SA_8": {
                 "required_fields": ["FILE_REFERENCE","APPLICANT","APPLICATION_DATE","DATE_TO","TENEMENT_NO","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TENEMENT_NO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 11,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -717,18 +674,18 @@
             },
             "SA_9": {
                 "required_fields": ["geometry", "CALL_NO","FILE_REFERENCE","DATE_FROM","DATE_TO","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "CALL_NO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 2,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -749,18 +706,18 @@
             },
             "TAS_1": {
                 "required_fields": ["geometry", "name","tenementType","owner","status","applicationDate","grantDate","expireDate","fileID","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "fileID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 11,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -780,22 +737,18 @@
             },
             "VIC_1": {
                 "required_fields": ["TNO","STATUS","TYPEDESCM","TYPEDESC","RENEW_APP","OWN_NAME","APPREC_DTI","GRANT1_DTI","GRANTL_DTI","EXPL_DTI","STATUSSDSC","STATUSLDSC","ACTIVE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TNO",
-                    "low_memory": false,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "combine_polygons", 
-                            "configs": {"index":"TNO", "geom_field":"geometry", "status": {"field":"ACTIVE" ,"value":"Current"}}
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -815,26 +768,18 @@
             },
             "VIC_2": {
                 "required_fields": ["geometry", "TNO","COVER","AUTH_TYPE","AUTH_TYPEL","NO","STATUSS","STATUSSDSC","TEN_HOLD1","ISSUE_DT","ISSUE_DTI","EXPIRE_DT","EXPIRE_DTI","APP_DT","APP_DTI","TERM_DT","TERM_DTI","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TNO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "combine_polygons", 
-                            "configs": {"index": "TNO", "status": {"field": "DBSOURCE" ,"value": "rram_sf"}}
-                        },
-                        {
-                            "type": "no_match_blank", 
-                            "configs": {"field":"COVER","vals":["petrola","petrolb","petrole"]}
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -854,18 +799,18 @@
             },
             "WA_1": {
                 "required_fields": ["TENID","TYPE","TENSTATUS","STARTDATE","ENDDATE","GRANTDATE","FMT_TENID","ALL_HOLDER","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TENID",
-                    "low_memory": false,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": false,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -885,18 +830,18 @@
             },
             "WA_2": {
                 "required_fields": ["geometry", "TENID","TEN_TYPE","RLESID","RLES_STATU","RLES_STAMP","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "RLESID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 3,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [],
@@ -913,18 +858,18 @@
             },
             "WA_3": {
                 "required_fields": ["geometry", "TENID","AMALGID","END_STAMP","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "AMALGID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 3,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": {"file": "WA_1","this_file": "TENID","other_file": "TENID","clean_up": "WA_merge_1"},
                     "format": [
@@ -945,18 +890,18 @@
             },
             "WA_4": {
                 "required_fields": ["geometry", "TENID","RESTNID","RESTN_STAT","START_STAM","END_STAMP","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "RESTNID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 3,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -975,19 +920,20 @@
             },
             "WA_5": {
                 "required_fields": ["geometry", "TITLE_ID","TYPE","ISSUED","EXPIRY","STATUS","ALL_HOLDER","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TITLE_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "STATUS", "type": "exclude", "vals": [""]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": [""]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1007,18 +953,18 @@
             },
             "WA_6": {
                 "required_fields": ["geometry", "TITLE_ID","TYPE","LODGED","STATUS","APPLNT_1","APPLNT_2","APPLNT_3","APPLNT_4","APPLNT_5","APPLNT_6","APPLNT_7","APPLNT_8","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TITLE_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1040,18 +986,18 @@
             },
             "WA_7": {
                 "required_fields": ["geometry", "TITLE_ID","TYPE","GAZETTED","CLOSING","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TITLE_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1071,18 +1017,18 @@
             },
             "WA_8": {
                 "required_fields": ["geometry", "TITLE_ID","TYPE","LODGED","ISSUED","SPA_EXPIRY","AO_EXPIRY","STATUS","HOLDER_1","HOLDER_2","HOLDER_3","HOLDER_4","HOLDER_5","HOLDER_6","HOLDER_7","HOLDER_8","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "TITLE_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1105,23 +1051,20 @@
     "occurrence": {
             "AUS_OSPET_1": {
                 "required_fields": ["geometry", "Well_Name","Title","Borehole_Operator","Kick_Off_Date","Borehole_reason","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "Well_ENO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "combine_ausos_well_duplicates", 
-                            "configs": {"index": "Well_ENO", "field": "Borehole_reason", "vals": ["development","appraisal","exploration"]}
-                        },
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "Borehole_reason", "type": "include", "vals": ["exploration", "appraisal", "development"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 2,
+                "field_filter": [
+                    {"name": "Borehole_reason", "type": "include", "vals": ["exploration", "appraisal", "development"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1139,36 +1082,20 @@
             },
             "NSW_1": {
                 "required_fields": ["geometry", "OCCURRENCE","METAL_NO","DEPOSIT_NA","ALL_NAMES","OPERATION","OP_STATE","OP_STATUS","WORK_DESC","SUMMARY_DE","SIZE_CODE","MAJOR_COMM","MINOR_COMM","ORE_MIN","GS_NUMBER","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "OCCURRENCE",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "multi_blank_filter", 
-                            "configs": ["WORK_DESC","DEPOSIT_NA"]
-                        },
-                        {
-                            "type": "keyword_drop", 
-                            "configs": [
-                                {"field": "DEPOSIT_NA", "type": "exclude", "keywords": ["State Forest","Beach","Road","Highway","Borehole"]}
-                            ]
-                        },
-                        {
-                            "type": "create_type_join_fields", 
-                            "configs": ["DEPOSIT_NA","ALL_NAMES","OPERATION","WORK_DESC"]
-                        },
-                        {
-                            "type": "clear_value", 
-                            "configs": {"field": "DEPOSIT_NA", "values": ["operation not named","unknown","unnamed","unexpected","\\?"]}
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": ["WORK_DESC","DEPOSIT_NA"],
+                "keyword_drop": [
+                    {"field": "DEPOSIT_NA", "type": "exclude", "keywords": ["State Forest","Beach","Road","Highway","Borehole"]}
+                ],
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": ["DEPOSIT_NA","ALL_NAMES","OPERATION","WORK_DESC"],
+                "clear_value": {"field": "DEPOSIT_NA", "values": ["operation not named","unknown","unnamed","unexpected","\\?"]},
                 "build": {
                     "merge": null,
                     "format": [
@@ -1185,21 +1112,22 @@
             },
             "NSW_2": {
                 "required_fields": ["geometry", "HOLE_NAME","HOLEPURPOS","BUS_PURPOS","TITLEREF","COMMENCED_","COMPLETED_","HOLE_STATU","PLUG_DATE","TOPSTRAT","CSGSTATUS","REPORTS","OPENFILE_D","COMMENTS","GSNSW_DRIL","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SITE_ID",
-                    "low_memory": false,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "BUS_PURPOS", "type": "include", "vals": ["Petroleum", "Coal seam methane"]},
-                                {"name": "HOLEPURPOS", "type": "include", "vals": ["Exploration", "Production"]},
-                                {"name": "HOLE_STATU", "type": "exclude", "vals": ["", "Water Bore","Unknown"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "BUS_PURPOS", "type": "include", "vals": ["Petroleum", "Coal seam methane"]},
+                    {"name": "HOLEPURPOS", "type": "include", "vals": ["Exploration", "Production"]},
+                    {"name": "HOLE_STATU", "type": "exclude", "vals": ["", "Water Bore","Unknown"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1217,19 +1145,20 @@
             },
             "NT_1": {
                 "required_fields": ["geometry", "MODAT_ID","NAME","MIN_CATGRY","COM_MAJOR","COM_MINOR","STATUS","OCCUR_SIZE","COMMENTS1","COMMENTS2","COMMENTS3","PROD_COMME","MIN_METHOD","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "MODAT_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "STATUS", "type": "exclude", "vals": ["Feasibility", "Care and maintenance", "Operating mine"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": ["Feasibility", "Care and maintenance", "Operating mine"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1246,19 +1175,20 @@
             },
             "NT_2": {
                 "required_fields": ["geometry", "WELLNAME","PURPOSE","CLASS_POST","TITLE_ID","STATUS","DT_SPUD","DT_DEPTH","DT_RELEASE","HCSHOWS","BASICSTAT","INTERPSTAT","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "WELLNAME",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "STATUS", "type": "exclude", "vals": ["Injector", "NR"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": ["Injector", "NR"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1275,18 +1205,18 @@
             },
             "QLD_1": {
                 "required_fields": ["geometry", "SITE_NO","OCCUR_NAME","DATE_CURRE","DATE_RECOR","SITE_TYPE","MINE_STATU","EXPLORE_ST","EXPOSURE_T","DEPOSIT_SI","MAIN_COMMO","MAIN_COM_1","MAIN_OCCUR","MAIN_OCC_1","ALL_COMMOD","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SITE_NO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1306,18 +1236,18 @@
             },
             "QLD_2": {
                 "required_fields": ["geometry", "SITE_NO","OCCUR_NAME","DATE_CURRE","DATE_RECOR","SITE_TYPE","DEPOSIT_SI","MAIN_COMMO","MAIN_COM_1","MAIN_OCCUR","MAIN_OCC_1","ALL_COMMOD","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SITE_NO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1337,42 +1267,25 @@
             },
             "SA_1": {
                 "required_fields": ["geometry", "MINDEP_NO","DEP_NAME","REFERENCE","COMM_CODE","COMMODS","COMMOD_MAJ","COMM_SPECS","CLASS_CODE","OPER_TYPE","MAP_SYMB","STATUS_VAL","SIZE_VAL","SRCE_CNTRE","COMMENTS","O_MAP_SYMB","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "MINDEP_NO",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "create_unique_key", 
-                            "configs": {"name": "join_fields","fields": ["EASTING","NORTHING"]}
-                        },
-                        {
-                            "type": "run_method_on_different_file", 
-                            "configs": {"file":"SA_2","method": "create_unique_key","configs": {"name": "join_fields","fields": ["EASTING","NORTHING"]}}
-                        },
-                        {
-                            "type": "duplicate_rows_key", 
-                            "configs": "UNIQUE_FIELD"
-                        },
-                        {
-                            "type": "merge_file", 
-                            "configs": {
-                                "file": "SA_2", 
-                                "key": {"this_file": "UNIQUE_FIELD", "other_file": "UNIQUE_FIELD"},
-                                "fields": [["geometry","geometry"],["DEP_NAME","PR_NAME"],["CLASS_CODE","PR_STATUS"],["STATUS_VAL","DEV_STATUS"]]
-                            }
-                        },
-                        {
-                            "type": "create_type_join_fields", 
-                            "configs": ["CLASS_CODE","SRCE_CNTRE"]
-                        }
-                    ]
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "UNIQUE_FIELD",
+                "create_unique_key": {
+                    "name": "join_fields",
+                    "fields": ["EASTING","NORTHING"]
                 },
+                "merge_file": {
+                    "file": "SA_2", 
+                    "key": {"this_file": "UNIQUE_FIELD", "other_file": "UNIQUE_FIELD"},
+                    "fields": [["geometry","geometry"],["DEP_NAME","PR_NAME"],["CLASS_CODE","PR_STATUS"],["STATUS_VAL","DEV_STATUS"]]
+                },
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": ["CLASS_CODE","SRCE_CNTRE"],
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1388,21 +1301,42 @@
                     "alternate_ids": ["MINDEP_NO"]
                 }
             },
+            "SA_2": {
+                "unrequired_fields": "",
+                "required_fields": [],
+                "unique_column": "",
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": {
+                    "name": "join_fields",
+                    "fields": ["EASTING","NORTHING"]
+                },
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
+                "build": null
+            },
             "SA_3": {
                 "required_fields": ["WELLDISPLA","WELL_ID","CLASS","TYPE","STATUSRR","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "WELL_ID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "CLASS", "type": "include", "vals": ["Exploration", "Appraisal", "Development"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "CLASS", "type": "include", "vals": ["Exploration", "Appraisal", "Development"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1419,23 +1353,20 @@
             },
             "TAS_1": {
                 "required_fields": ["geometry", "GID","DEPOSIT_ID","NAME","ALIAS","TYPE","COMM_TYPE","COMMODITYS","DESCRIPT","STATUS","DEP_SIZE","RESOURCES","REF","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "GID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "COMM_TYPE", "type": "exclude", "vals": ["Geothermal"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "create_type_join_fields", 
-                            "configs": ["NAME","DESCRIPT","TYPE","STATUS"]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": [
+                    {"name": "COMM_TYPE", "type": "exclude", "vals": ["Geothermal"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": ["NAME","DESCRIPT","TYPE","STATUS"],
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1452,18 +1383,18 @@
             },
             "VIC_1": {
                 "required_fields": ["geometry", "FEATURE","SITEID","MINE_TYPE","SIZE_CAT","ADIT","IN_SITU","OPEN_CUT","SHAFT","DECLINE","SLUICING","DREDGING","PROD_COMM","PRI_COMM","SEC_COMM","MIN_ASS","MININGMETH","PLOTTYPE","SITE_TYPE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SITEID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1481,22 +1412,23 @@
             },
             "VIC_2": {
                 "required_fields": ["geometry", "SITEID","WELL_NAME","CURRNTSTAT","SYMBOLDESC","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SITEID",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "SYMBOLDESC", "type": "exclude", "vals": ["Location", "Proposed well - COORDINATES ARE NOT ACTUAL"]},
-                                {"name": "PRVNCSTATE", "type": "include", "vals": ["VIC"]},
-                                {"name": "CRRNTCLASS", "type": "include", "vals": ["D_HC_PROD","D_APPRAISAL","W_PRODUCER","E_ABANDONED","E_WILDCAT","D_ABANDONED","E_APPRAISAL","E_EXTENSION","E_PROPOSED","E_CONFIRM","GT_WILDCAT","E_STEPOUT"]},
-                                {"name": "SYMBOLDESC", "type": "exclude", "vals": ["","Observation_HC","Injector - gas","Injector","Gas Well CO2"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": [
+                    {"name": "SYMBOLDESC", "type": "exclude", "vals": ["Location", "Proposed well - COORDINATES ARE NOT ACTUAL"]},
+                    {"name": "PRVNCSTATE", "type": "include", "vals": ["VIC"]},
+                    {"name": "CRRNTCLASS", "type": "include", "vals": ["D_HC_PROD","D_APPRAISAL","W_PRODUCER","E_ABANDONED","E_WILDCAT","D_ABANDONED","E_APPRAISAL","E_EXTENSION","E_PROPOSED","E_CONFIRM","GT_WILDCAT","E_STEPOUT"]},
+                    {"name": "SYMBOLDESC", "type": "exclude", "vals": ["","Observation_HC","Injector - gas","Injector","Gas Well CO2"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",                
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1513,18 +1445,18 @@
             },
             "WA_1": {
                 "required_fields": ["geometry", "SITE_CODE","SITE_TITLE","SHORT_NAME","SITE_COMMO","SITE_TYPE_","SITE_SUB_T","SITE_STAGE","TARGET_COM","COMMODITY","PROJ_CODE","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "SITE_CODE",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        }
-                    ]
-                },
+                "unique_column": 0,
+                "field_filter": "",
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": true,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [
@@ -1542,24 +1474,21 @@
             },
             "WA_2": {
                 "required_fields": ["geometry", "WELL_NAME","UWI","CLASS","STATUS","NEW_IDENTIFIER"],
-                "preformat": {
-                    "unique_column": "UWI",
-                    "low_memory": true,
-                    "format": [
-                        {
-                            "type": "field_filter", 
-                            "configs": [
-                                {"name": "STATUS", "type": "exclude", "vals": ["Water", "Service"]},
-                                {"name": "CLASS", "type": "include", "vals": ["NFW","EXT","DEV","O","DPT","NPW","SPT","CBM"]},
-                                {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
-                            ]
-                        },
-                        {
-                            "type": "duplicate_rows_key", 
-                            "configs": "UWI"
-                        }
-                    ]
-                },
+                "unique_column": 1,
+                "field_filter": [
+                    {"name": "STATUS", "type": "exclude", "vals": ["Water", "Service"]},
+                    {"name": "CLASS", "type": "include", "vals": ["NFW","EXT","DEV","O","DPT","NPW","SPT","CBM"]}
+                ],
+                "multi_blank_filter": "",
+                "keyword_drop": "",
+                "duplicate_rows_key": "UWI",
+                "create_unique_key": "",
+                "merge_file": "",
+                "merge_rows": "",
+                "sort_values": "",
+                "low_memory": false,
+                "create_type_join_fields": null,
+                "clear_value": null,
                 "build": {
                     "merge": null,
                     "format": [

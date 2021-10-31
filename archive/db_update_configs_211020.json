@@ -235,6 +235,25 @@
         "is_base_table": false,
         "check_changes_group": "occurrence"
     },
+    "OccGeom": {
+        "record_changes": {
+            "data_group": "occurrence",
+            "track_changes": false,
+            "relation_update": false,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "ind_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Occurrence"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "occurrence"
+    },
     "OccurrenceAddition": {
         "record_changes": null,
         "update_table": {
@@ -494,6 +513,25 @@
         "is_base_table": false,
         "check_changes_group": "tenement"
     },
+    "TenGeom": {
+        "record_changes": {
+            "data_group": "tenement",
+            "track_changes": false,
+            "relation_update": false,
+            "user_edits": null,
+            "drop_fields": [],
+            "key": "ind_id",
+            "second_data_group": null
+        },
+        "update_table": null,
+        "related_tables": ["Tenement"],
+        "inactive_ids": null,
+        "index": "ind_id",
+        "file_type": "update",
+        "db_to_core_transfer": null,
+        "is_base_table": false,
+        "check_changes_group": "tenement"
+    },
     "TenementChange": {
         "record_changes": null,
         "update_table": {
@@ -658,7 +696,7 @@
         "record_changes": {
             "data_group": "tenement",
             "track_changes": true,
-            "relation_update": false,
+            "relation_update": true,
             "user_edits": {
                 "actions": {
                     "tenoriginalid_id": "new-edits-changes-multi" 

@@ -1,0 +1,155 @@
+{
+    "HOLDER": {
+        "find_matches": {
+            "type": "core_match",
+            "file": "Holder_pre",
+            "field": "name"
+        },
+        "update_core": {
+            "raw_file": "Companies_R",
+            "raw_update": {"style":"simple","fields":{"ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"Holder","left_on":"LIKELY_MATCH","right_on":"name","index":"_id"},
+            "miss_merge": {"left_on":"VALUE","right_on":"ORIGINAL"},
+            "ind_file": "TenHolder",
+            "df_build": {"user_name": "ss", "valid_relations": true, "valid_instance": true, "user_edit": false, "date_modified": "date", "date_created": "date"},
+            "remove_temp": true,
+            "db_update": {"type":"holder","columns":["tenement_id","name_id"],"index":null,"proccess":["clear","append"]}
+        }
+    },
+    "NAME": {
+        "find_matches": {
+            "type": "format_only",
+            "file": null,
+            "field": null
+        },
+        "update_core": {
+            "raw_file": null,
+            "raw_update": null,
+            "id_file": {"name":"OccName","left_on":"LIKELY_MATCH","right_on":"name","index":"_id"},
+            "miss_merge": {"left_on":"VALUE","right_on":"ORIGINAL"},
+            "ind_file": "occurrence_name",
+            "df_build": {"user_name": "ss", "valid_instance": true, "date_created": "date"},
+            "remove_temp": false,
+            "db_update": {"type":"append","columns":["occurrence_id","occname_id"],"index":null,"proccess":["append"]}
+        }
+    },
+    "MAJOR_MATERIAL": {
+        "find_matches": {
+            "type": "raw_match_for_core",
+            "file": {"core":"Material","raw":"Materials_R"},
+            "field": {"core":"name","raw":"GP_VALUE"}
+        },
+        "update_core": {
+            "raw_file": "Materials_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"Material","left_on":"LIKELY_MATCH","right_on":"name","index":"_id"},
+            "miss_merge": {"left_on":["STATE","VALUE"],"right_on":["STATE","ORIGINAL"]},
+            "ind_file": "occurrence_majmat",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"append","columns":["occurrence_id","material_id"],"index":null,"proccess":["append"]}
+        }
+    },
+    "MINOR_MATERIAL": {
+        "find_matches": {
+            "type": "raw_match_for_core",
+            "file": {"core":"Material","raw":"Materials_R"},
+            "field": {"core":"name","raw":"GP_VALUE"}
+        },
+        "update_core": {
+            "raw_file": "Materials_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"Material","left_on":"LIKELY_MATCH","right_on":"name","index":"_id"},
+            "miss_merge": {"left_on":["STATE","VALUE"],"right_on":["STATE","ORIGINAL"]},
+            "ind_file": "occurrence_minmat",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"append","columns":["occurrence_id","material_id"],"index":null,"proccess":["append"]}
+        }
+    },
+    "TITLE_STATUS": {
+        "find_matches": {
+            "type": "all_core",
+            "file": "TenStatus",
+            "field": "original"
+        },
+        "update_core": {
+            "raw_file": "TenStatus_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"TenStatus","left_on":"LIKELY_MATCH","right_on":"original","index":"_id"},
+            "miss_merge": {"left_on":["STATE","VALUE"],"right_on":["STATE","ORIGINAL"]},
+            "ind_file": "Tenement",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"insert","columns":["ind","status_id"],"index":"ind","proccess":["update"]}
+        }
+    },
+    "SITE_STATUS": {
+        "find_matches": {
+            "type": "all_core",
+            "file": "OccStatus",
+            "field": "original"
+        },
+        "update_core": {
+            "raw_file": "OccStatus_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","GROUP":"GROUP","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"OccStatus","left_on":"LIKELY_MATCH","right_on":"original","index":"_id"},
+            "miss_merge": {"left_on":["STATE","GROUP","VALUE"],"right_on":["STATE","GROUP","ORIGINAL"]},
+            "ind_file": "Occurrence",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"insert","columns":["ind","status_id"],"index":"ind","proccess":["update"]}
+        }
+    },
+    "TITLE_TYPE": {
+        "find_matches": {
+            "type": "core_match",
+            "file": "TenType",
+            "field": "original"
+        },
+        "update_core": {
+            "raw_file": "TenType_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","GROUP":"GROUP","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"TenType","left_on":"LIKELY_MATCH","right_on":"original","index":"_id"},
+            "miss_merge": {"left_on":["STATE","GROUP","VALUE"],"right_on":["STATE","GROUP","ORIGINAL"]},
+            "ind_file": "Tenement",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"insert","columns":["ind","typ_id"],"index":"ind","proccess":["update"]}
+        }
+    },
+    "SITE_TYPE": {
+        "find_matches": {
+            "type": "core_match",
+            "file": "OccType",
+            "field": "original"
+        },
+        "update_core": {
+            "raw_file": "OccType_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","GROUP":"GROUP","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"OccType","left_on":"LIKELY_MATCH","right_on":"original","index":"_id"},
+            "miss_merge": {"left_on":["STATE","GROUP","VALUE"],"right_on":["STATE","GROUP","ORIGINAL"]},
+            "ind_file": "occurrence_typ",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"append","columns":["occurrence_id","occtype_id"],"index":null,"proccess":["append"]}
+        }
+    },
+    "SIZE": {
+        "find_matches": {
+            "type": "all_core",
+            "file": "OccSize",
+            "field": "name"
+        },
+        "update_core": {
+            "raw_file": "OccSize_R",
+            "raw_update": {"style":"simple","fields":{"STATE":"STATE","GROUP":"GROUP","ORIGINAL":"DS_VALUE","LIKELY_MATCH":"GP_VALUE"}},
+            "id_file": {"name":"OccSize","left_on":"LIKELY_MATCH","right_on":"name","index":"_id"},
+            "miss_merge": {"left_on":["STATE","GROUP","VALUE"],"right_on":["STATE","GROUP","ORIGINAL"]},
+            "ind_file": "Occurrence",
+            "df_build": null,
+            "remove_temp": false,
+            "db_update": {"type":"insert","columns":["ind","size_id"],"index":"ind","proccess":["update"]}
+        }
+    }
+}

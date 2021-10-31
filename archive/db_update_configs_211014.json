@@ -4,7 +4,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -52,7 +52,7 @@
     "Holder": {
         "record_changes": null,
         "update_table": null,
-        "related_tables": [],
+        "related_tables": ["HolderType"],
         "inactive_ids": null,
         "index": "name",
         "file_type": "replace",
@@ -70,6 +70,16 @@
         "related_tables": ["Holder","Listed"],
         "inactive_ids": null,
         "index": "holder_id",
+        "file_type": null,
+        "db_to_core_transfer": null,
+        "is_base_table": true
+    },
+    "HolderType": {
+        "record_changes": null,
+        "update_table": null,
+        "related_tables": [],
+        "inactive_ids": null,
+        "index": "original",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -109,7 +119,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -149,7 +159,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": "replace",
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -159,7 +169,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -427,7 +437,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -437,7 +447,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -447,7 +457,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -457,7 +467,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": null,
         "db_to_core_transfer": null,
         "is_base_table": true
@@ -658,7 +668,7 @@
         "record_changes": {
             "data_group": "tenement",
             "track_changes": true,
-            "relation_update": false,
+            "relation_update": true,
             "user_edits": {
                 "actions": {
                     "tenoriginalid_id": "new-edits-changes-multi" 
@@ -705,7 +715,7 @@
         "update_table": null,
         "related_tables": [],
         "inactive_ids": null,
-        "index": "_id",
+        "index": "code",
         "file_type": "replace",
         "db_to_core_transfer": null,
         "is_base_table": true

@@ -1,9 +1,14 @@
 import time
 import datetime
+# import pandas as pd
+# from datetime import datetime, date
 import os
-
+# from updateData_functions import (download_data_to_csv, add_wkt_tenement, 
+#                                 create_spatial_relation_files, find_changes_update_core_and_database, 
+#                                 add_crs_to_wkt, previous_core_to_db, fileExist,
+#                                 check_csvs_for_errors, apply_missing_data_updates)
+# build_local_gov_files, separate_geom_fields, reduce_pnts_in_poly, combine_title_data, combine_site_data, output_missing_data, extract_user_edits_to_core, preformat_file
 from functions import (
-        download_data_to_csv,
         create_combined_datasets, 
         extract_user_edits_to_core, 
         preformat_files, 
@@ -11,8 +16,7 @@ from functions import (
         add_crs_to_wkt, 
         find_changes_update_core_and_database, 
         apply_missing_data_updates,
-        fileExist,
-        time_past
+        fileExist
         )
 
 
@@ -46,7 +50,6 @@ class UpdateData():
         
 
     def download_format(self):
-        func_start = time.time()
         # # download the data and convert it to WKT in csv
         # download_data_to_csv(self)
         # save the frontend user edits to the core file
@@ -61,7 +64,6 @@ class UpdateData():
         add_crs_to_wkt(self)
         # Find the changes between the new and the core files and update them
         find_changes_update_core_and_database(self)
-        print('Total duration: %s' %(time_past(func_start,time.time())))
 
 
     def update_missing_data(self):
@@ -72,3 +74,79 @@ class UpdateData():
 
 UpdateData().download_format()
 # UpdateData().update_missing_data()
+
+
+
+
+
+#     # # add the wkt data back to the tenement data
+        #     # add_wkt_tenement(self)
+
+# # check the csv files for errors that will be problematic when loading to the db. currently not used
+    # check_csvs_for_errors(self)
+
+
+
+# def reduce_poly_pnts(self):
+    #     # 
+    #     reduce_pnts_in_poly(self)
+
+# UpdateData().reduce_poly_pnts()
+
+
+
+# # combine all title data in to one dataset
+# combine_title_data(self)
+# # combine all site data in to one dataset
+# combine_site_data(self)
+# # save the missing data to files
+# output_missing_data(self)
+
+
+
+
+    # def revert_db_to_previous(self):
+    #     # delete all db tables and load the previous core files from the archive to the database. This is useful if there is an arror when running the update.
+    #     previous_core_to_db(self)
+
+    # def add_user_dummy_user_edits(self):
+# UpdateData().add_relations()
+
+# UpdateData().revert_db_to_previous()
+
+
+
+    # def build_local_gov_datasets(self):
+
+    #     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+    #     self.standard = os.path.join(BASE_DIR,'regions','standard')
+    #     self.new_local = os.path.join(BASE_DIR,'regions','new_local')
+    #     self.region = os.path.join(BASE_DIR,'regions')
+
+    #     self.core = os.path.join(self.output_dir,'core')
+
+    #     build_local_gov_files(self)
+    
+
+# UpdateData().build_local_gov_datasets()
+
+    # def update_database(self):
+    #     # Find the changes between the new and the core files and update them
+    #     create_change_and_update_core_files(self)
+        
+        
+        # # Use the Update and change files to update the db
+        # make_database_changes(self)
+        # # # Add the Change and Update files to the db
+
+
+
+# UpdateData().download_format()
+# UpdateData().add_relations()
+
+# UpdateData().update_database()
+
+# "user_name","valid_relations","valid_instance","user_edit","date_modified","date_created"
+# "user_name","valid_instance","date_created"
+# "valid_relations","user_edit","date_modified"

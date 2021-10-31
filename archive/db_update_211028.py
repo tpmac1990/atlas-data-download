@@ -64,8 +64,8 @@ def find_changes_update_core_and_database(self):
         print('This is an update only. Creating CHANGE and UPDATE files.')
         # add core data to new csv file for Tenement & Occurrence values that were added in the tenement_occurrence relation step
         add_relation_core_rows_to_new_file(self) # need to fix
-                # # # # update the db for core files that are updated manually and are not compared to 
-                # # # update_db_for_manually_handled_core(self)
+        # update the db for core files that are updated manually and are not compared to 
+        update_db_for_manually_handled_core(self)
         # copy new files that will be updated with user edits to a separate folder. This will only be used to compare the new file updated with the user edits and the original
         backup_new_useredit_file(self)
         # Compare all the files that don't have changes recorded. Add new rows to db.
@@ -79,10 +79,10 @@ def find_changes_update_core_and_database(self):
         delete_updating_rows_from_updating_db_tables(self)
         # makes the changes to the core file and the db
         make_core_file_and_db_changes(self) 
-        # # create the change, add and remove tables and update them in the core files and database 
-        # build_update_tables_update_db(self)
-        # # create qgis compatible files for tenement & occurrence files
-        # create_qgis_spatial_files(self)
+        # create the change, add and remove tables and update them in the core files and database 
+        build_update_tables_update_db(self)
+        # create qgis compatible files for tenement & occurrence files
+        create_qgis_spatial_files(self)
 
     print('Find changes and updates: %s' %(time_past(func_start,time.time())))
 
@@ -666,7 +666,6 @@ def make_core_file_and_db_changes(self):
                 # field = update_configs[file]["columns"][key]
                 field = key
                 table = "gp_%s"%(file.lower())
-
                 # clear necessary rows from the db table 
                 if len(db_remove_lst) > 0:
                     clear_db_table_rows_in_lst(psycopg2_con, table, field, db_remove_lst) # uncomment this
@@ -678,7 +677,6 @@ def make_core_file_and_db_changes(self):
         # write dfs to db in order
         print("Appending data to database for the %s data_group"%(data_group))
         for file in ordered_file_lst:
-            # if file == 'tenement_oid':
             print("Writing to Database: %s"%(file))
             table = "gp_%s"%(file.lower())
             df = change_dic[file]
@@ -772,36 +770,36 @@ def convert_date_fields_to_datetime(df):
     return df
 
 
-# def update_db_for_manually_handled_core(self):
-#     ''' The 'Holder' file is updated manually when running the tenement vba macro, thus when the new and core files are compared there 
-#         are no new values to add to the db. This is not true, so this method is to update the db for manually managed core files so the core is 
-#         maintained as a copy of its equivalent db table.
-#         This works by getting the last _id value from the db and then adding all rows with an _id greater than that to the table.
-#     '''
-#     print("Updating db for manually managed core files.")
-#     # Configs
-#     access_configs = self.access_configs
-#     # db connections
-#     sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
-#     psycopg2_con = connect_psycopg2(access_configs[self.db_location])
+def update_db_for_manually_handled_core(self):
+    ''' The 'Holder' file is updated manually when running the tenement vba macro, thus when the new and core files are compared there 
+        are no new values to add to the db. This is not true, so this method is to update the db for manually managed core files so the core is 
+        maintained as a copy of its equivalent db table.
+        This works by getting the last _id value from the db and then adding all rows with an _id greater than that to the table.
+    '''
+    print("Updating db for manually managed core files.")
+    # Configs
+    access_configs = self.access_configs
+    # db connections
+    sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+    psycopg2_con = connect_psycopg2(access_configs[self.db_location])
 
-#     # put Holder.csv into a df
-#     core_path = os.path.join(self.core_dir,'Holder.csv')
-#     core_df = pd.read_csv(core_path,engine="python")
+    # put Holder.csv into a df
+    core_path = os.path.join(self.core_dir,'Holder.csv')
+    core_df = pd.read_csv(core_path,engine="python")
 
-#     # get the max _id value from the db
-#     cur = psycopg2_con.cursor()
-#     cur.execute("SELECT MAX(_id) FROM gp_holder")
-#     max_id = cur.fetchall()[0][0]
-#     cur.close()
+    # get the max _id value from the db
+    cur = psycopg2_con.cursor()
+    cur.execute("SELECT MAX(_id) FROM gp_holder")
+    max_id = cur.fetchall()[0][0]
+    cur.close()
 
-#     # filter the core_df for _id above max_id
-#     new_values_df = core_df[core_df['_id'] > max_id]
-#     if len(new_values_df.index) > 0:
-#         # new_values_df = convert_date_fields_to_datetime(new_values_df) # I don't think i need this now that i have changed the date formatting in the vba macros
-#         new_values_df.to_sql('gp_holder', sqlalchemy_con, if_exists='append', index=False, method='multi')
+    # filter the core_df for _id above max_id
+    new_values_df = core_df[core_df['_id'] > max_id]
+    if len(new_values_df.index) > 0:
+        # new_values_df = convert_date_fields_to_datetime(new_values_df) # I don't think i need this now that i have changed the date formatting in the vba macros
+        new_values_df.to_sql('gp_holder', sqlalchemy_con, if_exists='append', index=False, method='multi')
 
-#     sqlalchemy_con.close()
+    sqlalchemy_con.close()
 
 
 def drop_id(val):
@@ -1076,6 +1074,10 @@ def find_differences_in_each_field(fields,key,core_df,new_df,data_group,file):
             changes_df = pd.concat((changes_df,df))
     return changes_df
 
+    # i can use the file name to determine the actual field name
+    # tenement = {"LODGEDATE": "lodgedateval", "STARTDATE": "startdateval", "ENDDATE": "enddateval", "HOLDER_ID": "holderval_id", "TYPE": "typeval_id", "STATUS": "statusval_id", "RELATEDID": "oidval_id", "MATERIAL_MAJ": "majmatval_id", "MATERIAL_MIN": "minmatval_id", "DATE": "date"}
+
+    # occurrence = { "TYPE": "typeval_id", "STATUS": "statusval_id", "RELATEDID": "oidval_id", "NAME": "nameval_id", "MATERIAL_MAJ": "majmatval_id", "MATERIAL_MIN": "minmatval_id", "DATE": "date" }
 
 
 def format_date(date_string):
@@ -1189,3 +1191,820 @@ def create_qgis_spatial_files(self):
             df.to_csv(os.path.join(directory,'qgis_%s.csv'%(file)),index=False)
 
 
+
+            
+
+# def update_new_files_with_user_changes(self):
+#     ''' This method looks through the TenementChange, OccurrenceChange & HolderChange tables for the user changes and then adds them to the new file
+#         so in the next step when all rows with the ind value in the new file are deleted, the new file rows to be added will maintain the user updates.
+#         I will need to use both the core file and the Change file so I am not adding data that the Change file says exists which doesn't exist in the core file. This 
+#         shouldn't be an issue, but a good safety net.
+#     '''
+#     # Configs
+#     update_configs = self.update_configs
+
+#     # this in only adding updates to the new file
+#     dic = {
+#         "occurrence": {
+#             "majmatval_id": {"action": "apply all changes from change file, leave new ss values"},
+#             "minmatval_id": {"action": "apply all changes from change file, leave new ss values"},
+#             "nameval_id": {"action": "apply all changes from change file, leave new ss values"}, 
+#             "oidval_id": {"action": "apply all changes from change file, leave new ss values"},  
+#             "statusval_id": {"action": "update if ss value has changed"}, 
+#             "typeval_id": {"action": "update if ss value has changed"}, 
+#             "geoprovinceval_id": {"action": "apply all changes from change file, leave new ss values"},  
+#             "sizeval_id": {"action": "apply all changes from change file, leave new ss values"}, 
+#         },
+#         "tenement": {
+#             "lodgedateval": {"action": None}, 
+#             "startdateval": {"action": None}, 
+#             "enddateval": {"action": None},  
+#             "oidval_id": {"action": "apply all changes from change file, leave new ss values"}, 
+#             "statusval_id": {"action": "update if ss value has changed"}, 
+#             "typeval_id": {"action": "update if ss value has changed"}, 
+#             "geoprovinceval_id": {"action": "apply all changes from change file, leave new ss values"}, 
+#             "holderval_id": {"action": "update if ss value has changed"},
+#             "holderperc": {"action": "update if ss value has changed"},
+#         }
+#     }
+
+#     # might be easier to maintain a ss updated core file set. This woulf allow the comparison of the new files and which values have actually changed.
+#     #   it wouldn't need to be every file, just those that are user editable.
+
+
+#     # get a list of all the tables which have changes recorded
+#     all_file_lst = [x for x in update_configs if update_configs[x]["record_changes"] != None and update_configs[x]["record_changes"]['track_changes']]
+
+#     for data_group in self.data_groups:
+
+#         change_path = os.path.join(self.core_dir,"%sChange.csv"%(data_group.capitalize()))
+
+#         if fileExist(change_path):
+
+#             change_df = pd.read_csv(change_path,engine='python')
+#             change_df = change_df[change_df['user'] != 'ss']
+
+#             print(change_df.head())
+
+#             # get the ind values from the data_group. These are all the instances that contain changes somewhere
+#             df = pd.read_csv(os.path.join(self.new_dir,"%s.csv"%(data_group.capitalize())),engine="python")
+#             ind_lst = df['ind'].values.tolist()
+
+#             file_lst = [x for x in all_file_lst if update_configs[x]["record_changes"]['data_group'] == data_group]
+        
+#             for file in file_lst:
+
+#                 new_path = os.path.join(self.new_dir,"%s.csv"%(file))
+#                 # core_df = pd.read_csv(os.path.join(self.core_dir,"%s.csv"%(file)),engine="python")
+#                 new_df = pd.read_csv(new_path,engine="python")
+
+#                 for ind in ind_lst:
+#                     pass
+
+
+
+
+
+
+
+
+            # print(file)
+            # # set path of the file in the output/new directory
+            # new_path = os.path.join(self.new_dir,"%s.csv"%(file))
+            # # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
+            # if fileExist(new_path):
+            #     print("Working on: %s"%(file))
+            #     # Set the paths
+            #     core_path = os.path.join(self.core_dir,"%s.csv"%(file))
+            #     change_file_path = os.path.join(self.change_dir,"%s.csv"%(file))
+
+            #     # Get the core file and filter for the change ids
+            #     core_df = pd.read_csv(core_path,engine="python")
+            #     new_df = pd.read_csv(new_path,engine="python")
+
+            #     # get the df of only the new ids
+            #     ind = update_configs[file]["index"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def copy_to_us_core_add_fields(self):
+#     ''' copy the files from the ds_new folder to the us_core folder. As this is the initial dataset and not updating, the only
+#         thing that is required is to add the three extra columns, 'user_input', 'valid' & 'modified' to the editable tables from the frontend.
+#         user_input: True if the user has made updates to the field
+#         valid: True if the data has been checked and verified. Only False after a user has made an update
+#         modified: The date the last time the field was editied
+#     '''
+#     func_start = time.time()
+#     print('Copying all files from ds_new to us_core and adding user_input, valid & modified fileds to editable tables.')
+#     # increase the field size to handle the Tenement WKT field
+#     csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
+#     # copy files from new_dir to the us_core_dir
+#     copy_directory(self.new_dir,self.us_core_dir)
+#     # add extra fields to relevant tables
+#     # for table in ["OccName","OccOriginalID","TenOriginalID","Listed","Holder","Parent","TenHolder","Occurrence","Tenement"]:
+#     for table in ["Holder","Occurrence","Tenement"]:
+#         print('working on: %s'%(table))
+#         path = os.path.join(self.us_core_dir,table + '.csv')
+#         df = pd.read_csv(path, engine="python")
+#         df['user_input'] = False
+#         df['valid'] = True
+#         df['modified'] = datetime.now()
+#         if table == 'Holder':
+#             df['created'] = datetime.now()
+#         df.to_csv(path,index=False)
+
+#     for table in ["OccName","OccOriginalID","TenOriginalID","Listed"]:
+#         print('working on: %s'%(table))
+#         path = os.path.join(self.us_core_dir,table + '.csv')
+#         df = pd.read_csv(path, engine="python")
+#         df['valid'] = True
+#         df['created'] = datetime.now()            
+#         df.to_csv(path,index=False)
+
+
+#     print('Copying files to us_change folder.')
+#     copy_directory(self.us_core_dir,self.us_change_dir)
+#     print('Complete')
+#     print('Copy to us_core & us_change time: %s' %(time_past(func_start,time.time())))
+
+
+
+# # update core & user files with user updates
+# def record_user_edits(self):
+#     ''' When a change is made in the application, the instance, whether is it related to the Tenement, Occurrence or Holder dataset has the
+#         user_input & valid fields updated to True & False respectively. This function filters for these changes and gets the ids of these fields that
+#         have been updated. It is not recorded which field is updated, but with the ids each of the related db tables are filtered by these keys and compared 
+#         to its equivalent core file. This comparison finds the values that have been added, or removed by the user and added to a core file named 'change.csv' 
+#     '''
+#     # increase the field size to handle the Tenement WKT field
+#     csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
+#     # Configs
+#     access_configs = self.access_configs
+#     update_configs = self.update_configs
+
+#     # db connections
+#     sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+
+#     # loop through Tenement and Occurrence
+#     for data_group in self.data_groups:
+
+#         # get the ids of the occurrence table where valid = False & input = True
+#         sql = "SELECT ind FROM gp_%s WHERE valid = False AND user_input = True"%(data_group)
+#         ind_lst = pd.read_sql(sql, sqlalchemy_con)['ind'].values.tolist()
+        
+#         # if the length of the ind_lst is equal to 0 then there are no user updates, so no need to proceed.
+#         if len(ind_lst) > 0:
+#             for file in update_configs:
+#                 record_changes = update_configs[file]["record_changes"]
+#                 if record_changes != None and record_changes["data_group"] == data_group:
+#                     # if file == 'Occurrence':
+#                     # print(file)
+#                     # extract the data from the db table for ind's in the ind_lst
+#                     # get the tables db field names
+#                     columns = update_configs[file]['columns']
+#                     rev_columns = {columns[x]: x for x in columns}
+#                     drop_fields = record_changes['drop_fields']
+#                     drop_fields = drop_fields + ['user_input','valid','modified','created']
+#                     key = record_changes['key']
+#                     db_fields = ','.join([columns[x] for x in columns if x not in drop_fields])
+#                     core_path = os.path.join(self.core_dir,"%s.csv"%(file))
+
+#                     sql = "SELECT %s FROM gp_%s WHERE %s IN %s"%(db_fields,file.lower(),columns[key],tuple(ind_lst))
+#                     user_df = pd.read_sql(sql, sqlalchemy_con).rename(columns=rev_columns)
+#                     core_df = pd.read_csv(core_path)
+#                     core_columns = core_df.columns
+#                     drop_fields = [x for x in drop_fields if x in core_columns]
+#                     loop_columns = [x for x in core_columns if x not in drop_fields]
+#                     core_df.drop(columns=drop_fields,inplace=True)
+#                     core_df = core_df[core_df[key].isin(ind_lst)]
+#                     user_df = user_df.astype(core_df.dtypes.to_dict())
+#                     merge_df = user_df.merge(core_df,indicator=True,how='outer')
+
+#                     if len(merge_df.index) > 0:
+#                         final_changes_df = find_differences_in_each_field(fields=loop_columns,key=key,core_df=core_df,new_df=user_df)
+
+#     # adds date and id field and commits to csv files. 
+#     add_id_date_fields_and_write_files(self,final_changes_df,self.changes_path,self.core_changes_path)
+
+#     sqlalchemy_con.close()
+
+
+
+
+
+# def transfer_user_edits_to_core(self):
+#     ''' This function loops over the three groups; Holder, Tenement & Occurrence. It filters for rows where 'user_edit=True' which means that a user 
+#         has made an edit to the group file or one of its related files. If there are rows returned, then two steps follow; 
+#             1. This group file is updated by filtering out the edited rows and replacing with their updated rows from the db table and saved as the core file.
+#             2. Each of the related tables are looped and the edited ids are filtered in both the db and core files. These df's are then compared and 
+#                 if there are differences then the changes are applied to the core file and saved
+#         There are no recording of changes in the 'Change' file here as this is done in the application when a change is made.
+#     '''
+#     print('Updating core files with changes in db')
+#     csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
+
+#     # Configs
+#     access_configs = self.access_configs
+#     update_configs = self.update_configs
+
+#     # db connections
+#     sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+
+#     # this will create a list with 'Holder','Occurrence','Tenement'
+#     creation_tables = [x for x in update_configs if update_configs[x]['db_to_core_transfer'] != None]
+
+#     for group in creation_tables:
+#         # if group == 'Holder':
+#         print('Working on Group: %s'%(group))
+
+#         dic = update_configs[group]['db_to_core_transfer']
+#         pk = dic['pk']
+#         related_field = dic['related_field']
+#         is_geospatial = dic['is_geospatial']
+#         table_lst = dic['table_lst']
+
+#         # if there are no user edit rows then get all user edits from the db, otherwise find the date of the last user_edit from the core file 
+#         # and get the new user edits from this date
+#         core_path = os.path.join(self.core_dir,"%s.csv"%(group))
+#         core_df = pd.read_csv(core_path,engine='python')
+#         user_edit_df = core_df[core_df['user_edit'] == True]
+
+#         if user_edit_df.empty:
+#             sql = "SELECT * FROM gp_%s WHERE user_edit = True"%(group.lower())
+#         else:
+#             # latest_date = format_date_r(user_edit_df['date_modified'].max())
+#             latest_date = user_edit_df['date_modified'].max()
+#             sql = "SELECT * FROM gp_%s WHERE user_edit = True AND date_modified >= '%s'"%(group.lower(), latest_date)
+
+#         # get the ids of only the latest 'user_edit' values from the db
+#         group_db_df = gpd.GeoDataFrame.from_postgis(sql, sqlalchemy_con) if is_geospatial else pd.read_sql(sql, sqlalchemy_con)
+#         # these are the keys of the instances that have had at least one update made by the user in either the group or its related tables
+#         keys_df = group_db_df[pk].values.tolist()
+
+#         # If there are no new rows with user_edits then no need to progress, the core file is already up to date
+#         if len(keys_df) > 0:
+
+#             # filter out these keys from the core_df, they will be replaced with the rows from the db
+#             reduced_core_df = core_df[~core_df[pk].isin(keys_df)]
+
+#             # filter the db data for the necessary ids, format the date columns & add the crs prefix to the geom column
+#             group_db_df = group_db_df[group_db_df[pk].isin(keys_df)]
+#             # create list of date fields to format for this file
+#             # date_columns = [x for x in group_db_df.columns if x in ['date_created','date_modified','lodgedate','startdate','enddate']]
+#             # for col in date_columns:
+#             #     group_db_df[col] = group_db_df[col].apply(lambda x: format_date(x))
+
+#             if is_geospatial:
+#                 group_db_df = geoDfToDf_wkt(group_db_df).drop(columns=['geometry'])
+#                 group_db_df['geom'] = group_db_df['geom'].apply(lambda x: "{}{}".format('SRID=4202;',x))
+
+#             # join the two df's to create the updated df and save
+#             final_df = pd.concat((reduced_core_df,group_db_df))
+
+#             final_df.to_csv(core_path,index=False) # uncomment this
+
+#             # update the edit file. this file contains only the user edits
+#             edit_path = os.path.join(self.edit_dir,"%s.csv"%(group))
+#             if fileExist(edit_path):
+#                 edit_df = pd.read_csv(edit_path,engine='python')
+#                 final_edit = pd.concat((edit_df,group_db_df)).drop_duplicates(ignore_index=True)
+#             else:
+#                 final_edit = group_db_df
+
+#             final_edit.to_csv(edit_path,index=False)
+
+#             for table in table_lst:
+#                 print("Working on related table: %s"%(table))
+#                 # get the values from the core file
+#                 core_path = os.path.join(self.core_dir,"%s.csv"%(table))
+#                 # loop through all the possible fields. 
+#                 for target_field in related_field:
+#                     # read the core_df. It needs to be re-read after each loop to include updates from the previous loop
+#                     core_df = pd.read_csv(core_path)
+#                     # only take action if the field exists in the df. This is the case for the 'Holder' group only
+#                     if target_field in core_df.columns:
+#                         filtered_core_df = core_df[core_df[target_field].isin(keys_df)].copy()
+#                         # convert ind values to 'str' format. Currently, they are an 'object' in the db_df and 'int64' in the core file which will cause an error on merge
+#                         convert_columns = [x for x in filtered_core_df.columns if x in ['tenement_id','occurrence_id']]
+#                         for col in convert_columns:
+#                             filtered_core_df[col] = filtered_core_df[col].astype(str)
+
+#                         # get the values from the db table
+#                         if len(keys_df) == 1:
+#                             if is_geospatial:
+#                                 # I have to cast to text otherwise i get an error even if i pass the key as a string
+#                                 sql = "SELECT * FROM gp_%s WHERE %s = CAST(%s as text)"%(table.lower(),target_field,keys_df[0])
+#                             else:
+#                                 sql = "SELECT * FROM gp_%s WHERE %s = %s"%(table.lower(),target_field,keys_df[0])
+#                         else:
+#                             sql = "SELECT * FROM gp_%s WHERE %s in %s"%(table.lower(),target_field,tuple(keys_df))
+#                         db_df = pd.read_sql(sql, sqlalchemy_con)
+
+#                         # drop the 'id' field of the m2m fields. these are automatically populated
+#                         if 'id' in db_df.columns: 
+#                             db_df.drop(columns=['id'],inplace=True)
+
+#                         # merge the db & core values to find if there are any differences between the two. Firstly, convert db_df dtypes to that of the core_df
+#                         db_df = db_df.astype(filtered_core_df.dtypes.to_dict())
+#                         merge_df = filtered_core_df.merge(db_df,indicator=True,how='outer')
+#                         diff_df = merge_df[merge_df["_merge"] != 'both']
+
+#                         # if the diff_df length is more than 0 then the core file needs to be updated. remove the rows with the filtered ids, concat the updated rows and save.
+#                         if len(diff_df.index) > 0:
+#                             reduced_core_df = core_df[~core_df[target_field].isin(keys_df)]
+#                             final_df = pd.concat((reduced_core_df,db_df))
+#                             final_df.to_csv(core_path,index=False) # uncomment this
+#                             # save edits to the edit file. This is only used to view the edits separatly
+#                             edit_path = os.path.join(self.edit_dir,"%s.csv"%(table))
+#                             if fileExist(edit_path):
+#                                 edit_df = pd.read_csv(edit_path,engine='python')
+#                                 final_edit = pd.concat((edit_df,db_df)).drop_duplicates(ignore_index=True)
+#                             else:
+#                                 final_edit = db_df
+#                             final_edit.to_csv(edit_path,index=False)
+
+#     sqlalchemy_con.close()
+
+
+# def transfer_user_creations_to_core(self):
+#     ''' Copy the user created instances from db tables and add to the core file '''
+#     print("Copy the user created instances to their core file.")
+#     # Configs
+#     access_configs = self.access_configs
+#     update_configs = self.update_configs
+
+#     # db connections
+#     sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+
+#     for table in ['OccName','OccOriginalID','TenOriginalID','Listed','Holder']:
+#         print("Updating: %s"%(table))
+#         core_path = os.path.join(self.core_dir,"%s.csv"%(table))
+#         edit_path = os.path.join(self.edit_dir,"%s.csv"%(table))
+#         core_df = pd.read_csv(core_path,engine='python')
+#         temp_df = core_df.copy()
+#         # temp_df['date_created'] = temp_df['date_created'].apply(lambda x: format_date_r(x))
+#         last_date = temp_df[['date_created']].max()
+#         f_date = last_date[0]
+#         # Get the latest rows entered by users by filtering from the latest date in the core file and where user_name is 'user'
+#         sql = "SELECT * FROM gp_%s WHERE user_name = 'user' AND CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
+#         # convert the blanks to Nan
+#         df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
+#         # no need to continue if there are no new rows from the db
+#         if len(df.index) > 0:
+#             # convert dates to d/m/y format
+#             # df = format_date_columns_b(df)
+#             # concat user edits to the edit file. create new file if it doesn't exist 
+#             if fileExist(edit_path):
+#                 edit_df = pd.read_csv(edit_path,engine='python')
+#                 final_edit = pd.concat((edit_df,df)).drop_duplicates(ignore_index=True)
+#             else:
+#                 final_edit = df
+#             final_edit.to_csv(edit_path,index=False)
+#             # concat the new rows from the db table to the core file and drop the duplicates
+#             final_core_df = pd.concat((core_df,df)).drop_duplicates(ignore_index=True)
+#             # overwrite the core file with the updates
+#             final_core_df.to_csv(core_path,index=False)
+
+
+
+
+# def transfer_changes_to_core(self):
+#     ''' Copy the Change tables from the db and concatenate the user additions to the core file '''
+#     print("Updating the core Change files with the latest db updates")
+#     # Configs
+#     access_configs = self.access_configs
+#     update_configs = self.update_configs
+
+#     # db connections
+#     sqlalchemy_con = sqlalchemy_engine(access_configs[self.db_location]).connect()
+
+#     for table in ['OccurrenceChange','TenementChange','HolderChange']:
+#         # if table == 'HolderChange':
+#         print("Working on: %s"%(table))
+#         # get the date of the last user entry. This is the date the db search will filter from 
+#         core_path = os.path.join(self.core_dir,"%s.csv"%(table))
+#         if fileExist(core_path):
+#             core_df = pd.read_csv(core_path)
+#             if len(core_df.index) > 0:
+#                 temp_df = core_df.copy()
+#                 # temp_df['date_created'] = temp_df['date_created'].apply(lambda x: format_date_r(x))
+#                 last_date = temp_df[['date_created']].max()
+#                 f_date = last_date[0]
+#                 # last_date = core_df[['date_created']].max()
+#                 # last_date = pd.to_datetime(last_date)[0]
+#                 # f_date = (last_date - timedelta(days=1)).strftime('%Y%m%d')
+#             else:
+#                 # f_date = date(2000, 2, 1).strftime('%Y%m%d')
+#                 f_date = '2000-02-01'
+#         else:
+#             core_df = pd.DataFrame()
+#             f_date = '2000-02-01'
+#             # f_date = date(2000, 2, 1).strftime('%Y%m%d')
+
+#         # e_date = (date.today() + timedelta(days=1)).strftime('%Y%m%d')
+#         # Get the latest rows from the Change tables by filtering rows after the last date in the core file. I was not able to query for user = 'user', so i used pandas as below
+#         sql = "SELECT * FROM gp_%s WHERE CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
+#         # drop id column and convert all None to Nan
+#         df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
+#         df = df[df['user'] != 'ss']
+#         # convert all types to string so there are no differences between types when dropping duplicates, then replace 'nan'
+#         df = df.astype(str).replace('nan', np.nan, regex=True)
+#         core_df = core_df.astype(str).replace('nan', np.nan, regex=True)
+#         # convert the date format of the db table to fit the csv format
+#         # # date_columns = [x for x in df.columns if 'date' in x]
+#         # # for col in date_columns:
+#         # #     df[col] = df[col].apply(lambda x: format_date(x))
+#         # if the core_df is empty then create core with the db df, otherwise concat the db table with the core file. If there are duplicates, the first will be kept
+#         #  and the others deleted
+#         final_core_df = df if core_df.empty else pd.concat((core_df,df)).drop_duplicates(ignore_index=True)
+#         # only create file if the df is not empty. An empty df might cause issues later when trying to find the max _id value that would't exist
+#         if not final_core_df.empty:
+#             final_core_df.to_csv(core_path,index=False)
+
+
+
+
+
+
+
+
+# if 'geom' in core_df.columns:
+        #     core_df['geom'] = core_df['geom'].str.replace('SRID=4202;', '')
+        #     core_df = df_to_geo_df_wkt(core_df)
+
+        # filtered_core_df = core_df[core_df['ind'].isin(keys_df)].copy()
+
+        # filtered_core_df = filtered_core_df.astype({'ind': 'str'})
+
+        # for col in ['date_created','date_modified']:
+        #     group_db_df[col] = group_db_df[col].apply(lambda x: format_date(x))
+
+        # group_db_df = group_db_df[["ind", "geom", "govregion_id", "localgov_id", "size_id", "state_id", "status_id", "date_modified", "valid_instance", "date_created"]].copy()
+        # filtered_core_df = filtered_core_df[["ind", "geom", "govregion_id", "localgov_id", "size_id", "state_id", "status_id", "date_modified", "valid_instance", "date_created"]].copy()
+
+        # merge_df = group_db_df.merge(filtered_core_df,indicator=True,how='outer')
+        # diff_df = merge_df[merge_df["_merge"] != 'both']
+        # print(merge_df)
+
+        # # print(group_db_df.head())
+        # print(group_db_df.dtypes)
+        # # print(filtered_core_df.head())
+        # print(filtered_core_df.dtypes)
+
+
+
+
+
+
+# core_path = os.path.join(self.core_dir,"%s.csv"%(table))
+            # core_df = pd.read_csv(core_path)
+
+            # # remove irrelevant fields and check if any entries alreay exist
+            # merge_df = pd.merge(new_df,core_df,how="left",on='NAME',suffixes=("", "_core"))
+            # drop_columns = [x for x in merge_df if '_core' in x]
+            # unique_new_df = merge_df.drop(columns=drop_columns)
+            # # append to the core and update
+            # core_df = core_df.append(unique_new_df)
+            # overwrite the core file
+
+
+
+# if len(merge_df.index) > 0:
+                    #     for field in loop_columns:
+                    #         core_field_df = core_df[[key,field]].drop_duplicates()
+                    #         user_field_df = user_df[[key,field]].drop_duplicates()
+                    #         merge_field_df = core_field_df.merge(user_field_df,indicator=True,how='outer')
+                    #         remove_df = merge_field_df[merge_field_df["_merge"] == "left_only"].drop(columns="_merge")
+                    #         add_df = merge_field_df[merge_field_df["_merge"] == "right_only"].drop(columns="_merge")
+                    #         for type_group in [[remove_df,"REMOVE"],[add_df,"ADD"]]:
+                    #             df = type_group[0]
+                    #             df.columns = ["KEY_VALUE","VALUE"]
+                    #             df["GROUP"] = data_group
+                    #             df["TYPE"] = type_group[1]
+                    #             df["TABLE"] = file
+                    #             df["CHANGE_FIELD"] = field
+                    #             # concat the df to the maintained final_changes_df 
+                    #             final_changes_df = pd.concat((final_changes_df,df))
+
+
+    # sql = "SELECT * FROM gp_occname WHERE valid = False"
+    # # df = gpd.GeoDataFrame.from_postgis(sql, sqlalchemy_con)
+    # df = pd.read_sql(sql, sqlalchemy_con)
+
+
+# this can be deleted
+    # if file == "Tenement":
+    #     if len(remove_keys_lst) != 0:
+    #         remove_core_df = core_df[core_df[key].isin(remove_keys_lst)].copy()
+    #         remove_core_df["STATUS"] = 20
+    #         to_add_df.append(remove_core_df,inplace=True)
+    #         edit_core_df = core_df[~core_df[key].isin(change_keys_lst + remove_keys_lst)]
+    #         edit_core_df = pd.concat((edit_core_df,to_add_df,remove_core_df))
+    #     else:
+    #         edit_core_df = core_df[~core_df[key].isin(change_keys_lst)]
+    #         edit_core_df = pd.concat((edit_core_df,to_add_df))
+    #     # these are the ids that will be deleted from the db table
+    #     db_remove_lst = [str(int(x)) for x in (change_keys_lst + remove_keys_lst)]
+    # elif file == "Occurrence":
+    #     edit_core_df = core_df[~core_df[key].isin(change_keys_lst)]
+    #     edit_core_df = pd.concat((edit_core_df,to_add_df))
+    #     # these are the ids that will be deleted from the db table
+    #     db_remove_lst = [str(int(x)) for x in (change_keys_lst)]
+    # else:
+    #     # drop the relevant rows from the core df and concat to to_add_df
+    #     edit_core_df = core_df[~core_df[key].isin(change_keys_lst + remove_keys_lst)]
+    #     edit_core_df = pd.concat((edit_core_df,to_add_df))
+    #     # these are the ids that will be deleted from the db table
+    #     db_remove_lst = [str(int(x)) for x in (change_keys_lst + remove_keys_lst)]
+
+
+    # # concat
+
+    # # print(datagroup_change_df.head())
+    # datagroup_change_df = final_changes_df[['GROUP','KEY_VALUE']].copy()
+    # datagroup_change_df["TYPE"] = "CHANGE"
+    # final_updates_df = pd.concat((final_updates_df,datagroup_change_df))
+
+
+    # final_updates_df = final_updates_df[final_updates_df["GROUP"] == "tenement"].copy()
+
+    # # check if there are any duplicate ids between the three types
+    # change_update_df = final_updates_df.loc[final_updates_df["TYPE"] == "CHANGE",["KEY_VALUE"]]
+    # remove_update_df = final_updates_df.loc[final_updates_df["TYPE"] == "REMOVE",["KEY_VALUE"]]
+    # add_update_df = final_updates_df.loc[final_updates_df["TYPE"] == "ADD",["KEY_VALUE"]]
+    # change_update_lst = final_updates_df.loc[final_updates_df["TYPE"] == "CHANGE","KEY_VALUE"]
+    # remove_update_lst = final_updates_df.loc[final_updates_df["TYPE"] == "REMOVE","KEY_VALUE"]
+    # add_update_lst = final_updates_df.loc[final_updates_df["TYPE"] == "ADD","KEY_VALUE"]
+
+
+    # # print(add_update_df.values.tolist())
+
+
+    # ten_df = add_update_df[add_update_df["KEY_VALUE"].isin(remove_update_lst.values.tolist())]
+    # print(ten_df.head())
+    # print(len(ten_df.index))
+
+
+
+    # diff_df = add_update_df.merge(final_updates_df.loc[final_updates_df["TYPE"].isin(["REMOVE"]),["KEY_VALUE"]],indicator=True,how='outer')
+    # print(len(diff_df.index))
+    # print(len(diff_df[diff_df["_merge"] == "both"].index))
+
+    # print(remove_update_df.head())
+
+    # # find remove that exist in new_df
+    # ten_df = pd.read_csv(os.path.join(self.new_dir,"Tenement.csv"))
+    # ten_ids_df = ten_df["TENID"]
+
+    # ten_df = ten_df[ten_df["TENID"].isin(change_update_df.values.tolist())]
+    # # # ten_df = ten_df.loc[ten_df["TENID"].isin([remove_update_df]),["TENID"]]
+    # print(ten_df.head())
+    # print(len(ten_df.index))
+
+
+
+
+    # save_path = os.path.join(self.new_dir,"%s_poo.csv"%(file))
+    # new_df.drop(columns=["WKT"],inplace=True)
+    # new_df.to_csv(save_path)
+
+
+
+
+
+
+
+        # print(datagroup_change_lst)
+
+# save_path = os.path.join(self.new_dir,"%s_poo.csv"%(file))
+#                         new_df.drop(columns=["WKT"],inplace=True)
+#                         new_df.to_csv(save_path)
+
+# def removeOldAddNewToCoreAndDb(self,update_lst):
+#     # get the new and old ids for the tenement and occurrence datasets.
+#     occurrence_old_ids, occurrence_new_ids, occurrence_change_ids = getOldAndNewIdLists(self.occurrence_update_path)
+#     # tenement_old_ids, tenement_new_ids, tenement_change_ids = getOldAndNewIdLists(self.tenement_update_path)
+#     # # # remove all old entries and changed entries from db
+#     # # removeOldAndChangeEntriesDb(self,{"tenement": tenement_old_ids + tenement_change_ids,"occurrence": occurrence_old_ids + occurrence_change_ids})
+#     # # add all new and changed entries to db (need to move this within the atlas app to map shapefiles to db)
+
+#     # # add new and old entries to the update list
+#     # update_lst = addNewAndOldEntriesToChangeLst(update_lst,{"tenement":{"REMOVE":tenement_old_ids,"NEW":tenement_new_ids},"occurrence":{"REMOVE":occurrence_old_ids,"NEW":occurrence_new_ids}})
+#     # # remove old entries from core file
+#     # removeOldEntriesCoreFile(self,{"tenement": tenement_old_ids,"occurrence": occurrence_old_ids})
+#     # # correct the foreign key value for required new files
+#     # correctNewForeignKeyValues(self)
+#     # # add new entries in core file
+#     # addNewEntriesCoreFile(self,{"tenement": tenement_new_ids,"occurrence": occurrence_new_ids})
+
+#     return update_lst
+
+
+# def getOldAndNewIdLists(path):
+#     df = pd.read_csv(path)
+#     old_ids_lst = convertSingleColumnDfToList(df[df["ACTION"] == "REMOVE"].loc[:,["NEW_ID"]])
+#     new_ids_lst = convertSingleColumnDfToList(df[df["ACTION"] == "NEW"].loc[:,["NEW_ID"]])
+#     change_ids_lst = convertSingleColumnDfToList(df[df["ACTION"] == "CHANGE"].loc[:,["NEW_ID"]])
+#     return old_ids_lst, new_ids_lst, change_ids_lst
+
+
+# def removeOldAddNewToCoreAndDb(self,update_lst):
+#     # get the new and old ids for the tenement and occurrence datasets.
+#     occurrence_old_ids, occurrence_new_ids, occurrence_change_ids = getOldAndNewIdLists(self.occurrence_update_path)
+#     tenement_old_ids, tenement_new_ids, tenement_change_ids = getOldAndNewIdLists(self.tenement_update_path)
+#     # # remove all old entries and changed entries from db
+#     # removeOldAndChangeEntriesDb(self,{"tenement": tenement_old_ids + tenement_change_ids,"occurrence": occurrence_old_ids + occurrence_change_ids})
+#     # add all new and changed entries to db (need to move this within the atlas app to map shapefiles to db)
+
+#     # add new and old entries to the update list
+#     update_lst = addNewAndOldEntriesToChangeLst(update_lst,{"tenement":{"REMOVE":tenement_old_ids,"NEW":tenement_new_ids},"occurrence":{"REMOVE":occurrence_old_ids,"NEW":occurrence_new_ids}})
+#     # remove old entries from core file
+#     removeOldEntriesCoreFile(self,{"tenement": tenement_old_ids,"occurrence": occurrence_old_ids})
+#     # correct the foreign key value for required new files
+#     correctNewForeignKeyValues(self)
+#     # add new entries in core file
+#     addNewEntriesCoreFile(self,{"tenement": tenement_new_ids,"occurrence": occurrence_new_ids})
+
+#     return update_lst
+
+# def addNewAndOldEntriesToChangeLst(update_lst,ids_dic):
+#     for category in ['occurrence','tenement']:
+#         for action in ['REMOVE','NEW']:
+#             for ind in ids_dic[category][action]:
+#                 update_lst.append([action,category,ind])
+#     return update_lst
+
+# def removeOldEntriesCoreFile(self,old_ids_dic):
+#     configs = self.configs
+#     for category in [2,1]:
+#         for file_name in configs:
+#             record_changes = configs[file_name]['record_changes']
+#             if record_changes != "" and configs[file_name]['add_category'] == category:
+#                 remove_ids = old_ids_dic[record_changes['data_group']]
+#                 core_file = "%s%s.csv"%(self.core_directory,file_name)
+#                 core_df = pd.read_csv(core_file,engine='python')
+#                 result_df = core_df[~core_df[record_changes['key']].isin(remove_ids)]
+#                 result_df.to_csv(core_file,index=False)
+
+# def addNewEntriesCoreFile(self,new_ids_dic):
+#     configs = self.configs
+#     for category in [1,2]:
+#         for file_name in configs:
+#             record_changes = configs[file_name]['record_changes']
+#             if record_changes != "" and configs[file_name]['add_category'] == category:
+#                 add_ids = new_ids_dic[record_changes['data_group']]
+#                 core_file = "%s%s.csv"%(self.core_directory,file_name)
+#                 new_file = "%s%s.csv"%(self.core_directory,file_name)
+#                 core_df = pd.read_csv(core_file,engine='python')
+#                 new_df = pd.read_csv(new_file,engine='python')
+#                 to_add_df = new_df[new_df[record_changes['key']].isin(add_ids)]
+#                 result_df.to_csv(core_file,index=False)
+
+
+# def getOldAndNewIdLists(path):
+#     df = pd.read_csv(path)
+#     old_ids_lst = convertSingleColumnDfToList(df[df["ACTION"] == "REMOVE"].loc[:,["NEW_ID"]])
+#     new_ids_lst = convertSingleColumnDfToList(df[df["ACTION"] == "NEW"].loc[:,["NEW_ID"]])
+#     change_ids_lst = convertSingleColumnDfToList(df[df["ACTION"] == "CHANGE"].loc[:,["NEW_ID"]])
+#     return old_ids_lst, new_ids_lst, change_ids_lst
+
+# def convertSingleColumnDfToList(df):
+#     return [x[0] for x in df.values.tolist()]
+
+
+# def compareOutputCoreToNew(self,changes_lst):
+#     print('Comparing the output new files to the output core files and building the change and update files.')
+#     configs = self.configs
+#     for file_name in configs:
+#         record_changes = configs[file_name]['record_changes']
+#         if record_changes != "":
+#             # if file_name == 'occurrence_majmat':
+#             comparison_type = record_changes['comparison_type']
+#             drop_fields = record_changes['drop_fields']
+#             key = record_changes['key']
+#             data_group = record_changes['data_group']
+#             value_field = record_changes['value_field']
+#             removal_ids = updates[data_group]
+#             new_df, core_df = readAndDropNecessaryColumnsDf(["%s%s.csv"%(self.new_directory,file_name), "%s%s.csv"%(self.core_directory,file_name)],drop_fields)
+#             merged_df = core_df.merge(new_df,indicator=True,how='outer')
+#             # merged_df = merged_df[merged_df['_merge'] == "right_only"].drop(columns=['_merge'])
+#             # filter core_df for keys in the remove list
+#             # remove_df = core_df[core_df[key].isin(removal_ids)]
+#             if comparison_type == "MULTIPLE": # merged_df was right_only
+#                 changes_lst = getMultipleChanges(self,merged_df,changes_lst,core_df,key,file_name,data_group)
+#             elif comparison_type == "SINGLE":
+#                 changes_lst = getSingleChanges(self,merged_df,changes_lst,key,file_name,data_group,value_field)
+#             else:
+#                 print("%s: does not exist"%(comparison_type))
+#     return changes_lst
+    # writeToFile(self.update_directory + 'update.csv', update_lst) # do this in a separate macro
+    # print('Done!')
+
+    # I need to filter for individual ids and then compare for what is being added and what is being removed
+# def getSingleChanges(self,merged_df,changes_lst,core_df,key,file_name,data_group,value_field):
+#     # all values in the merged_df will be NEW entries. There are no CHANGE values and the REMOVE values will be updated next
+#     # ['TYPE','GROUP','TABLE','KEY_VALUE','CHANGE_FIELD','VALUE']
+#     # type = DROP or ADD
+#     drop_df = merged_df[merged_df['_merge'] == "left_only"].drop(columns=['_merge'])
+#     add_df = merged_df[merged_df['_merge'] == "right_only"].drop(columns=['_merge'])
+
+#     for i, line in drop_df.iterrows():
+#         changes_lst.append(["DROP",data_group,file_name,line[key],value_field,line[value_field]])
+
+#     for i, line in add_df.iterrows():
+#         changes_lst.append(["ADD",data_group,file_name,line[key],value_field,line[value_field]])
+
+#     return changes_lst
+    # key_lst = merged_df.loc[:,[key]].values.tolist()
+    # value_lst = merged_df.loc[:,[value_field]].values.tolist()
+    # for i, row in enumerate(key_lst):
+    #     changes_lst.append(["NEW",data_group,file_name,key,row[0],value_field,"",value_lst[i][0]])
+    # # add the removal keys and values to the change list
+    # key_lst = remove_df.loc[:,[key]].values.tolist()
+    # value_lst = remove_df.loc[:,[value_field]].values.tolist()
+    # for i, row in enumerate(key_lst):
+    #     changes_lst.append(["REMOVE",data_group,file_name,key,key_lst[i][0],value_field,value_lst[i][0],""])
+    # return changes_lst
+
+    # just need to add a control to no add for fields like WKT
+# def getMultipleChanges(self,merged_df,changes_lst,core_df,key,file_name,data_group):
+#     merged_df = merged_df[merged_df['_merge'] == "right_only"].drop(columns=['_merge'])
+#     merged_index_df = merged_df.loc[:,[key]]
+#     core_index_df = core_df.loc[:,[key]]
+#     compare_index = merged_index_df.merge(core_index_df,indicator=True,how='outer')
+#     # new_index_lst = [x[0] for x in compare_index[compare_index['_merge'] == "left_only"].drop(columns=['_merge']).values.tolist()]
+#     change_index_lst = [x[0] for x in compare_index[compare_index['_merge'] == "both"].drop(columns=['_merge']).values.tolist()]
+#     # removal_lst = remove_df.values.tolist()
+#     headers = core_df.columns
+#     # key_index = list(remove_df.columns).index(key)
+#     # get the changes
+#     for ind in change_index_lst:
+#         new_row_lst = merged_df[merged_df[key] == ind].values.tolist()[0]
+#         core_row_lst = core_df[core_df[key] == ind].values.tolist()[0]
+#         for i, header in enumerate(headers):
+#             if new_row_lst[i] != core_row_lst[i]:
+#                 changes_lst.append(["DROP",data_group,file_name,ind,header,core_row_lst[i]])
+#                 changes_lst.append(["ADD",data_group,file_name,ind,header,new_row_lst[i]])
+#                 # changes_lst.append(["CHANGE",data_group,file_name,key,ind,header,core_row_lst[i],new_row_lst[i]]) # need to add "CHANGE"
+#                 # ['TYPE','GROUP','TABLE','KEY_VALUE','CHANGE_FIELD','VALUE']
+#     # # get the new
+#     # for ind in new_index_lst:
+#     #     new_row_lst = merged_df[merged_df[key] == ind].values.tolist()[0]
+#     #     for i, header in enumerate(headers):
+#     #         changes_lst.append(["NEW",data_group,file_name,key,ind,header,"",new_row_lst[i]])
+#     # # get the removals. loops through the removal_df that has been filetered for all the keys from the update list in the datagroup folders.
+#     # for line in removal_lst:
+#     #     for i, header in enumerate(headers):
+#     #         changes_lst.append(["REMOVE",data_group,file_name,key,line[key_index],header,line[i],""])
+#     return changes_lst
+    
+
+# def correctNewForeignKeyValues(self):
+#     # this only applies to the occurrence_name and its related OccName table. All other foreign key tables are created equally each time
+#     configs = self.configs
+#     for file_name in configs:
+#         if file_name == 'tenement_holder':
+#             update_foreignkey = configs[file_name]['update_foreignkey']
+#             if update_foreignkey != "":
+#                 field_to_replace = update_foreignkey['field_to_replace']
+#                 lookup_field = update_foreignkey['lookup_field']
+#                 new_file = "%s%s.csv"%(self.new_directory,file_name)
+#                 related_file = "%s%s.csv"%(self.core_directory,update_foreignkey['related_file'])
+#                 lookup_file = "%s%s.csv"%(self.core_directory,update_foreignkey['related_file'])
+#                 new_df, related_df, lookup_df = [pd.read_csv(file,engine='python') for file in [new_file,related_file,lookup_file]]
+#                 columns = related_df.columns
+#                 lookup_column = columns.get_loc(lookup_field) # get the index of the lookupfield to get the fields after it to drop
+#                 drop_columns = [c for j, c in enumerate(related_df.columns) if j > lookup_column] # get list of fields to drop
+#                 related_df.drop(drop_columns,axis=1,inplace=True) # drop fields so the last is the lookup_field
+#                 merged_df = pd.merge(new_df,related_df,left_on=field_to_replace,right_on=related_df.columns[0]).iloc[:,[-1]] # merge new and related dfs to get all the foreign key values. The create a df with just the foreign key values
+#                 col_df = pd.merge(merged_df,lookup_df,left_on=merged_df.columns[0],right_on=lookup_field) # merge with the lookup df to align it with its true foreign key index from the core file.
+#                 new_df.drop(field_to_replace,axis=1,inplace=True) #drop the old foreign key index field
+#                 new_df = pd.concat((new_df,col_df),axis='columns') # add true foreign key values
+#                 new_df.to_csv(new_file,index=False)
+#                 # nothing needs to added to the db here
+
+
+
+
+
+# def changeHeadersAndLoadToDatabase(db_configs,file_directory,csv_name,table_name,headers_dic):
+#     print("Starting to load csv '%s' to model '%s'" %(csv_name,table_name))
+#     file_path = file_directory + csv_name
+#     engine = sqlalchemy.create_engine('postgresql://%s:%s@%s/%s' %(db_configs['user'], db_configs['password'], db_configs['host'], db_configs['dbname']))
+#     con = engine.connect()
+#     df = pd.read_csv(file_path)
+#     df = df.rename(columns=headers_dic)
+#     df.to_sql(table_name, con, if_exists='append', index=False, method='multi')
+#     con.close()
+#     print('wkts_tenement_occurrence table in shapefiles db!')

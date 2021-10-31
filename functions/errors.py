@@ -11,23 +11,23 @@ def check_csvs_for_errors(self):
     ''' checks for errors in the data before it it loaded to the database. This inludes blanks and primary keys that 
         don't exist in the related file.
     '''
-    csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
+    pass
+    # csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
-    self.new_dir = os.path.join(self.output_dir,'new')
-    self.core_dir = os.path.join(self.output_dir,'core')
+    # self.new_dir = os.path.join(self.output_dir,'new')
+    # self.core_dir = os.path.join(self.output_dir,'core')
 
-    miss_id_dic = find_missing_ids_related_files(self)
-    blanks_dic = find_blanks_in_tables(self)
+    # miss_id_dic = find_missing_ids_related_files(self)
+    # blanks_dic = find_blanks_in_tables(self)
 
-    errors = True if miss_id_dic != {} or blanks_dic != {} else False
+    # errors = True if miss_id_dic != {} or blanks_dic != {} else False
 
-    if errors:
-        try:
-            raise Exception('Errors where found in the data. They need to be fixed before progressing.',{'missing_ids': miss_id_dic, 'blanks': blanks_dic})
-        except Exception as e:
-            print(e)
+    # if errors:
+    #     try:
+    #         raise Exception('Errors where found in the data. They need to be fixed before progressing.',{'missing_ids': miss_id_dic, 'blanks': blanks_dic})
+    #     except Exception as e:
+    #         print(e)
 
-    # return {'errors': errors, 'missing_ids': miss_id_dic, 'blanks': blanks_dic}
 
 
 

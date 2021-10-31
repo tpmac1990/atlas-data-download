@@ -4,6 +4,7 @@ from functions import *
 from functions.add_wkt import *
 import ctypes
 import geopandas as gpd
+import pandas as pd
 
 
 def download_data_to_csv(self):
@@ -55,6 +56,7 @@ def preformat_file(self):
     csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
     for data_group in self.data_groups:
+    # for data_group in ['occurrence']:
         # set directories and open config files
         self.data_group_dir = os.path.join(self.input_dir,data_group)
         self.core_dir = os.path.join(self.data_group_dir,'core')
@@ -76,21 +78,41 @@ def preformat_file(self):
         self.data_group = data_group
         self.ignore_files = getIgnoreFiles(self)
 
+        # archive previous input files
         archiveRemoveOldFiles(self)
+        # archive previous output files
         archiveRemoveOutputFiles(self)
+        # combine duplicate AUS_OS wells. There are duplicates for exploration, appraisal and production. only AUS_OS occurrence 
         combineSameNameWellsAusOS(self)
+        # merge multiple polygons for the same id spread over multiple rows. only tenement VIC 1 & 2
         combinePolygonsWithSameID_VIC(self)
+        # remove the duplicate id rows, keeping the last not the first. only tenement QLD_1
         deleteSecondofDuplicate_QLD_1(self)
-        removeDuplicateRowsByKeyAllFiles(self)
-        filterAllFilesForRelevantData(self)
-        filterOutBlanksForMultipleColumns(self)
-        filterOutByKeyWord(self)
+        # create a unique key field for files that don't have one. occurrence SA_2, SA_1. tenement QLD_3
         createUniqueKeyFieldAllFiles(self)
+        # drop duplicate rows by the 'key' column. occurrences SA_1, WA_2
+        removeDuplicateRowsByKeyAllFiles(self)
+        # merge two files on a given column and overwrite fields of the primary file with the values of the second file. only occurrence SA_1
         combineFilesAllFiles(self)
+        # creates a type column for sites by finding keywords from a string composed on multiple joined fields. occurrence SA_1, NSW_1, TAS_1
+        getSiteTypeFromJoinedString(self)
+        # clear field if it contains any value in a given list. occurrence NSW_1
+        clearFieldIfContainsValueFromList(self)
+        # filter for or filter out a list of values for given fields. common in both occurrence and tenement
+        filterAllFilesForRelevantData(self)
+        # filter out rows with blanks for all fields in a given list. only occurrence NSW_1
+        filterOutBlanksForMultipleColumns(self)
+        # filters out a row if any of the values in a given list exist
+        filterOutByKeyWord(self)
+        # merges the percentage with the holder name. NT files
         mergeRowsAllFiles(self)
+        # sort multiple values separated by ; 
         sortMultipleValuesString(self)
+        # filter out rows that have invalid gemoetry
         deletingInvalidWktRowsAllFiles(self)
+        # add the gplore identifier field
         addIdentifierField(self)
+        # create the files that will be combined to make the complete dataset
         createChangeFiles(self)
 
     print('Preformat time: %s' %(time_past(func_start,time.time())))
@@ -369,3 +391,330 @@ def previous_core_to_db(self):
 
 #     self.sqlalchemy_con.close()
 #     print('Built update tables: %s' %(time_past(func_start,time.time())))
+
+
+
+def combine_title_data(self):
+    ''' compile all the separate site files into one dataset '''
+    func_start = time.time()
+    print('Combine all title data into complete files')
+
+    # convert_dir = os.path.join(self.output_dir,'convert')
+    convert_dir = self.convert_dir
+    core_dir = os.path.join(self.output_dir,'core')
+    new_dir = os.path.join(self.output_dir,'new')
+    self.update_dir = os.path.join(self.output_dir,'update')
+
+    related_ids_core_path = os.path.join(core_dir,"TenOriginalID.csv")
+
+    companies_orig_df = pd.read_csv(os.path.join(convert_dir,"Companies_R.csv"),engine='python')
+    status_orig_df = pd.read_csv(os.path.join(convert_dir,"TenStatus_R.csv"),engine='python')
+    type_orig_df = pd.read_csv(os.path.join(convert_dir,"TenType_R.csv"),engine='python')
+
+    TenType_df = pd.read_csv(os.path.join(core_dir,"TenType.csv"),engine='python')
+    TenStatus_df = pd.read_csv(os.path.join(core_dir,"TenStatus.csv"),engine='python')
+    self.Holder_df = pd.read_csv(os.path.join(core_dir,"Holder.csv"),engine='python')
+    Shore_df = pd.read_csv(os.path.join(core_dir,"Shore.csv"),engine='python')
+
+    self.status_df = status_orig_df.merge(TenStatus_df,left_on='Original',right_on='original',how='left').drop(columns=['original','simple_id'],axis=1)
+    self.type_df = type_orig_df.merge(TenType_df,left_on='F_Name',right_on='fname',how='left').drop(columns=['fname','act_id','original','simple_id','Act'],axis=1)
+    self.companies_df = companies_orig_df.merge(self.Holder_df,left_on='new_name',right_on='name',how='left').drop(columns=['name','typ_id','user_name','valid_relations','valid_instance','user_edit','date_modified','date_created'],axis=1)
+    
+    self.status_uk = TenStatus_df.query('original == "Unknown"').iloc[0]['_id']
+    self.type_uk = TenType_df.query('original == "Unknown"').iloc[0]['_id']
+    self.holder_uk = self.Holder_df.query('name == "Unknown"').iloc[0]['_id']
+    self.shore_uk = Shore_df.query('name == "Unknown"').iloc[0]['code']
+
+    self.Tenement_nowkt_df = pd.DataFrame()
+    self.tenement_oid_df = pd.DataFrame()
+    self.TenHolder_df = pd.DataFrame()
+
+    # save self.Holder_df with suffix '_pre' so it can be referred to later when finding near matches for missing holders. The missing holders will be temporarily added to self.Holder_df, so it can not be used.
+    self.Holder_df.to_csv(os.path.join(core_dir,"Holder_pre.csv"),index=False)
+
+    # for data_group in self.data_groups:
+    self.configs = getJSON(os.path.join(self.configs_dir,'formatting_config.json'))['tenement']
+
+    # print([x for x in self.configs]) 
+    # VIC_1, _2, QLD_1: nan in dates
+
+    for file in self.configs:
+        # configs to format and combine the data 
+        configs = self.configs[file]['build']
+        # directory with the new files
+        self.vba_dir = os.path.join(self.input_dir,'tenement','vba')
+        self.plain_dir = os.path.join(self.input_dir,'tenement','plain')
+        self.state = file[:-2]
+
+        # if file == 'QLD_1':
+        # read the csv file to pandas df
+        if configs:
+            print('tenement: ' + file)
+            format_file_to_combine(self,file,configs)
+
+    self.tenement_oid_df.drop_duplicates(inplace=True)
+    self.Tenement_nowkt_df.drop_duplicates(inplace=True)
+    self.TenHolder_df['_id'] = np.arange(1, len(self.TenHolder_df) + 1)
+
+    add_new_related_ids_to_core(self,self.tenement_oid_df,related_ids_core_path)
+
+    self.Tenement_nowkt_df.to_csv(os.path.join(new_dir,'Tenement_nowkt.csv'),index=False)
+    self.tenement_oid_df.to_csv(os.path.join(new_dir,'tenement_oid.csv'),index=False)
+    self.TenHolder_df.to_csv(os.path.join(new_dir,'TenHolder.csv'),index=False)
+    # Holder_df will have the missing holder names added to it, so it needs to be saved
+    self.Holder_df.to_csv(os.path.join(core_dir,"Holder.csv"),index=False) 
+
+    print('Title data compilation: %s' %(time_past(func_start,time.time())))
+
+
+
+
+# nsw_1:
+# delete any row that has missing data, is unknown etc
+# use 'DEPOSIT_NA' as name. ALL_NAMES includes lodes that exist within the site.
+# create one field that joins all relevant fields. look for relevant values in this field. Underground mine overrides, mine. drop words like mineral
+
+
+from datetime import datetime, date, timedelta
+
+def combine_site_data(self):
+    ''' compile all the separate title files into one dataset '''
+    func_start = time.time()
+    print('Combine all site data into complete files')
+
+    convert_dir = self.convert_dir
+    core_dir = os.path.join(self.output_dir,'core')
+    new_dir = os.path.join(self.output_dir,'new')
+
+    related_ids_core_path = os.path.join(core_dir,"OccOriginalID.csv")
+
+    # directory with the new files
+    self.vba_dir = os.path.join(self.input_dir,'occurrence','vba')
+    self.plain_dir = os.path.join(self.input_dir,'occurrence','plain')
+    self.update_dir = os.path.join(self.output_dir,'update')
+
+    status_orig_df = pd.read_csv(os.path.join(convert_dir,"OccStatus_R.csv"),engine='python')
+    type_orig_df = pd.read_csv(os.path.join(convert_dir,"OccType_R.csv"),engine='python')
+    size_orig_df = pd.read_csv(os.path.join(convert_dir,"OccSize_R.csv"),engine='python')
+    material_orig_df = pd.read_csv(os.path.join(convert_dir,"Materials_R.csv"),engine='python')
+
+    OccStatus_df = pd.read_csv(os.path.join(core_dir,"OccStatus.csv"),engine='python')
+    OccType_df = pd.read_csv(os.path.join(core_dir,"OccType.csv"),engine='python')
+    OccSize_df = pd.read_csv(os.path.join(core_dir,"OccSize.csv"),engine='python')
+    Material_df = pd.read_csv(os.path.join(core_dir,"Material.csv"),engine='python')
+
+    self.status_df = status_orig_df.merge(OccStatus_df,left_on='Original Version',right_on='original',how='left').drop(columns=['Original Version','original','simple_id'],axis=1)
+    self.type_df = type_orig_df.merge(OccType_df,left_on='Original Version',right_on='original',how='left').drop(columns=['Original Version','original','simple_id'],axis=1)
+    self.size_df = size_orig_df.merge(OccSize_df,left_on='Formatted',right_on='name',how='left').drop(columns=['Formatted','name'],axis=1)
+    self.material_df = material_orig_df.merge(Material_df,on='code',how='left',suffixes=('_x',''))     
+    self.related_mat_df = pd.read_csv(os.path.join(convert_dir,"Materials_Related_R.csv"),engine='python')
+    self.name_lookup_df = pd.read_csv(os.path.join(convert_dir,"OccName_R.csv"),engine='python')
+    self.name_id_df = pd.read_csv(os.path.join(core_dir,"OccName.csv"),engine='python')
+
+    self.status_uk = OccStatus_df.query('original == "Unknown"').iloc[0]['_id']
+    self.size_uk = OccSize_df.query('name == "Unspecified"').iloc[0]['code']
+    self.type_uk = OccType_df.query('original == "Unspecified"').iloc[0]['_id']
+    self.material_uk = Material_df.query('name == "Unknown"').iloc[0]['code']
+
+    self.Occurrence_df = pd.DataFrame()
+    self.occurrence_oid_df = pd.DataFrame()
+    self.occurrence_name_df = pd.DataFrame()
+    self.occurrence_typ_df = pd.DataFrame()
+    self.occurrence_majmat_df = pd.DataFrame()
+    self.occurrence_minmat_df = pd.DataFrame()
+
+    self.configs = getJSON(os.path.join(self.configs_dir,'formatting_config.json'))['occurrence']
+
+    # # ['AUS_OSPET_1', 'NSW_1', 'NSW_2', 'NT_1', 'NT_2', 'QLD_1', 'QLD_2', 'SA_1', 'SA_2', 'SA_3', 'TAS_1', 'VIC_1', 'VIC_2', 'WA_1', 'WA_2']
+    # # print([i for i in self.configs])
+    # TAS_1: nan exist in type
+
+    for file in self.configs:
+        # configs to format and combine the data 
+        configs = self.configs[file]['build']
+        self.state = file[:-2]
+
+        # if file == 'NSW_1':
+        # read the csv file to pandas df
+        if configs:
+            print('Occurrence: ' + file)
+            format_site_file_to_combine(self,file,configs)
+    
+    self.occurrence_oid_df.drop_duplicates(inplace=True)
+    self.occurrence_name_df.drop_duplicates(inplace=True)
+    self.occurrence_majmat_df.drop_duplicates(inplace=True)
+    self.occurrence_minmat_df.drop_duplicates(inplace=True)
+    self.occurrence_typ_df.drop_duplicates(inplace=True)
+
+    add_new_related_ids_to_core(self,self.occurrence_oid_df,related_ids_core_path)
+
+    self.Occurrence_df.to_csv(os.path.join(new_dir,'Occurrence_pre.csv'),index=False)
+    self.occurrence_oid_df.to_csv(os.path.join(new_dir,'occurrence_oid.csv'),index=False)
+    self.occurrence_name_df.to_csv(os.path.join(new_dir,'occurrence_name.csv'),index=False)
+    self.occurrence_typ_df.to_csv(os.path.join(new_dir,'occurrence_typ.csv'),index=False)
+    self.occurrence_majmat_df.to_csv(os.path.join(new_dir,'occurrence_majmat.csv'),index=False)
+    self.occurrence_minmat_df.to_csv(os.path.join(new_dir,'occurrence_minmat.csv'),index=False)
+
+    print('Site data compilation: %s' %(time_past(func_start,time.time())))
+
+
+def output_missing_data(self):
+    ''' save missing data in files stored in the output/update directory.
+        missing_all: each missing item with its 'ind' value so it can be updated later
+        missing_reduced: unique missing values. if a new company name appears for multiple titles, it will only be shown in this list once.
+        use fuzzywuzzy to find similar names for missing company names
+    '''
+    print('Output missing data files.')
+    
+    finalize_missing_data(self)
+
+
+
+def apply_missing_data_updates(self):
+
+    self.core_dir = os.path.join(self.output_dir,'core')
+    self.update_dir = os.path.join(self.output_dir,'update')
+
+    access_configs = getJSON(os.path.join(self.configs_dir,'db_access_configs.json'))
+    configs = getJSON(os.path.join(self.configs_dir,'commit_updates.json'))
+
+    # update the database tables to match the csv files
+    db_keys = access_configs[self.db_location]
+    self.con = sqlalchemy_engine(db_keys).connect()
+    self.conn = connect_psycopg2(db_keys)
+
+    manual_update_path = os.path.join(self.update_dir,'manual_update_required.csv')
+    missing_all_path = os.path.join(self.update_dir,'missing_all.csv')
+    manual_update_df = pd.read_csv(manual_update_path)
+    self.manual_update_df = manual_update_df[['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH']]
+    self.missing_all_df = pd.read_csv(missing_all_path)
+
+
+    for x in configs:
+        print(x)
+        # if x == 'SIZE':
+        commit_fields_updated_data(self,x,configs[x])
+
+    self.con.close()
+    self.conn.close()
+
+
+
+
+
+
+
+
+
+
+    # names_dir = os.path.join(convert_dir,'occurrence')
+    # path = os.path.join(os.path.join(convert_dir,'occurrence','OccName_R.csv'))
+    # df = pd.read_csv(path).fillna('').drop('NAME',1)
+
+    # # print(df.head())
+
+    # s = df['FINAL'].str.split(';').apply(pd.Series, 1).stack()
+    # s.index = s.index.droplevel(-1)
+    # s.drop_duplicates(inplace=True)
+    # s.name = 'name'
+    # s.sort_values(inplace=True)
+    # new_df = s.to_frame()
+    # new_df['_id'] = np.arange(1, len(new_df) + 1)
+
+    # new_df['user_name'] = 'ss'
+    # new_df['valid_instance'] = True
+    # new_df['date_created'] = date.today()
+
+    # new_df.to_csv(os.path.join(core_dir,'OccName.csv'),index=False)
+
+    # df = df.join(s)
+
+    # df = df_main.join(s)
+
+
+
+
+
+
+
+
+    #     df.columns = ['NAME']
+    #     if name_df.empty:
+    #         name_df = df
+    #     else:
+    #         name_df = pd.concat((name_df,df))
+
+    # # # print(name_df.head())
+    # # # print(len(name_df.index))
+    # name_df.drop_duplicates(inplace=True)
+    # # # print(len(name_df.index))
+    # # name_df.to_csv(os.path.join(self.vba_dir,'a_names.csv'),index=False)
+
+    # names_dir = os.path.join(convert_dir,'occurrence','name')
+    # path = os.path.join(names_dir,'orig_2_names.csv')
+    # # name_df.to_csv(path,index=False)
+
+    # path = os.path.join(names_dir,'names.csv')
+
+    # df = pd.read_csv(path).fillna('')
+    # orig_df = pd.read_csv(os.path.join(names_dir,'orig_2_names.csv'))
+
+    # merg_df = df.merge(orig_df,on='NAME',how='outer',indicator=True)
+
+    # # print(merg_df.query('_merge != "both"').head())
+    # # print(len(merg_df.query('_merge != "both"').index))
+
+    # merg_df.to_csv(os.path.join(names_dir,'rejects.csv'),index=False)
+
+
+
+    # # print(len(other_df.index))
+
+    # # # # re_str = r"(\?|Unnamed|\]|\=|\-\-|Ã|\\|\/)"
+    # # # re_str = r"(\[|\])"   
+    # # # 'S part of  delete all Rd   Rd Lot    hwy
+    # # # re_str = r"(in Later|remove|approx|Extensions|Also)"
+    # re_str = r"(\(.\))"
+
+    # df['SYMBOL'] = df['NAME'].apply(lambda x: True if re.search(re_str,x) else False)
+    # # df = df.query('SYMBOL == True').query('FINAL != ""').drop('SYMBOL',1)
+    # df = df.query('SYMBOL == False or FINAL == ""').drop('SYMBOL',1)
+    # # print(len(df.index))
+    
+
+    # df = pd.concat((df,other_df))
+
+    # # df.to_csv(os.path.join(names_dir,'semi.csv'),index=False)
+    # df.to_csv(os.path.join(names_dir,'names.csv'),index=False)
+    # # df.to_csv(os.path.join(names_dir,'new_names.csv'),index=False)
+
+
+
+
+
+
+    # df['FINAL'] = df['NAME']
+    # df.to_csv(os.path.join(names_dir,'names.csv'),index=False)
+
+
+
+
+
+
+
+
+
+
+
+
+    # companies_orig_df = pd.read_csv(os.path.join(convert_dir,'occurrence',"Companies_R.csv"),engine='python')
+    # status_orig_df = pd.read_csv(os.path.join(convert_dir,'occurrence',"Status_R.csv"),engine='python')
+    # type_orig_df = pd.read_csv(os.path.join(convert_dir,'occurrence',"Type_R.csv"),engine='python')
+
+    # TenType_df = pd.read_csv(os.path.join(core_dir,"TenType.csv"),engine='python')
+    # TenStatus_df = pd.read_csv(os.path.join(core_dir,"TenStatus.csv"),engine='python')
+    # Holder_df = pd.read_csv(os.path.join(core_dir,"Holder.csv"),engine='python')
+
+    # self.status_df = status_orig_df.merge(TenStatus_df,left_on='Original',right_on='original',how='left').drop(columns=['Simplified','original','simple_id'],axis=1)
+    # self.type_df = type_orig_df.merge(TenType_df,left_on='F_Name',right_on='fname',how='left').drop(columns=['fname','act_id','original','simple_id','Act','Original','Simplified'],axis=1)
+    # self.companies_df = companies_orig_df.merge(Holder_df,left_on='FINAL NAME',right_on='name',how='left').drop(columns=['name','typ_id','user_name','valid_relations','valid_instance','user_edit','date_modified','date_created'],axis=1)

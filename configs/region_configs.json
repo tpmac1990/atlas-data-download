@@ -78,7 +78,7 @@
         },
         {
             "file_name": "State",
-            "columns": ["name","code","geometry"]
+            "columns": ["name","_id","geometry"]
         }
     ]
 }
