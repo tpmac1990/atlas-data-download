@@ -278,39 +278,41 @@ def build_update_and_change_files(self):
                 core_df = pd.read_csv(os.path.join(self.core_dir,"%s.csv"%(file)))
                 new_df = pd.read_csv(new_path)
 
-                # get ids from the new_df, then compare to the core_df ids. Then we can find which are ADD and which are CHANGE
-                new_ids_df = new_df[[key]].drop_duplicates()
-                core_ids_df = core_df[[key]].drop_duplicates()
-                merge_df = new_ids_df.merge(core_ids_df,indicator=True,how='outer')
+                # if empty then there is nothing to add
+                if not new_df.empty:
+                    # get ids from the new_df, then compare to the core_df ids. Then we can find which are ADD and which are CHANGE
+                    new_ids_df = new_df[[key]].drop_duplicates()
+                    core_ids_df = core_df[[key]].drop_duplicates()
+                    merge_df = new_ids_df.merge(core_ids_df,indicator=True,how='outer')
 
-                # add ids are those that exist in the new_df and not the core_df, but only for the Tenement & Occurrence files/tables.
-                if file.lower() == data_group:
-                    add_ids_df = merge_df[merge_df["_merge"] == "left_only"].drop(columns=["_merge"])
-                    # Add the ADD updates to the update df
-                    final_updates_df = concat_to_update_df(final_updates_df,add_ids_df,"ADD",data_group)
+                    # add ids are those that exist in the new_df and not the core_df, but only for the Tenement & Occurrence files/tables.
+                    if file.lower() == data_group:
+                        add_ids_df = merge_df[merge_df["_merge"] == "left_only"].drop(columns=["_merge"])
+                        # Add the ADD updates to the update df
+                        final_updates_df = concat_to_update_df(final_updates_df,add_ids_df,"ADD",data_group)
 
-                # change ids are those that exist in both
-                change_ids_df = merge_df[merge_df["_merge"] == "both"].drop(columns=["_merge"])
+                    # change ids are those that exist in both
+                    change_ids_df = merge_df[merge_df["_merge"] == "both"].drop(columns=["_merge"])
 
-                # get the rows of the core and new df for the change ids
-                core_change_df = pd.merge(change_ids_df, core_df, on=key).drop(columns=drop_fields)
-                new_change_df = pd.merge(change_ids_df, new_df, on=key).drop(columns=drop_fields)
+                    # get the rows of the core and new df for the change ids
+                    core_change_df = pd.merge(change_ids_df, core_df, on=key).drop(columns=drop_fields)
+                    new_change_df = pd.merge(change_ids_df, new_df, on=key).drop(columns=drop_fields)
 
-                # merge the two to find only the rows that are different
-                merged_df = core_change_df.merge(new_change_df,indicator=True,how='outer')
-                diff_df = merged_df[merged_df["_merge"] != "both"]
+                    # merge the two to find only the rows that are different
+                    merged_df = core_change_df.merge(new_change_df,indicator=True,how='outer')
+                    diff_df = merged_df[merged_df["_merge"] != "both"]
 
-                # if len is 0 then there were no differences, therefore no further action required
-                if len(diff_df.index) > 0:
-                    # get the ids for the change rows 
-                    change_ids_lst = diff_df[key].drop_duplicates().values.tolist()
-                    core_change_df = core_df[core_df[key].isin(change_ids_lst)].drop(columns=drop_fields)
-                    new_change_df = new_df[new_df[key].isin(change_ids_lst)].drop(columns=drop_fields)
-                    columns = list(core_change_df.columns)
-                    columns.pop(columns.index(key))
+                    # if len is 0 then there were no differences, therefore no further action required
+                    if len(diff_df.index) > 0:
+                        # get the ids for the change rows 
+                        change_ids_lst = diff_df[key].drop_duplicates().values.tolist()
+                        core_change_df = core_df[core_df[key].isin(change_ids_lst)].drop(columns=drop_fields)
+                        new_change_df = new_df[new_df[key].isin(change_ids_lst)].drop(columns=drop_fields)
+                        columns = list(core_change_df.columns)
+                        columns.pop(columns.index(key))
 
-                    changes_df = find_differences_in_each_field(fields=columns,key=key,core_df=core_change_df,new_df=new_change_df,data_group=data_group,file=file)
-                    final_changes_df = pd.concat((final_changes_df,changes_df))
+                        changes_df = find_differences_in_each_field(fields=columns,key=key,core_df=core_change_df,new_df=new_change_df,data_group=data_group,file=file)
+                        final_changes_df = pd.concat((final_changes_df,changes_df))
 
         # Add the REMOVE updates to the update df
         final_updates_df = concat_to_update_df(final_updates_df,datagroup_remove_df,"REMOVE",data_group)
@@ -499,6 +501,8 @@ def make_ss_file_and_db_changes(self):
                 elif action == 'new-edits-changes-multi':
 
                     # if in new and not in ss then add
+                    # print(t_ss_df.head())
+                    # print(c_new_df.head())
                     add_df = pd.merge(t_ss_df,c_new_df,how='outer', indicator=True).query('_merge == "right_only"').drop('_merge', 1)
 
                     # find user edits by comparing ss to core. 
@@ -513,7 +517,13 @@ def make_ss_file_and_db_changes(self):
                     sfinal_df = pd.concat((a_new_df,add_df,user_add_df,same_df))
                     # drop rows dropped by user
                     # print(new_df[new_df['tenement_id'] == 1028563])
-                    new_df = sfinal_df.merge(user_drop_df,how='left').drop_duplicates()
+                    # print(sfinal_df.head())
+                    # print(user_drop_df.head())
+                    # can't merge with an empty df
+                    if not sfinal_df.empty:
+                        new_df = sfinal_df.merge(user_drop_df,how='left').drop_duplicates()
+                    else:
+                        new_df = sfinal_df
                     # print(len(new_df.index))
                     # temp_df = sfinal_df[~sfinal_df.isin(user_drop_df)].drop_duplicates()
                     # print(len(temp_df.index))

@@ -174,17 +174,6 @@ def combine_site_data(self):
     print('Site data compilation: %s' %(time_past(func_start,time.time())))
 
 
-# def output_missing_data(self):
-#     ''' save missing data in files stored in the output/update directory.
-#         missing_all: each missing item with its 'ind' value so it can be updated later
-#         missing_reduced: unique missing values. if a new company name appears for multiple titles, it will only be shown in this list once.
-#         use fuzzywuzzy to find similar names for missing company names
-#     '''
-#     print('Output missing data files.')
-#     finalize_missing_data(self)
-
-
-
 
 # ###########################################################
 # pre-formatting functions
@@ -362,21 +351,26 @@ def NT_2_3_merge_cleanup(x):
 
 
 def merge_files(self,df,merg):
-    # path_2 = os.path.join(self.plain_dir,('%s.csv')%(merg['file']))
     path_2 = os.path.join(self.change_dir,('%s_WKT.csv')%(merg['file']))
 
     if merg['clean_up'] == 'NT_merge_1':
-        df_2 = pd.read_csv(path_2)[merg['other_file']]
-        df = df.merge(df_2,left_on=merg['this_file'],right_on=merg['other_file'],indicator=True,how='outer')
-        df = df.query('_merge != "right_only"').copy()
-        df['STATUS'] = df.apply(lambda x: NT_2_3_merge_cleanup(x), axis=1)
-        df = df.drop('_merge', 1).drop_duplicates()
+        try:
+            df_2 = pd.read_csv(path_2)[merg['other_file']]
+            df = df.merge(df_2,left_on=merg['this_file'],right_on=merg['other_file'],indicator=True,how='outer')
+            df = df.query('_merge != "right_only"').copy()
+            df['STATUS'] = df.apply(lambda x: NT_2_3_merge_cleanup(x), axis=1)
+            df = df.drop('_merge', 1).drop_duplicates()
+        except FileNotFoundError:
+            print('## %s does not exist to merge'%(merg['file']))
 
     elif merg['clean_up'] == 'WA_merge_1':
-        df_2 = pd.read_csv(path_2,low_memory=False)[[merg['other_file'],'ALL_HOLDER']]
-        df = df.merge(df_2,left_on=merg['this_file'],right_on=merg['other_file'],indicator=True,how='outer')
-        df = df.query('_merge != "right_only"').copy()
-        df = df.drop('_merge', 1).drop_duplicates()
+        try:
+            df_2 = pd.read_csv(path_2,low_memory=False)[[merg['other_file'],'ALL_HOLDER']]
+            df = df.merge(df_2,left_on=merg['this_file'],right_on=merg['other_file'],indicator=True,how='outer')
+            df = df.query('_merge != "right_only"').copy()
+            df = df.drop('_merge', 1).drop_duplicates()
+        except FileNotFoundError:
+            print('## %s does not exist to merge'%(merg['file']))
 
     return df
 
@@ -1038,7 +1032,14 @@ def all_core_options_as_matches(self,miss_df,file_name,miss_field,return_field,c
     final_df = miss_field_df.merge(df,on='FIELD',how='left').rename(columns={'VALUE':'ORIGINAL'})
     return final_df
 
-
+# def output_missing_data(self):
+#     ''' save missing data in files stored in the output/update directory.
+#         missing_all: each missing item with its 'ind' value so it can be updated later
+#         missing_reduced: unique missing values. if a new company name appears for multiple titles, it will only be shown in this list once.
+#         use fuzzywuzzy to find similar names for missing company names
+#     '''
+#     print('Output missing data files.')
+#     finalize_missing_data(self)
 
 # miss_df = pd.read_csv(os.path.join(self.update_dir,'missing_reduced.csv'))
 def finalize_missing_data(self):
@@ -1064,15 +1065,20 @@ def finalize_missing_data(self):
     missing_df = pd.concat((non_materials_df,materials_df))
     # reduce the missing data to unique values without the ind values. save missing files
     miss_df = missing_df.drop('IND',1).drop_duplicates()
+    # add existing 'missing_all' rows from past updates to these new rows
+    missing_all_path = os.path.join(self.update_dir,'missing_all.csv')
+    if fileExist(missing_all_path):
+        missing_past_df = pd.read_csv(missing_all_path)
+        missing_df = pd.concat((missing_past_df,missing_df)).drop_duplicates()
     # save the missing and reduced_missing df's to file
-    missing_df.to_csv(os.path.join(self.update_dir,'missing_all.csv'),index=False)
-    miss_df.to_csv(os.path.join(self.update_dir,'missing_reduced.csv'),index=False)    
+    missing_df.to_csv(missing_all_path,index=False)
+    miss_df.to_csv(os.path.join(self.update_dir,'missing_reduced.csv'),index=False)  
 
     # # used for testing only
     # missing_df = pd.read_csv(os.path.join(self.update_dir,'missing_all.csv'))
     # miss_df = pd.read_csv(os.path.join(self.update_dir,'missing_reduced.csv'))   
 
-    complete_df = pd.DataFrame()
+    complete_df = pd.DataFrame([],columns=['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH'])
     columns_lst = ['MATCH_%s'%(x) for x in list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')]
 
     for FIELD in configs:
@@ -1123,8 +1129,10 @@ def finalize_missing_data(self):
             # concatenate the df's
             complete_df = pd.concat((complete_df,final_df))
 
+    # add existing 'manual_update_required' rows from past updates to these new rows and drop any possible duplicates
+    manual_update_required_path = os.path.join(self.update_dir,'manual_update_required.csv')
+    if fileExist(manual_update_required_path):
+        required_past_df = pd.read_csv(manual_update_required_path)
+        complete_df = pd.concat((required_past_df,complete_df)).drop_duplicates()
     # create a file for user to make final changes before they are commited
-    complete_df.to_csv(os.path.join(self.update_dir,'manual_update_required.csv'),index=False)
-
-
-
+    complete_df.to_csv(manual_update_required_path,index=False)

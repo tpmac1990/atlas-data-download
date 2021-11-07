@@ -14,8 +14,10 @@ from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_ps
 
 
 def apply_missing_data_updates(self):
-    ''' Once the data has been reviewed and all the fields have been filled out in the 'missing_reduced' file found in the 
-        update folder, this will add these new values to the core files and database files 
+    ''' Once the data has been reviewed and all the fields have been filled out in the 'manual_update_required' file found in the 
+        update folder, this will add these new values to the core files and database files.
+        Files that have no new value applied to the LIKELY_MATCH field will remain in these update files through updates until they have a value
+        added to LIKELY_MATCH
     '''
     print('Applying missing data to core, raw and db tables')
     func_start = time.time()
@@ -34,13 +36,26 @@ def apply_missing_data_updates(self):
     manual_update_path = os.path.join(self.update_dir,'manual_update_required.csv')
     missing_all_path = os.path.join(self.update_dir,'missing_all.csv')
     manual_update_df = pd.read_csv(manual_update_path)
-    self.manual_update_df = manual_update_df[['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH']]
-    self.missing_all_df = pd.read_csv(missing_all_path)
+    manual_update_df = manual_update_df[['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH']]
+    missing_all_df = pd.read_csv(missing_all_path)
 
+    # save the remaining rows from the 'manual_update_required' that are yet to have the correct value assigned
+    re_reduced_df = manual_update_df[manual_update_df['LIKELY_MATCH'].isnull()]
+    re_full_df = missing_all_df.merge(re_reduced_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH'])
+
+    # filter for rows that have had a matching updating value added to LIKELY_MATCH
+    self.manual_update_df = manual_update_df[~manual_update_df['LIKELY_MATCH'].isnull()]
+    self.missing_all_df = missing_all_df.merge(self.manual_update_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH']).drop_duplicates()
+
+    # commit changes to the database
     for x in configs:
         print('Field: %s'%(x))
-        # if x == 'SIZE':
+        # if x == 'MAJOR_MATERIAL':
         commit_fields_updated_data(self,x,configs[x])
+
+    # overwrite the update files with the remaining rows that had no new value to apply, the user will then be able to update the value at a later date
+    re_reduced_df.to_csv(manual_update_path,index=False)
+    re_full_df.to_csv(missing_all_path,index=False)
 
     self.con.close()
     self.conn.close()
@@ -206,6 +221,8 @@ def commit_fields_updated_data(self,field,configs):
             update_dic = {'index': columns[0], 'field':columns[1], 'lst':update_df.values.tolist()}
 
         elif db_add_style == 'append':
+            # print(ind_merge_df.head(10))
+            # print(ind_df.head(10))
             # perform an outer merge to remove any rows in ind_merge_df that already exist in the ind_df. There shouldn't be any duplicates, but if they exist and aren't remove it will throw an error when appending to the db
             ind_merge_df = ind_merge_df.merge(ind_df,how='outer',indicator=True).query('_merge == "left_only"').drop('_merge',1)
             # merge additions to the final ind_df
@@ -253,6 +270,7 @@ def commit_fields_updated_data(self,field,configs):
 
         # if data exists in ind_merge_df
         if "append" in update_process and not ind_merge_df.empty:
+            # print(ind_merge_df[ind_merge_df['occurrence_id'] == 1095315])
             append_to_db(con,config['ind_file'],ind_merge_df)
             ind_df.to_csv(ind_path,index=False)
 
