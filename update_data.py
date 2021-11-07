@@ -20,6 +20,7 @@ from functions import (
 class UpdateData():
 
     def __init__(self):
+        self.spacial_relations = None
         # BASE_DIR in this instance is the RAW_DATASETS
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         # set the date
@@ -56,7 +57,7 @@ class UpdateData():
         # combine all the separate file into single dataset and record the missing values in the missing_all and missing_reduced files used to update values later
         create_combined_datasets(self)
         # add spatially related data
-        create_spatial_relation_files(self)
+        self.spacial_relations = SpacialRelations()
         # add crs to each of the geometires in the WKT field and reduce points in Tenement polygons
         add_crs_to_wkt(self)
         # Find the changes between the new and the core files and update them
