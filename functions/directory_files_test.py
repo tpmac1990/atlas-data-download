@@ -26,8 +26,3 @@ def test_archive_and_clear_directories():
             p_dest_dir=''
         )
 
-
-
-
-
-

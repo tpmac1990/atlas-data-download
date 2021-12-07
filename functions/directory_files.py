@@ -98,6 +98,3 @@ def archive_and_clear_directories(archive_lst:str, delete_lst:list, p_src_dir:st
             clearDirectory(src_dir,extension=".csv")
 
     
-
-
-
