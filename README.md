@@ -1,3 +1,4 @@
-Data download functionality for gplore app.
+# Atlas Data management application 
 
-This is the backend mechanism for collating data and updating the database.
+Responsible for downloading, updating and maintaining data between the numerous state and federal data sources, and the user edits made within the Atlas application.
+
