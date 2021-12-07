@@ -7,7 +7,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "GeologicalProvince": {
         "record_changes": null,
@@ -17,7 +18,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "GeologicalProvinceSpatial": {
         "record_changes": null,
@@ -27,7 +29,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "GovernmentRegion": {
         "record_changes": null,
@@ -37,7 +40,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "GovernmentRegionSpatial": {
         "record_changes": null,
@@ -47,7 +51,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "Holder": {
         "record_changes": null,
@@ -62,7 +67,8 @@
             "is_geospatial": false,
             "table_lst": ["holder_listed", "Parent"]
         },
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "holder_listed": {
         "record_changes": null,
@@ -72,7 +78,8 @@
         "index": "holder_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "Listed": {
         "record_changes": null,
@@ -82,7 +89,8 @@
         "index": "ticker",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "LocalGovernment": {
         "record_changes": null,
@@ -92,7 +100,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "LocalGovernmentSpatial": {
         "record_changes": null,
@@ -102,7 +111,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "Material": {
         "record_changes": null,
@@ -112,7 +122,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "material_category": {
         "record_changes": null,
@@ -122,7 +133,8 @@
         "index": "material_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "MaterialCategory": {
         "record_changes": null,
@@ -132,7 +144,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "OccName": {
         "record_changes": null,
@@ -142,7 +155,8 @@
         "index": "name",
         "file_type": "replace",
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "OccOriginalID": {
         "record_changes": null,
@@ -152,7 +166,13 @@
         "index": "_id",
         "file_type": "replace",
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": {
+            "file": "occurrence_oid",
+            "extract_field": "occoriginalid_id",
+            "rename_field": "_id",
+            "additional_fields": ["user_name", "valid_instance", "date_created"]
+        }
     },
     "OccSize": {
         "record_changes": null,
@@ -162,7 +182,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "OccStatus": {
         "record_changes": null,
@@ -172,7 +193,8 @@
         "index": "original",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "OccStatusSimp": {
         "record_changes": null,
@@ -182,7 +204,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "OccType": {
         "record_changes": null,
@@ -192,7 +215,8 @@
         "index": "original",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "OccTypeSimp": {
         "record_changes": null,
@@ -202,7 +226,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "Occurrence": {
         "record_changes": {
@@ -233,6 +258,7 @@
             "table_lst": ["occurrence_geoprovince", "occurrence_majmat", "occurrence_minmat", "occurrence_name", "occurrence_oid", "occurrence_typ"]
         },
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "OccurrenceAddition": {
@@ -246,7 +272,8 @@
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "OccurrenceRemoval": {
         "record_changes": null,
@@ -259,7 +286,8 @@
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "OccurrenceChange": {
         "record_changes": null,
@@ -271,8 +299,10 @@
         "index": "ind_id",
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "ACTION": "action", "FIELD": "field", "TYPE": "typeval_id", "STATUS": "statusval_id", "RELATEDID": "oidval_id", "NAME": "nameval_id", "MATERIAL_MAJ": "majmatval_id", "MATERIAL_MIN": "minmatval_id", "GEOPROVINCE": "geoprovinceval_id", "DATE": "date_created", "USER": "user" },
+        "int_types": ["typeval_id", "statusval_id", "nameval_id", "majmatval_id", "minmatval_id", "geoprovinceval_id"],
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "occurrence_geoprovince": {
         "record_changes": {
@@ -295,6 +325,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "occurrence_majmat": {
@@ -318,6 +349,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "occurrence_minmat": {
@@ -341,6 +373,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "occurrence_name": {
@@ -364,6 +397,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "occurrence_oid": {
@@ -387,6 +421,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "occurrence_typ": {
@@ -410,6 +445,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "occurrence"
     },
     "Parent": {
@@ -420,7 +456,8 @@
         "index": "name_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "Shore": {
         "record_changes": null,
@@ -430,7 +467,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "State": {
         "record_changes": null,
@@ -440,7 +478,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "StateSpatial": {
         "record_changes": null,
@@ -450,7 +489,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "TenAct": {
         "record_changes": null,
@@ -460,7 +500,8 @@
         "index": "_id",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "Tenement": {
         "record_changes": {
@@ -492,6 +533,7 @@
             "table_lst": ["tenement_geoprovince", "tenement_majmat", "tenement_minmat", "tenement_occurrence", "tenement_oid", "TenHolder"]
         },
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "TenementChange": {
@@ -504,8 +546,10 @@
         "index": "ind_id",
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "ACTION": "action", "FIELD": "field", "LODGEDATE": "lodgedateval", "STARTDATE": "startdateval", "ENDDATE": "enddateval", "HOLDER_ID": "holderval_id", "TYPE": "typeval_id", "STATUS": "statusval_id", "RELATEDID": "oidval_id", "GEOPROVINCE": "geoprovinceval_id", "HOLDER_PERC": "holderperc", "DATE": "date_created", "USER": "user" },
+        "int_types": ["holderval_id", "typeval_id", "statusval_id", "geoprovinceval_id"],
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "TenementAddition": {
         "record_changes": null,
@@ -518,7 +562,8 @@
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "TenementRemoval": {
         "record_changes": null,
@@ -531,7 +576,8 @@
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "DATE": "date_created" },
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "tenement_geoprovince": {
         "record_changes": {
@@ -554,6 +600,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "tenement_govregion": {
@@ -573,6 +620,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "tenement_localgov": {
@@ -592,6 +640,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "tenement_majmat": {
@@ -611,6 +660,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "tenement_minmat": {
@@ -630,6 +680,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "tenement_occurrence": {
@@ -652,7 +703,8 @@
         "index": "tenement_id",
         "file_type": "update",
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     },
     "tenement_oid": {
         "record_changes": {
@@ -675,6 +727,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "TenHolder": {
@@ -698,6 +751,7 @@
         "file_type": "update",
         "db_to_core_transfer": null,
         "is_base_table": false,
+        "extract_new_data": null,
         "check_changes_group": "tenement"
     },
     "TenOriginalID": {
@@ -708,7 +762,13 @@
         "index": "_id",
         "file_type": "replace",
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": {
+            "file": "tenement_oid",
+            "extract_field": "tenoriginalid_id",
+            "rename_field": "_id",
+            "additional_fields": ["user_name", "valid_instance", "date_created"]
+        }
     },
     "TenStatus": {
         "record_changes": null,
@@ -718,7 +778,8 @@
         "index": "original",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "TenStatusSimp": {
         "record_changes": null,
@@ -728,7 +789,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "TenType": {
         "record_changes": null,
@@ -738,7 +800,8 @@
         "index": "original",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "TenTypeSimp": {
         "record_changes": null,
@@ -748,7 +811,8 @@
         "index": "name",
         "file_type": null,
         "db_to_core_transfer": null,
-        "is_base_table": true
+        "is_base_table": true,
+        "extract_new_data": null
     },
     "HolderChange": {
         "record_changes": null,
@@ -761,6 +825,7 @@
         "file_type": null,
         "columns": { "_ID": "_id", "IND": "ind_id", "ACTION": "action", "FIELD": "field", "CHILD": "childval_id", "PARENT": "parentval_id", "LISTED": "listedval_id", "PARENT_PERC": "parentperc", "CHILD_PERC": "childperc", "USER": "user", "DATE": "date_created" },
         "db_to_core_transfer": null,
-        "is_base_table": false
+        "is_base_table": false,
+        "extract_new_data": null
     }
 }

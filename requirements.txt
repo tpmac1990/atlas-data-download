@@ -1,0 +1,27 @@
+attrs==20.3.0
+certifi==2020.12.5
+chardet==4.0.0
+click==7.1.2
+click-plugins==1.1.1
+cligj==0.7.1
+Fiona @ file:///C:/Django_Projects/03_geodjango/Atlas/datasets/Raw_datasets/pd_dependencies/Fiona-1.8.18-cp37-cp37m-win_amd64.whl
+fuzzywuzzy==0.18.0
+GDAL @ file:///C:/Django_Projects/03_geodjango/Atlas/datasets/Raw_datasets/pd_dependencies/GDAL-3.1.4-cp37-cp37m-win_amd64.whl
+geopandas @ file:///C:/Django_Projects/03_geodjango/Atlas/datasets/Raw_datasets/pd_dependencies/geopandas-0.8.1-py3-none-any.whl
+idna==2.10
+munch==2.5.0
+numpy==1.19.4
+OWSLib==0.21.0
+pandas==1.1.4
+psycopg2==2.8.6
+pyproj @ file:///C:/Django_Projects/03_geodjango/Atlas/datasets/Raw_datasets/pd_dependencies/pyproj-3.0.0.post1-cp37-cp37m-win_amd64.whl
+python-dateutil==2.8.1
+python-Levenshtein==0.12.2
+pytz==2020.4
+PyYAML==5.3.1
+requests==2.25.1
+Rtree @ file:///C:/Django_Projects/03_geodjango/Atlas/datasets/Raw_datasets/env/pd_dependencies/Rtree-0.9.7-cp37-cp37m-win_amd64.whl
+Shapely @ file:///C:/Django_Projects/03_geodjango/Atlas/datasets/Raw_datasets/pd_dependencies/Shapely-1.7.1-cp37-cp37m-win_amd64.whl
+six==1.15.0
+SQLAlchemy==1.3.22
+urllib3==1.26.2

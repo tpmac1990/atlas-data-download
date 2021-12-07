@@ -1,0 +1,99 @@
+{
+    "update_missing_data": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_core",
+                "src_extension": "output/core",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_update",
+                "src_extension": "output/update",
+                "copy_files": ["manual_update_required","missing_all","missing_reduced"]
+            }
+        ],
+        "affects_db": false,
+        "dispose_on_success": true
+    },
+    "extract_user_edits": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_core",
+                "src_extension": "output/core",
+                "copy_files": "__all__"
+            }
+        ],
+        "affects_db": false,
+        "dispose_on_success": true
+    },
+    "preformat": {
+        "folders_to_backup": [
+            {
+                "store_folder": "input_occurrence_new",
+                "src_extension": "input/occurrence/new",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "input_tenement_new",
+                "src_extension": "input/tenement/new",
+                "copy_files": "__all__"
+            }
+        ],
+        "affects_db": false,
+        "dispose_on_success": true
+    },
+    "combine_datasets": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_update",
+                "src_extension": "output/update",
+                "copy_files": "__all__"
+            }
+        ],
+        "affects_db": false,
+        "dispose_on_success": true
+    },
+    "spatial_relationships": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_new",
+                "src_extension": "output/new",
+                "copy_files": ["Tenement","Occurrence"]
+            }
+        ],
+        "affects_db": false,
+        "dispose_on_success": true
+    },
+    "change_and_update": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_new",
+                "src_extension": "output/new",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_core",
+                "src_extension": "output/core",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_ss",
+                "src_extension": "output/ss",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_onew",
+                "src_extension": "output/onew",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_update",
+                "src_extension": "output/update",
+                "copy_files": "__all__"
+            }
+        ],
+        "affects_db": true,
+        "dispose_on_success": true
+    }
+}
+

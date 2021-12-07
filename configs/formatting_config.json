@@ -1,15 +1,14 @@
 {
     "tenement": {
             "AUS_OSPET_1": {
-                "required_fields": ["geometry", "TITLE_NAME", "TITLE_TYPE", "INITIALEXP_DATE", "LASTRENEWAL", "CURRENTEXP_DATE", "EXPIRY_DATE_NEATS", "GRANT_DATE_NEATS", "STATUS_NEATS", "TITLE_HOLDERS_NEATS", "NEW_IDENTIFIER"],
+                "required_fields": ["geometry", "Title", "TitleType", "ExpiryDate", "LastReDate", "GrantDate", "Status", "TitleHold", "OffShoreAr", "NEW_IDENTIFIER"],
                 "preformat": {
-                    "unique_column": "TITLE_NAME",
-                    "low_memory": true,
+                    "unique_column": "Title",
                     "format": [
                         {
                             "type": "field_filter", 
                             "configs": [
-                                {"name": "OFFSHORE_AREA", "type": "include", "vals": ["Territory of Ashmore and Cartier Islands", "Victoria", "Northern Territory", "Queensland", "Tasmania", "Western Australia"]},
+                                {"name": "OffShoreAr", "type": "include", "vals": ["Territory of Ashmore and Cartier Islands", "Victoria", "Northern Territory", "Queensland", "Tasmania", "Western Australia"]},
                                 {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
                             ]
                         }
@@ -18,11 +17,11 @@
                 "build": {
                     "merge": null,
                     "format": [
-                        {"source": "LASTRENEWAL", "new_field": "NEW_STARTDATE", "format_type": "date-time-zero-to-null"},
-                        {"source": "CURRENTEXP_DATE", "new_field": "NEW_ENDDATE", "format_type": "date-time-zero-to-null"},
-                        {"source": "NEW_ENDDATE", "new_field": "TEMP_STATUS", "format_type": "time_since_expiry_desc"},
-                        {"source": ["TEMP_STATUS","STATUS"], "new_field": "NEW_STATUS", "format_type": "join"},
-                        {"source": ["TITLE_TYPE","OFFSHORE_AREA"], "new_field": "NEW_TYPE", "format_type": "join-dash"}
+                        {"source": "LastReDate", "new_field": "NEW_STARTDATE", "format_type": "date-time-zero-to-null"},
+                        {"source": "ExpiryDate", "new_field": "NEW_ENDDATE", "format_type": "date-time-zero-to-null"},
+                        {"source": "ExpiryDate", "new_field": "TEMP_STATUS", "format_type": "time_since_expiry_desc"},
+                        {"source": ["TEMP_STATUS","Status"], "new_field": "NEW_STATUS", "format_type": "join"},
+                        {"source": ["TitleType","OffShoreAr"], "new_field": "NEW_TYPE", "format_type": "join-dash"}
                     ],
                     "unique_field": "NEW_ID",
                     "type": {"group": "Petroleum", "field": "NEW_TYPE", "format_type": "type_by_code"},
@@ -31,15 +30,14 @@
                         "rename": {"NEW_STARTDATE": "startdate", "NEW_ENDDATE": "enddate"},
                         "create": ["lodgedate"]
                     },
-                    "alternate_ids": ["TITLE_NAME"],
-                    "holders": {"field": "TITLE_HOLDERS_NEATS", "format_type": "semi-colon-split", "perc_own": false}
+                    "alternate_ids": ["Title"],
+                    "holders": {"field": "TitleHold", "format_type": "semi-colon-split", "perc_own": false}
                 }
             },
             "NSW_1": {
                 "required_fields": ["tas_id","title","holder","grant_date","expiry_dat","last_renew","title_code","operation","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "tas_id",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -74,7 +72,6 @@
                 "required_fields": ["tas_id","applicatio","appl_code","applicant","appl_date","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "tas_id",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -105,10 +102,9 @@
                 }
             },
             "NT_1": {
-                "required_fields": ["TITLEID","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","PTY_NAME","NEW_IDENTIFIER"],
+                "required_fields": ["TITLEID","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","PTY_NAME","PCT","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SW_MEMBER",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -119,7 +115,7 @@
                         },
                         {
                             "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
+                            "configs": {"fields": ["PTY_NAME","PCT"], "out_field": "PTY_NAME"}
                         },
                         {
                             "type": "sort_values", 
@@ -145,10 +141,9 @@
                 }
             },
             "NT_2": {
-                "required_fields": ["TITLEID", "STATUS", "TS_TYPE", "DT_EFFECT", "DT_CONSENT", "DT_VT_STRT", "DT_VT_FINL", "PTY_NAME", "HLD_TYPE", "NEW_IDENTIFIER"],
+                "required_fields": ["TITLEID", "STATUS", "TS_TYPE", "DT_EFFECT", "DT_CONSENT", "DT_VT_STRT", "DT_VT_FINL", "PTY_NAME", "HLD_TYPE", "PCT", "NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SW_MEMBER",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -159,7 +154,7 @@
                         },
                         {
                             "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
+                            "configs": {"fields": ["PTY_NAME","PCT"], "out_field": "PTY_NAME"}
                         },
                         {
                             "type": "sort_values", 
@@ -188,7 +183,6 @@
                 "required_fields": ["geometry", "TITLEID","DT_VT_STRT","DT_VT_FINL","DT_APPL","ACTIVE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TITLEID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -201,10 +195,9 @@
                 "build": null
             },
             "NT_4": {
-                "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_MOATORM","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
+                "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_MOATORM","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PCT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SW_MEMBER",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -215,7 +208,7 @@
                         },
                         {
                             "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
+                            "configs": {"fields": ["PTY_NAME","PCT"], "out_field": "PTY_NAME"}
                         },
                         {
                             "type": "sort_values", 
@@ -240,10 +233,9 @@
                 }
             },
             "NT_5": {
-                "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","TI_NUMBER","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","DT_RW_APPL","DT_RW_GRNT","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
+                "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","TI_NUMBER","STATUS","TS_TYPE","DT_EFFECT","DT_GRNT","DT_EXPIRY","DT_RW_APPL","DT_RW_GRNT","PTY_NAME","PCT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SW_MEMBER",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -254,7 +246,7 @@
                         },
                         {
                             "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
+                            "configs": {"fields": ["PTY_NAME","PCT"], "out_field": "PTY_NAME"}
                         },
                         {
                             "type": "sort_values", 
@@ -280,10 +272,9 @@
                 }
             },
             "NT_6": {
-                "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_CONSENT","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PERCENT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
+                "required_fields": ["geometry", "TITLEID","SW_MEMBER","TI_TYPE_CD","STATUS","TS_TYPE","DT_EFFECT","DT_CONSENT","DT_VT_STRT","DT_VT_FINL","PTY_NAME","PCT","HLD_TY_CD","HLD_TYPE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SW_MEMBER",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -294,7 +285,7 @@
                         },
                         {
                             "type": "merge_rows", 
-                            "configs": {"fields": ["PTY_NAME","PERCENT"], "out_field": "PTY_NAME"}
+                            "configs": {"fields": ["PTY_NAME","PCT"], "out_field": "PTY_NAME"}
                         },
                         {
                             "type": "sort_values", 
@@ -323,7 +314,6 @@
                 "required_fields": ["geometry", "ID","OPEN_DATE","CLOSE_DATE","STATUS","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -354,7 +344,6 @@
                 "required_fields": ["geometry", "MORA_ID","TITLEID","DT_APPL","DT_VT_STRT","DT_VT_FINL","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "MORA_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -370,7 +359,6 @@
                 "required_fields": ["geometry", "PERMITTY_1","PERMITTY_2","PERMITMINE","LODGEDATE","APPROVEDAT","EXPIRYDATE","NONCURRENT","AUTHORIS_1","NEW_IDENTIFIER"],					
                 "preformat": {
                     "unique_column": "DISPLAYNAM",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -400,7 +388,6 @@
                 "required_fields": ["NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": null,
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -428,7 +415,6 @@
                 "required_fields": ["geometry", "TENURE", "EFFECTIVED", "NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "UNIQUE_FIELD",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -460,7 +446,6 @@
                 "required_fields": ["geometry", "TENEMENT_LABEL","TENEMENT_STATUS","TENEMENT_HOLDERS","REGISTRATION_GRANT_DATE","SURRENDER_DATE","EXPIRY_DATE","RENEWAL_RECEIVED_DATE","TRANSFER_RECEIVED_DATE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TENEMENT_LABEL",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -493,7 +478,6 @@
                 "required_fields": ["geometry", "TENEMENT_LABEL","TENEMENT_STATUS","LICENCEES","TENEMENT_START_DATE","TENEMENT_SURRENDER_DATE","TENEMENT_EXPIRY_DATE","RENEWAL_APPLICATION_DATE","TRANSFER_APPLICATION_DATE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TENEMENT_LABEL",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -528,7 +512,6 @@
                 "required_fields": ["geometry", "AREA_TYPE","PUBLISH_DATE","AREA_START_DATE","APPLICATION_CLOSE_DATE","AREA_STATUS","ERA_NUMBER","APPLICANTS","APPLICATION_OPEN_DATE","RELATED_TENEMENTS","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "ERA_NUMBER",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -559,7 +542,6 @@
                 "required_fields": ["APPLICATION_LABEL","APPLICANTS","PEGGING_DATE","APPLICATION_RECEIVED_DATE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "FILE_REFERENCE",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -591,7 +573,6 @@
                 "required_fields": ["geometry", "DATE_RECEIVED","LEASE_TYPE","FILE_REFERENCE","APPLICANTS","RELATED_TENEMENTS","DATE_REQUIREMENTS_COMPLETE","NATIVE_TITLE","ASSESSMENT_STATUS","DATE_ASSESSMENT_COMPLETED","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "FILE_REFERENCE",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -623,7 +604,6 @@
                 "required_fields": ["geometry", "APPLICATION_TYPE","FILE_REFERENCE","APPLICANTS","APPLICATION_RECEIVED_DATE","DATE_OFFERED","DATE_ACCEPTED","OUTCOME","OUTCOME_DATE","RESULTING_TENEMENT","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "FILE_REFERENCE",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -655,7 +635,6 @@
                 "required_fields": ["geometry", "FILE_REFERENCE","LICENSEE","GRANTED_DATE","EXPIRY_DATE","TENEMENT_NO","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TENEMENT_NO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -687,7 +666,6 @@
                 "required_fields": ["FILE_REFERENCE","APPLICANT","APPLICATION_DATE","DATE_TO","TENEMENT_NO","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TENEMENT_NO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -719,7 +697,6 @@
                 "required_fields": ["geometry", "CALL_NO","FILE_REFERENCE","DATE_FROM","DATE_TO","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "CALL_NO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -751,7 +728,6 @@
                 "required_fields": ["geometry", "name","tenementType","owner","status","applicationDate","grantDate","expireDate","fileID","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "fileID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -782,7 +758,6 @@
                 "required_fields": ["TNO","STATUS","TYPEDESCM","TYPEDESC","RENEW_APP","OWN_NAME","APPREC_DTI","GRANT1_DTI","GRANTL_DTI","EXPL_DTI","STATUSSDSC","STATUSLDSC","ACTIVE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TNO",
-                    "low_memory": false,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -817,7 +792,6 @@
                 "required_fields": ["geometry", "TNO","COVER","AUTH_TYPE","AUTH_TYPEL","NO","STATUSS","STATUSSDSC","TEN_HOLD1","ISSUE_DT","ISSUE_DTI","EXPIRE_DT","EXPIRE_DTI","APP_DT","APP_DTI","TERM_DT","TERM_DTI","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TNO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -856,7 +830,6 @@
                 "required_fields": ["TENID","TYPE","TENSTATUS","STARTDATE","ENDDATE","GRANTDATE","FMT_TENID","ALL_HOLDER","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TENID",
-                    "low_memory": false,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -887,7 +860,6 @@
                 "required_fields": ["geometry", "TENID","TEN_TYPE","RLESID","RLES_STATU","RLES_STAMP","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "RLESID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -915,7 +887,6 @@
                 "required_fields": ["geometry", "TENID","AMALGID","END_STAMP","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "AMALGID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -947,7 +918,6 @@
                 "required_fields": ["geometry", "TENID","RESTNID","RESTN_STAT","START_STAM","END_STAMP","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "RESTNID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -977,7 +947,6 @@
                 "required_fields": ["geometry", "TITLE_ID","TYPE","ISSUED","EXPIRY","STATUS","ALL_HOLDER","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TITLE_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1009,7 +978,6 @@
                 "required_fields": ["geometry", "TITLE_ID","TYPE","LODGED","STATUS","APPLNT_1","APPLNT_2","APPLNT_3","APPLNT_4","APPLNT_5","APPLNT_6","APPLNT_7","APPLNT_8","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TITLE_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1042,7 +1010,6 @@
                 "required_fields": ["geometry", "TITLE_ID","TYPE","GAZETTED","CLOSING","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TITLE_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1073,7 +1040,6 @@
                 "required_fields": ["geometry", "TITLE_ID","TYPE","LODGED","ISSUED","SPA_EXPIRY","AO_EXPIRY","STATUS","HOLDER_1","HOLDER_2","HOLDER_3","HOLDER_4","HOLDER_5","HOLDER_6","HOLDER_7","HOLDER_8","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "TITLE_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1104,19 +1070,18 @@
         },
     "occurrence": {
             "AUS_OSPET_1": {
-                "required_fields": ["geometry", "Well_Name","Title","Borehole_Operator","Kick_Off_Date","Borehole_reason","NEW_IDENTIFIER"],
+                "required_fields": ["geometry", "Well_Name","Kick_Off_D","Borehole_r","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "Well_ENO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "combine_ausos_well_duplicates", 
-                            "configs": {"index": "Well_ENO", "field": "Borehole_reason", "vals": ["development","appraisal","exploration"]}
+                            "configs": {"index": "Well_ENO", "field": "Borehole_r", "vals": ["development","appraisal","exploration"]}
                         },
                         {
                             "type": "field_filter", 
                             "configs": [
-                                {"name": "Borehole_reason", "type": "include", "vals": ["exploration", "appraisal", "development"]},
+                                {"name": "Borehole_r", "type": "include", "vals": ["exploration", "appraisal", "development"]},
                                 {"name": "geometry", "type": "exclude", "vals": ["EMPTY","POLYGON EMPTY",""]}
                             ]
                         }
@@ -1129,7 +1094,7 @@
                         {"source": null, "new_field": "NEW_SIZE", "format_type": "all_unknown"}
                     ],
                     "unique_field": "NEW_ID",
-                    "type": {"group": "Petroleum", "field": "Borehole_reason", "format_type": ""},
+                    "type": {"group": "Petroleum", "field": "Borehole_r", "format_type": ""},
                     "status": {"group": "Petroleum", "field": "NEW_STATUS", "format_type": ""},
                     "name": "Well_Name",
                     "size": {"group": "Petroleum", "field": "NEW_SIZE", "format_type": ""},
@@ -1141,7 +1106,6 @@
                 "required_fields": ["geometry", "OCCURRENCE","METAL_NO","DEPOSIT_NA","ALL_NAMES","OPERATION","OP_STATE","OP_STATUS","WORK_DESC","SUMMARY_DE","SIZE_CODE","MAJOR_COMM","MINOR_COMM","ORE_MIN","GS_NUMBER","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "OCCURRENCE",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1187,7 +1151,6 @@
                 "required_fields": ["geometry", "HOLE_NAME","HOLEPURPOS","BUS_PURPOS","TITLEREF","COMMENCED_","COMPLETED_","HOLE_STATU","PLUG_DATE","TOPSTRAT","CSGSTATUS","REPORTS","OPENFILE_D","COMMENTS","GSNSW_DRIL","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SITE_ID",
-                    "low_memory": false,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1219,7 +1182,6 @@
                 "required_fields": ["geometry", "MODAT_ID","NAME","MIN_CATGRY","COM_MAJOR","COM_MINOR","STATUS","OCCUR_SIZE","COMMENTS1","COMMENTS2","COMMENTS3","PROD_COMME","MIN_METHOD","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "MODAT_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1248,7 +1210,6 @@
                 "required_fields": ["geometry", "WELLNAME","PURPOSE","CLASS_POST","TITLE_ID","STATUS","DT_SPUD","DT_DEPTH","DT_RELEASE","HCSHOWS","BASICSTAT","INTERPSTAT","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "WELLNAME",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1277,7 +1238,6 @@
                 "required_fields": ["geometry", "SITE_NO","OCCUR_NAME","DATE_CURRE","DATE_RECOR","SITE_TYPE","MINE_STATU","EXPLORE_ST","EXPOSURE_T","DEPOSIT_SI","MAIN_COMMO","MAIN_COM_1","MAIN_OCCUR","MAIN_OCC_1","ALL_COMMOD","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SITE_NO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1308,7 +1268,6 @@
                 "required_fields": ["geometry", "SITE_NO","OCCUR_NAME","DATE_CURRE","DATE_RECOR","SITE_TYPE","DEPOSIT_SI","MAIN_COMMO","MAIN_COM_1","MAIN_OCCUR","MAIN_OCC_1","ALL_COMMOD","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SITE_NO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1339,7 +1298,6 @@
                 "required_fields": ["geometry", "MINDEP_NO","DEP_NAME","REFERENCE","COMM_CODE","COMMODS","COMMOD_MAJ","COMM_SPECS","CLASS_CODE","OPER_TYPE","MAP_SYMB","STATUS_VAL","SIZE_VAL","SRCE_CNTRE","COMMENTS","O_MAP_SYMB","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "MINDEP_NO",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1388,11 +1346,15 @@
                     "alternate_ids": ["MINDEP_NO"]
                 }
             },
+            "SA_2": {
+                "required_fields": ["geometry","PR_NAME","PR_STATUS","DEV_STATUS"],
+                "preformat": null,
+                "build": null
+            },
             "SA_3": {
                 "required_fields": ["WELLDISPLA","WELL_ID","CLASS","TYPE","STATUSRR","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "WELL_ID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1421,7 +1383,6 @@
                 "required_fields": ["geometry", "GID","DEPOSIT_ID","NAME","ALIAS","TYPE","COMM_TYPE","COMMODITYS","DESCRIPT","STATUS","DEP_SIZE","RESOURCES","REF","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "GID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1454,7 +1415,6 @@
                 "required_fields": ["geometry", "FEATURE","SITEID","MINE_TYPE","SIZE_CAT","ADIT","IN_SITU","OPEN_CUT","SHAFT","DECLINE","SLUICING","DREDGING","PROD_COMM","PRI_COMM","SEC_COMM","MIN_ASS","MININGMETH","PLOTTYPE","SITE_TYPE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SITEID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1483,7 +1443,6 @@
                 "required_fields": ["geometry", "SITEID","WELL_NAME","CURRNTSTAT","SYMBOLDESC","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SITEID",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1515,7 +1474,6 @@
                 "required_fields": ["geometry", "SITE_CODE","SITE_TITLE","SHORT_NAME","SITE_COMMO","SITE_TYPE_","SITE_SUB_T","SITE_STAGE","TARGET_COM","COMMODITY","PROJ_CODE","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "SITE_CODE",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 
@@ -1544,7 +1502,6 @@
                 "required_fields": ["geometry", "WELL_NAME","UWI","CLASS","STATUS","NEW_IDENTIFIER"],
                 "preformat": {
                     "unique_column": "UWI",
-                    "low_memory": true,
                     "format": [
                         {
                             "type": "field_filter", 

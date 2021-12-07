@@ -3,9 +3,13 @@
 *.gfs
 *.gml
 
-# excel, csv files
+# excel, csv files, log files
 *.csv
 *.xlsm
+*.logs
 
 # database access keys
 db_access_configs.json
+
+
+__pycache__/

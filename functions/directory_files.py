@@ -2,8 +2,6 @@ import os
 import shutil
 import csv
 import json
-import urllib.request
-import zipfile
 import pandas as pd
 
 
@@ -66,56 +64,13 @@ def delete_files_in_directory(directory):
         os.remove(os.path.join(directory,file))
 
 
-def unzipFile(zip_file_path,output_directory):
-    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-        zip_ref.extractall(output_directory)
-
-def download_unzip_and_remove(link,zip_file_path,unzipped_directory):
-    download_and_unzip(link,zip_file_path,unzipped_directory)
-    os.remove(zip_file_path)
-
-
-def getTempLink(data_import_group,temp_links):
-    link = data_import_group['link']
-    if link in list(temp_links.keys()):
-        link = temp_links[link]
-    return link
-
-
-def download_file(link,path_output):
-    urllib.request.urlretrieve(link, path_output)
-
-
-def download_and_unzip(link,file_path,output_directory):
-    download_file(link,file_path)
-    unzipFile(file_path,output_directory)
-
-
-def download_unzip_link_manual(self,data_import_group):
-    success = True
-    if data_import_group['data_source'] != 'WFS':
-        print('Downloading and unzipping ' + data_import_group['name'])
-        try:
-            if data_import_group['import_style'] == 'link':
-                link = getTempLink(data_import_group,self.temp_links)
-                download_unzip_and_remove(link,self.zip_file_path,os.path.join(self.unzipped_dir,data_import_group['created_extension']))
-            else:
-                unzipFile(os.path.join(self.manual_dir,data_import_group['link'] + '.zip'),self.unzipped_dir)
-        except:
-            # If the link fails then add the name, data_source and link to the download_fail.csv. This will be used later to determine whether to format the data or not.
-            success = False
-            df = pd.DataFrame({'NAME': [data_import_group['name']],'DATA_SOURCE': [data_import_group['data_source']],'LINK': [data_import_group['link']]})
-            if fileExist(self.download_fail_path):
-                existing_df = pd.read_csv(self.download_fail_path)
-                df.concat((existing_df,df))
-            df.to_csv(self.download_fail_path,index=False)
-            print("Download was unsuccessful. Check the link.")
-    return success
-
-
 def getJSON(path):
     with open(path) as json_file:
         return json.load(json_file)
+
+def writeJSON(path,obj):
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=4)
 
 
 def readMultipledf(file_lst):
@@ -125,4 +80,24 @@ def readMultipledf(file_lst):
 def createDirectory(directory):
     if not os.path.exists(directory):
         os.mkdir(directory)
+
+
+def archive_and_clear_directories(archive_lst:str, delete_lst:list, p_src_dir:str, p_dest_dir:str) -> (None):
+    ''' copy and compress folders from the archive_lst to the archive folder and then delete all the folders provided in the delete_lst '''
+    # create a complete list of all the folders to complete an action on
+    action_lst = archive_lst + [x for x in delete_lst if not x in archive_lst]
+    # loop throuh all folders
+    for name in action_lst:
+        src_dir = os.path.join(p_src_dir,name)
+        dest_dir = os.path.join(p_dest_dir,name)
+        # archive folder if in the archive_lst
+        if name in archive_lst:
+            copy_directory(src_dir,dest_dir)
+        # delete folder if in the delete_lst
+        if name in delete_lst:
+            clearDirectory(src_dir,extension=".csv")
+
+    
+
+
 

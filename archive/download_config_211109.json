@@ -123,7 +123,7 @@
                 "name":"qld_titles",
                 "data_source":"ogr",
                 "import_style":"link",
-                "link":"qld_titles",
+                "link":"Exploration_and_production_permits_Queensland",
                 "extension":"",
                 "created_extension":"",
                 "groups":
@@ -254,25 +254,36 @@
                     ]
             },
             {
-                "name":"vic_titles",
+                "name":"vic_mineral",
                 "data_source":"ogr",
                 "import_style":"link",
-                "link":"vic_all",
-                "extension":"ll_gda94/esrishape/whole_of_dataset/victoria/MINERALS/",
+                "link":"Vic minerals",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer",
                 "created_extension":"",
                 "groups":
                     [
                         {
                             "type":"none",
                             "output":"VIC_1",
-                            "crs":"EPSG:4283",
-                            "files":["MINTEN"]
-                        },
+                            "crs": "EPSG:4283",
+                            "files":["minten"]
+                        }
+                    ]
+            },
+            {
+                "name":"vic_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"Vic petroleum",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer",
+                "created_extension":"",
+                "groups":
+                    [
                         {
                             "type":"none",
                             "output":"VIC_2",
-                            "crs":"EPSG:4283",
-                            "files":["PETROL"]
+                            "crs": "EPSG:4283",
+                            "files":["petrol"]
                         }
                     ]
             },
@@ -431,10 +442,11 @@
                     ]
             },
             {
-                "name":"os_titles",
-                "data_source":"ogr",
-                "import_style":"link",
-                "link":"os_titles",
+                "name":"OS_petroleum_titles",
+                "data_source":"WFS",
+                "wfs_version": "2.0.0",
+                "import_style":"wfs",
+                "link":"https://arcgis.nopta.gov.au/arcgis/services/Public/PetroleumTitles_Company/MapServer/WFSServer",
                 "extension":"",
                 "created_extension":"",
                 "groups":
@@ -443,7 +455,7 @@
                             "type":"none",
                             "output":"AUS_OSPET_1",
                             "crs": "EPSG:4283",
-                            "files":["PetroleumTitles_Nov2021"]
+                            "files":["Public_PetroleumTitles_Company:Petroleum_Titles_Company"]
                         }
                     ]
             }
@@ -453,7 +465,7 @@
                 "name":"nsw_occurrence",
                 "data_source":"ogr",
                 "import_style":"link",
-                "link":"nsw_sites",
+                "link":"NSW_Occurrences",
                 "extension":"GSNSWDataset/",
                 "created_extension":"",
                 "groups":
@@ -470,7 +482,7 @@
                 "name":"nsw_drillholes",
                 "data_source":"ogr",
                 "import_style":"link",
-                "link":"nsw_wells",
+                "link":"NSW_Drillholes",
                 "extension":"GSNSWDataset/",
                 "created_extension":"",
                 "groups":
@@ -524,7 +536,7 @@
                 "name":"qld_all",
                 "data_source":"ogr",
                 "import_style":"link",
-                "link":"qld_sites",
+                "link":"QLD_All",
                 "extension":"in_temp_link",
                 "created_extension":"",
                 "groups":
@@ -566,8 +578,8 @@
             {
                 "name":"sa_mines",
                 "data_source":"ogr",
-                "import_style":"link",
-                "link":"https://data.sarig.sa.gov.au/Map/Download/layerDownload?layeId=502&formatLovId=365",
+                "import_style":"manual",
+                "link":"Mineral_Major_Mines_GDA2020_shp",
                 "extension":"",
                 "created_extension":"",
                 "groups":
@@ -583,8 +595,8 @@
             {
                 "name":"sa_petroleum",
                 "data_source":"ogr",
-                "import_style":"link",
-                "link":"https://data.sarig.sa.gov.au/Map/Download/layerDownload?layeId=227&formatLovId=365",
+                "import_style":"manual",
+                "link":"Petroleum wells_GDA2020_shp",
                 "extension":"",
                 "created_extension":"",
                 "groups":
@@ -598,11 +610,11 @@
                     ]
             },
             {
-                "name":"vic_sites",
+                "name":"vic_mines_occurrences",
                 "data_source":"ogr",
                 "import_style":"link",
-                "link":"vic_all",
-                "extension":"ll_gda94/esrishape/whole_of_dataset/victoria/MINERALS/",
+                "link":"VIC_Occurrences",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer/",
                 "created_extension":"",
                 "groups":
                     [
@@ -610,21 +622,32 @@
                             "type":"none",
                             "output":"VIC_1",
                             "crs":"EPSG:4283",
-                            "files":["MINSITE"]
-                        },
+                            "files":["minsite"]
+                        }
+                    ]
+            },
+            {
+                "name":"vic_petroleum",
+                "data_source":"ogr",
+                "import_style":"link",
+                "link":"VIC_Petroleum",
+                "extension":"ll_gda94/sde_shape/whole/VIC/MINERALS/layer/",
+                "created_extension":"",
+                "groups":
+                    [
                         {
                             "type":"none",
                             "output":"VIC_2",
                             "crs":"EPSG:4283",
-                            "files":["PET_WELLS_V_PUBLIC"]
+                            "files":["pet_wells"]
                         }
                     ]
             },
             {
                 "name":"tas_mineral",
                 "data_source":"ogr",
-                "import_style":"link",
-                "link":"https://www.mrt.tas.gov.au/mrtdoc/public_files/deposits.zip",
+                "import_style":"manual",
+                "link":"deposits",
                 "extension":"",
                 "created_extension":"",
                 "groups":
@@ -672,10 +695,11 @@
                     ]
             },
             {
-                "name":"os_wells",
-                "data_source":"ogr",
-                "import_style":"link",
-                "link":"os_wells",
+                "name":"OS_petroleum_wells",
+                "data_source":"WFS",
+                "wfs_version": "2.0.0",
+                "import_style":"wfs",
+                "link":"https://arcgis.nopta.gov.au/arcgis/services/Public/PetroleumWells_NOPIMS/MapServer/WFSServer",
                 "extension":"",
                 "created_extension":"",
                 "groups":
@@ -684,7 +708,7 @@
                             "type":"none",
                             "output":"AUS_OSPET_1",
                             "crs": "EPSG:4283",
-                            "files":["PetroleumWells_Nov2021"]
+                            "files":["Public_PetroleumWells_NOPTA:Petroleum_Wells"]
                         }
                     ]
             }
