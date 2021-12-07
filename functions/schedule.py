@@ -1,5 +1,5 @@
 import os
-from .directory_files import getJSON, writeJSON
+from .directory_files import get_json, write_json
 from .setup import SetUp
 
 
@@ -7,10 +7,10 @@ class Schedule:
     schedule_config_path = os.path.join(SetUp.configs_dir,'download_schedule.json')
 
     def open_schedule(self):
-        return getJSON(self.schedule_config_path)
+        return get_json(self.schedule_config_path)
 
     def update_schedule(self,configs):
-        writeJSON(self.schedule_config_path, configs)
+        write_json(self.schedule_config_path, configs)
 
     def failed_file(self,file,data_group,configs):
         ''' there was some type of error so remove from now so no further steps will be attempted, 

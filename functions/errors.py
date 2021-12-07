@@ -4,7 +4,7 @@ import numpy as np
 import ctypes
 import csv
 
-from .directory_files import fileExist
+from .directory_files import file_exist
 
 
 def check_csvs_for_errors(self):
@@ -40,7 +40,7 @@ def find_blanks_in_tables(self):
 
     for fname in blank_lst:
         path = os.path.join(self.new_dir,"%s.csv"%(fname))
-        if fileExist(path):
+        if file_exist(path):
             df = pd.read_csv(path,engine='python')
             na_fields = df.columns[df.isna().any()].tolist()
             if len(na_fields) > 0:

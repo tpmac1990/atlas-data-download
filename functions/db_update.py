@@ -11,7 +11,7 @@ import ctypes
 import csv
 import sys
 
-from .directory_files import copy_directory, getJSON, fileExist, copy_directory_in_list
+from .directory_files import copy_directory, get_json, file_exist, copy_directory_in_list
 from .timer import time_past, start_time
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
@@ -37,8 +37,8 @@ class ChangesAndUpdate:
         self.core_updates_path = os.path.join(self.core_dir,'update.csv')
         self.core_changes_path = os.path.join(self.core_dir,'change.csv')
         # configs
-        self.update_configs = getJSON(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
-        self.access_configs = getJSON(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
+        self.update_configs = get_json(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
+        self.access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
 
         self.find_changes_update_core_and_database()
 
@@ -204,7 +204,7 @@ class ChangesAndUpdate:
                 # set path of the file in the output/new directory
                 new_path = os.path.join(self.new_dir,"%s.csv"%(file))
                 # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
-                if fileExist(new_path):
+                if file_exist(new_path):
                     Logger.logger.info(f"Build update and change files for {file}")
                     # set the key (index) column and the fields to drop from the db_update_configs file
                     key = record_changes["key"]
@@ -271,7 +271,7 @@ class ChangesAndUpdate:
         # add date field
         df["DATE"] = SetUp.pyDate
         # concat to core file
-        if fileExist(core_file_path):
+        if file_exist(core_file_path):
             core_file_df = pd.read_csv(core_file_path)
             # core_changes_df = pd.read_csv(self.core_changes_path)
             next_id = core_file_df["_ID"].max() + 1
@@ -504,7 +504,7 @@ class ChangesAndUpdate:
                 core_path = os.path.join(self.core_dir,"%s.csv"%(file))
 
                 # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
-                if not fileExist(new_path):
+                if not file_exist(new_path):
                     Logger.logger.info(f"file '{file}' does not exist in the new directory")
                     continue
 
@@ -635,7 +635,7 @@ class ChangesAndUpdate:
             # set path of the file in the output/new directory
             new_path = os.path.join(self.new_dir,"%s.csv"%(file))
             # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
-            if not fileExist(new_path):
+            if not file_exist(new_path):
                 Logger.logger.info(f"'{file}' doesn't exist. No new entires could be found")
                 continue
 
@@ -789,7 +789,7 @@ class ChangesAndUpdate:
     def export_as_csv_to_update_and_core(self,df,update_dir,core_dir,file_name):
 
         # create update file and add entries to the core file
-        if fileExist(core_dir):
+        if file_exist(core_dir):
             # read the core equivalent file
             core_df = pd.read_csv(core_dir)
 
@@ -966,8 +966,8 @@ class ChangesAndUpdate:
         # output archive directory. The previous core data from the output archive directory
         previous_core_dir = os.path.join(self.output_archive_dir,archive_date,'core')
         # configs
-        self.update_configs = getJSON(os.path.join(self.configs_dir,'db_update_configs.json'))
-        self.access_configs = getJSON(os.path.join(self.configs_dir,'db_access_configs.json'))
+        self.update_configs = get_json(os.path.join(self.configs_dir,'db_update_configs.json'))
+        self.access_configs = get_json(os.path.join(self.configs_dir,'db_access_configs.json'))
 
         # the archived core directory needs to be set as change_dir so it works with the commit_all_files_to_db function which is used else where.
         self.change_dir = previous_core_dir

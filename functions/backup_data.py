@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from .directory_files import getJSON, fileExist, writeJSON
+from .directory_files import get_json
 from .timer import time_past, start_time
 
 from .setup import SetUp, Logger
@@ -21,7 +21,7 @@ class DataBackup:
 
     def __init__(self,stage):
         Data.stage = stage
-        files_configs = getJSON(os.path.join(SetUp.configs_dir,'backup_files.json'))[stage]
+        files_configs = get_json(os.path.join(SetUp.configs_dir,'backup_files.json'))[stage]
         Data.folders_to_backup = files_configs['folders_to_backup']
         Data.affects_db = files_configs['affects_db']
 

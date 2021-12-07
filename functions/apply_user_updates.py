@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import csv
 
-from .directory_files import getJSON, fileExist
+from .directory_files import get_json, file_exist
 from .db_update import sqlalchemy_engine
 from .timer import time_past, start_time
 
@@ -20,8 +20,8 @@ class ExtractUserEdits:
     def __init__(self):
         func_start = start_time()
         # configs
-        self.update_configs = getJSON(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
-        self.access_configs = getJSON(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
+        self.update_configs = get_json(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
+        self.access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
         # directories
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.edit_dir = os.path.join(SetUp.output_dir,'edit')
@@ -87,7 +87,7 @@ class ExtractUserEdits:
                 # convert dates to d/m/y format
                 # df = format_date_columns_b(df)
                 # concat user edits to the edit file. create new file if it doesn't exist 
-                if fileExist(edit_path):
+                if file_exist(edit_path):
                     edit_df = pd.read_csv(edit_path,engine='python')
                     final_edit = pd.concat((edit_df,df)).drop_duplicates(ignore_index=True)
                 else:
@@ -171,7 +171,7 @@ class ExtractUserEdits:
 
                 # update the edit file. this file contains only the user edits
                 edit_path = os.path.join(edit_dir,"%s.csv"%(group))
-                if fileExist(edit_path):
+                if file_exist(edit_path):
                     edit_df = pd.read_csv(edit_path,engine='python')
                     final_edit = pd.concat((edit_df,group_db_df)).drop_duplicates(ignore_index=True)
                 else:
@@ -222,7 +222,7 @@ class ExtractUserEdits:
                                 final_df.to_csv(core_path,index=False) # uncomment this
                                 # save edits to the edit file. This is only used to view the edits separatly
                                 edit_path = os.path.join(edit_dir,"%s.csv"%(table))
-                                if fileExist(edit_path):
+                                if file_exist(edit_path):
                                     edit_df = pd.read_csv(edit_path,engine='python')
                                     final_edit = pd.concat((edit_df,db_df)).drop_duplicates(ignore_index=True)
                                 else:
@@ -246,7 +246,7 @@ class ExtractUserEdits:
             Logger.logger.info(f"Working on: '{table}'")
             # get the date of the last user entry. This is the date the db search will filter from 
             core_path = os.path.join(core_dir,"%s.csv"%(table))
-            if fileExist(core_path):
+            if file_exist(core_path):
                 core_df = pd.read_csv(core_path)
                 if len(core_df.index) > 0:
                     temp_df = core_df.copy()

@@ -8,7 +8,7 @@ import numpy as np
 import shutil
 from collections import Counter
 
-from .directory_files import fileExist, createMultipleDirectories, copy_directory, clearDirectory, writeToFile, getJSON, archive_and_clear_directories
+from .directory_files import create_multiple_directories, copy_directory, write_to_file, get_json, archive_and_clear_directories
 from .timer import time_past, start_time
 
 from .schedule import Schedule
@@ -54,11 +54,11 @@ class PreformatData:
         # archive previous output files
         group.archive_clear_past_output_files()
         # preformat the files
-        group.preformatFiles()
+        group.preformat_grp_files()
         # add the gplore identifier field
-        group.addIdentifierField()
+        group.add_Identifier_field()
         # create the files that will be combined to make the complete dataset
-        group.createChangeFiles()
+        group.create_change_files()
         # save the updated schedule config file
         group.save_schedule_configs_to_file()
 
@@ -80,8 +80,8 @@ class PreFormatDataGroup:
         self.inactive_path = os.path.join(self.update_dir,'inactive.csv')
         self.reactivated_path = os.path.join(self.update_dir,'reactivated.csv')
         self.output_archive_dir = os.path.join(SetUp.output_dir,'archive',SetUp.tDate)
-        self.configs = getJSON(os.path.join(SetUp.configs_dir,'formatting_config.json'))[data_group]
-        self.download_configs = configs = getJSON(os.path.join(SetUp.configs_dir,'download_config.json'))[data_group]
+        self.configs = get_json(os.path.join(SetUp.configs_dir,'formatting_config.json'))[data_group]
+        self.download_configs = configs = get_json(os.path.join(SetUp.configs_dir,'download_config.json'))[data_group]
         self.download_fail_path = os.path.join(self.data_group_dir,'download_fail.csv')
         self.data_group = data_group
         # self.ignore_files = getIgnoreFiles(self)
@@ -96,12 +96,12 @@ class PreFormatDataGroup:
             if they don't alreay exist.
         '''
         Logger.logger.info("Creating 'change, core, update' folders in the 'input, output' archive directories")
-        createMultipleDirectories(self.archive_dir,['change','core','update'])
-        createMultipleDirectories(self.output_archive_dir,['change','core','update'])
+        create_multiple_directories(self.archive_dir,['change','core','update'])
+        create_multiple_directories(self.output_archive_dir,['change','core','update'])
 
 
 
-    def preformatFiles(self):
+    def preformat_grp_files(self):
         ''' Loop through each format type within the preformat dictionary in configs to prepare the files to be combined. 
             Formatting includes removing unnecessary rows, order values in a field, etc
         '''
@@ -203,7 +203,7 @@ class PreFormatDataGroup:
 
 
     # Add a unique ID for each tenement/ occurrence
-    def addIdentifierField(self):
+    def add_Identifier_field(self):
         ''' Create a 'NEW_IDENTIFIER' field so the data can be compared between downloads.
             Create 'NEW_ID' so each feature has its own id in the application.
             The code will start from 1 million so all pnts and polys have 7 values 
@@ -248,7 +248,7 @@ class PreFormatDataGroup:
 
 
 
-    def createChangeFiles(self):
+    def create_change_files(self):
         ''' If this is the initial download then the files from the 'new' directory will be copied to the 'core' and 'change' directories 
             and a blank change.csv file will be created in the 'update' directory.
             If this is an update, then this compares the newly downloaded file to their matching core file, searches for differences and 
@@ -464,7 +464,7 @@ class PreFormatDataGroup:
                     new_core_df.to_csv(core_path,index=False)
 
         # write update list to csv
-        writeToFile(update_path, update_lst)
+        write_to_file(update_path, update_lst)
         # write updated inactive df to csv. reactivated ids have been removed and 
         inactive_df.to_csv(self.inactive_path,index=False)
         # write reactiveated df to csv file
@@ -554,7 +554,7 @@ class PreFormatDataGroup:
 
         # if is an update then re-create the empty update file in the output. 
         if SetUp.isUpdate:
-            writeToFile(os.path.join(SetUp.output_dir,'update','change.csv'), [])
+            write_to_file(os.path.join(SetUp.output_dir,'update','change.csv'), [])
 
 
              

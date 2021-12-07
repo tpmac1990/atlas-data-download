@@ -7,5 +7,5 @@
 # from .db_update import find_changes_update_core_and_database, previous_core_to_db
 # from .commit_new_values import apply_missing_data_updates
 
-# from .directory_files import fileExist
+# from .directory_files import file_exist
 # from .timer import time_past

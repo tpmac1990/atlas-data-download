@@ -6,7 +6,8 @@
 # excel, csv files, log files
 *.csv
 *.xlsm
-*.logs
+*.log
+
 
 # ignore pycache
 __pycache__/

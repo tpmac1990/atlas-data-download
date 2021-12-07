@@ -18,17 +18,8 @@ def copy_directory_in_list(file_lst,src_directory,dest_directory):
             shutil.copy(os.path.join(src_directory,file), dest_directory)
         
 
-def adjustDirectoryFilenames(**kwargs):
-    from_val = kwargs['from_val']
-    to_val = kwargs['to_val']
-    src = kwargs['src']
-    for file in os.listdir(src):  
-        old_file = os.path.join(src,file)
-        new_file = os.path.join(src,file).replace(from_val,to_val)
-        os.rename(old_file, new_file)
 
-
-def clearDirectory(directory,**kwargs):
+def clear_directory(directory,**kwargs):
     if 'extension' in kwargs:
         extension = kwargs['extension']
     else:
@@ -38,24 +29,24 @@ def clearDirectory(directory,**kwargs):
             os.remove(os.path.join(directory,file))
 
 
-def createDirectory(directory):
+def create_directory(directory):
     if not os.path.exists(directory):
         os.mkdir(directory)
 
 
-def createMultipleDirectories(directory,lst):
-    createDirectory(directory)
+def create_multiple_directories(directory,lst):
+    create_directory(directory)
     for name in lst:
-        createDirectory(os.path.join(directory,name))
+        create_directory(os.path.join(directory,name))
 
 
-def writeToFile(path, lst):
+def write_to_file(path, lst):
     with open(path,'w') as t1:
         writer = csv.writer(t1, lineterminator='\n')
         writer.writerows(lst)
 
 
-def fileExist(path):
+def file_exist(path):
     return os.path.isfile(path)
 
 
@@ -64,20 +55,16 @@ def delete_files_in_directory(directory):
         os.remove(os.path.join(directory,file))
 
 
-def getJSON(path):
+def get_json(path):
     with open(path) as json_file:
         return json.load(json_file)
 
-def writeJSON(path,obj):
+def write_json(path,obj):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(obj, f, ensure_ascii=False, indent=4)
 
 
-def readMultipledf(file_lst):
-    return [pd.read_csv(file,engine='python') for file in file_lst]
-
-
-def createDirectory(directory):
+def create_directory(directory):
     if not os.path.exists(directory):
         os.mkdir(directory)
 
@@ -95,6 +82,6 @@ def archive_and_clear_directories(archive_lst:str, delete_lst:list, p_src_dir:st
             copy_directory(src_dir,dest_dir)
         # delete folder if in the delete_lst
         if name in delete_lst:
-            clearDirectory(src_dir,extension=".csv")
+            clear_directory(src_dir,extension=".csv")
 
     

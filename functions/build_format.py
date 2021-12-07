@@ -7,7 +7,7 @@ import time
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-from .directory_files import fileExist, getJSON
+from .directory_files import file_exist, get_json
 from .timer import time_past, start_time
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
@@ -68,7 +68,7 @@ class BuildBaseTables:
             No New 'occName' values are added at this stage. if they don't exist then they are added to the missing table and checked before being formatted and added at a later stage.
     '''
     new_dir = os.path.join(SetUp.output_dir,'new')
-    all_configs = getJSON(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
+    all_configs = get_json(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
     additional_field_values = {
         "user_name": "ss",
         "valid_instance": True,
@@ -95,7 +95,7 @@ class BuildBaseTables:
                 related_file_path = os.path.join(self.new_dir, f"{file}.csv")
                 output_path = os.path.join(self.new_dir, f'{table}.csv')
 
-                if not fileExist(related_file_path):
+                if not file_exist(related_file_path):
                     Logger.logger.info(f"'{file}' does not exist in the new directory, therefore there was no data to build the '{table}' file")
                     continue
 
@@ -151,7 +151,7 @@ class CombineTitleDatasets:
         self.Holder_df.to_csv(os.path.join(CombineDatasets.core_dir,"Holder_pre.csv"),index=False)
 
         # for data_group in self.data_groups:
-        self.configs = getJSON(os.path.join(SetUp.configs_dir,'formatting_config.json'))['tenement']
+        self.configs = get_json(os.path.join(SetUp.configs_dir,'formatting_config.json'))['tenement']
 
         # directory with the new files
         self.change_dir = os.path.join(SetUp.input_dir,'tenement','change')
@@ -168,7 +168,7 @@ class CombineTitleDatasets:
         Logger.logger.info(f"\n{Logger.dashed} tenement {Logger.dashed}")
 
         # get list of files that have been downloaded
-        download_schedule_configs = getJSON(os.path.join(SetUp.configs_dir,'download_schedule.json'))
+        download_schedule_configs = get_json(os.path.join(SetUp.configs_dir,'download_schedule.json'))
         format_files_lst = download_schedule_configs['tenement']['now']
 
         # for file in self.configs:
@@ -450,7 +450,7 @@ class CombineSiteDatasets():
         self.occurrence_majmat_df = pd.DataFrame()
         self.occurrence_minmat_df = pd.DataFrame()
 
-        self.configs = getJSON(os.path.join(SetUp.configs_dir,'formatting_config.json'))['occurrence']
+        self.configs = get_json(os.path.join(SetUp.configs_dir,'formatting_config.json'))['occurrence']
 
         self.missing_df = pd.read_csv(CombineDatasets.missing_temp_path)
         # need to update this from multiple functions
@@ -464,7 +464,7 @@ class CombineSiteDatasets():
         Logger.logger.info(f"\n{Logger.dashed} occurrence {Logger.dashed}")
 
         # get list of files that have been downloaded
-        download_schedule_configs = getJSON(os.path.join(SetUp.configs_dir,'download_schedule.json'))
+        download_schedule_configs = get_json(os.path.join(SetUp.configs_dir,'download_schedule.json'))
         format_files_lst = download_schedule_configs['occurrence']['now']
 
         # for file in self.configs:
@@ -745,7 +745,7 @@ class FinalizeMissingData():
         func_start = start_time()
         Logger.logger.info(f"\n{Logger.dashed} Collect Missing Data {Logger.dashed}")
 
-        configs = getJSON(os.path.join(SetUp.configs_dir,'commit_updates.json'))
+        configs = get_json(os.path.join(SetUp.configs_dir,'commit_updates.json'))
         update_dir = CombineDatasets.update_dir
 
         # drop the material duplicates that exist in the major and minor group
@@ -759,7 +759,7 @@ class FinalizeMissingData():
         miss_df = missing_df.drop('IND',1).drop_duplicates()
         # add existing 'missing_all' rows from past updates to these new rows
         missing_all_path = os.path.join(update_dir,'missing_all.csv')
-        if fileExist(missing_all_path):
+        if file_exist(missing_all_path):
             missing_past_df = pd.read_csv(missing_all_path)
             missing_df = pd.concat((missing_past_df,missing_df)).drop_duplicates()
         # save the missing and reduced_missing df's to file
@@ -825,7 +825,7 @@ class FinalizeMissingData():
 
         # add existing 'manual_update_required' rows from past updates to these new rows and drop any possible duplicates
         manual_update_required_path = os.path.join(update_dir,'manual_update_required.csv')
-        if fileExist(manual_update_required_path):
+        if file_exist(manual_update_required_path):
             required_past_df = pd.read_csv(manual_update_required_path)
             complete_df = pd.concat((required_past_df,complete_df))
         # create a file for user to make final changes before they are commited
@@ -885,7 +885,7 @@ def add_to_missing_df(df,null_field,raw_field,group,out_field,state,missing_df):
 #         core_path = os.path.join(CombineDatasets.core_dir,f"{file}.csv")
 #         change_path = os.path.join(CombineDatasets.change_dir,f"{file}.csv")
 
-#         # if not fileExist(core_path):
+#         # if not file_exist(core_path):
 #         #     Logging.logging.Error(f"'{file}' does not exist in the core directory.")
 #         #     return
 #         try:

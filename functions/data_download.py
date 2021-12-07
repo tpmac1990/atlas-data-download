@@ -20,7 +20,7 @@ import urllib.request
 import requests
 import fiona
 
-from .directory_files import delete_files_in_directory, fileExist, getJSON, writeJSON
+from .directory_files import delete_files_in_directory, file_exist, get_json
 from .timer import time_past, start_time
 
 from .schedule import Schedule
@@ -29,11 +29,11 @@ from .setup import SetUp, Logger
 
 
 class DownloadSetUp:
-    temp_links = getJSON(os.path.join(SetUp.configs_dir,'temp_links_config.json'))
-    format_configs = getJSON(os.path.join(SetUp.configs_dir,'formatting_config.json'))
+    temp_links = get_json(os.path.join(SetUp.configs_dir,'temp_links_config.json'))
+    format_configs = get_json(os.path.join(SetUp.configs_dir,'formatting_config.json'))
     download_schedule_path = os.path.join(SetUp.configs_dir,'download_schedule.json')
-    dl_schedule_config = getJSON(download_schedule_path)
-    download_configs = getJSON(os.path.join(SetUp.configs_dir,'download_config.json'))
+    dl_schedule_config = get_json(download_schedule_path)
+    download_configs = get_json(os.path.join(SetUp.configs_dir,'download_config.json'))
     
     def __init__(self,data_group):
         self.data_group_dir = os.path.join(SetUp.input_dir,data_group)

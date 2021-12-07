@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 import re
 
-from .directory_files import fileExist
+from .directory_files import file_exist
 
 
 class SetUp:
@@ -32,7 +32,7 @@ class SetUp:
     # data groups
     data_groups = ['occurrence','tenement']
     # update is True if there are no files in the output/core directory
-    isUpdate = True if fileExist(os.path.join(output_dir,'update','change.csv')) else False
+    isUpdate = True if file_exist(os.path.join(output_dir,'update','change.csv')) else False
     # is this a 'local' or 'remote' database update
     db_location = 'local'
 

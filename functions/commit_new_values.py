@@ -11,7 +11,7 @@ import psycopg2
 import sqlalchemy
 
 from .timer import time_past, start_time
-from .directory_files import getJSON
+from .directory_files import get_json
 from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_psycopg2, update_db_table_by_index_field_and_value_lst
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
@@ -26,8 +26,8 @@ class UpdateMissingData:
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.update_dir = os.path.join(SetUp.output_dir,'update')
 
-        access_configs = getJSON(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
-        self.configs = getJSON(os.path.join(SetUp.configs_dir,'commit_updates.json'))
+        access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
+        self.configs = get_json(os.path.join(SetUp.configs_dir,'commit_updates.json'))
 
         # update the database tables to match the csv files
         db_keys = access_configs[SetUp.db_location]

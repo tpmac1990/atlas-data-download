@@ -8,7 +8,7 @@ from shapely.geometry.point import Point
 from shapely import wkt
 # import time
 from .timer import time_past, start_time
-from .directory_files import getJSON, fileExist
+from .directory_files import get_json, file_exist
 
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
@@ -40,7 +40,7 @@ class SpatialRelations:
         self.geo_state_gdf = gpd.read_file(os.path.join(SetUp.regions_dir,'State.shp'))
 
         # get congif files
-        self.region_configs = getJSON(os.path.join(SetUp.configs_dir,'region_configs.json'))
+        self.region_configs = get_json(os.path.join(SetUp.configs_dir,'region_configs.json'))
 
         self.build_spatial_relations()
         
@@ -328,7 +328,7 @@ class SpatialRelations:
             }
         ]
         for file in files:
-            if not fileExist(file['path']):
+            if not file_exist(file['path']):
                 df = pd.DataFrame([], columns=file['headers'])
                 df.to_csv(file['path'],index=False)
 
