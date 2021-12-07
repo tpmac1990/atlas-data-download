@@ -8,8 +8,9 @@
 *.xlsm
 *.logs
 
+# ignore pycache
+__pycache__/
+
 # database access keys
 db_access_configs.json
 
-
-__pycache__/
