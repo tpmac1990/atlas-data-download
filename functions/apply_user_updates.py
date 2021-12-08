@@ -16,6 +16,10 @@ from .backup_data import DataBackup
 
 
 class ExtractUserEdits:
+    ''' This extracts the user edits made to the data and applies them to the core dataset so the core dataset is a 
+        clone of database. This is required before running either of the two tasks; the manual update or the state data source
+        update.
+    '''
 
     def __init__(self):
         func_start = start_time()

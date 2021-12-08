@@ -316,7 +316,6 @@ def add_missing_rows_to_id_df(id_df,to_add_df,to_remove_df,configs):
 def append_to_db(con,file_name,df):
     ''' appends a df to the given db table '''
     table_name = 'gp_%s'%(file_name.lower())
-    # append_df_to_db_table(con,table_name,df)
     try:
         df.to_sql(table_name,con,if_exists='append',index=False, method='multi')
     except:
@@ -324,29 +323,15 @@ def append_to_db(con,file_name,df):
             Logger.logger.error(f'error when appending to table {table_name}')
             raise
 
-        except Exception as e:
-            print('error 3')
+        except Exception as e: 
+            # print representation of error only to exclude the massive print out of the failed sql query
             print(repr(e))
             con.close()
             sys.exit(1)
 
         # except psycopg2.errors.NotNullViolation as e:
-        #     print('error 1')
-        #     print(repr(e))
-        #     con.close()
-        #     sys.exit(1)
-
         # except psycopg2.errors.UniqueViolation as e:
-        #     print('error 2')
-        #     print(repr(e))
-        #     con.close()
-        #     sys.exit(1)
-
         # except sqlalchemy.exc.IntegrityError as e:
-        #     print('error 3')
-        #     print(repr(e))
-        #     con.close()
-        #     sys.exit(1)
 
         
     Logger.logger.info("'%s' rows appended to '%s'"%(len(df.index),table_name))
