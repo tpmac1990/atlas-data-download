@@ -21,6 +21,11 @@ from .backup_data import DataBackup
 class UpdateMissingData:
 
     def __init__(self):
+        # if task is not 'manual_updates' then skip this step. It has not beed requested
+        run_tracker_config = get_json(os.path.join(SetUp.configs_dir, 'run_tracker.json'))['task']
+        if run_tracker_config != 'manual_updates':
+            return
+
         func_start = start_time()
 
         self.core_dir = os.path.join(SetUp.output_dir,'core')
@@ -58,16 +63,12 @@ class UpdateMissingData:
 
 
     def apply_missing_data_updates(self):
-        ''' first check to see if any updates are available, if not then ask user if they want to proceed with state source update.
-            backup necessary files to the backup folder
+        ''' backup necessary files to the backup folder
             Once the data has been reviewed and all the fields have been filled out in the 'manual_update_required' file found in the 
             update folder, this will add these new values to the core files and database files.
             Files that have no new value applied to the LIKELY_MATCH field will remain in these update files through updates until they have a value
             added to LIKELY_MATCH
         '''
-        # check if there are any rows that require updating
-        self.are_updates_available()
-
         Logger.logger.info(f"\n\n{Logger.hashed}\nApply Missing Data Updates\n{Logger.hashed}")
 
         dbu = DataBackup('update_missing_data')
@@ -79,7 +80,6 @@ class UpdateMissingData:
             # commit changes to the database
             for x in configs:
                 Logger.logger.info(f"Working on field '{x}'")
-                # if x == 'HOLDER':
                 self.commit_fields_updated_data(x,configs[x])
 
             # overwrite the update files with the remaining rows that had no new value to apply, the user will then be able to update the value at a later date
@@ -94,44 +94,6 @@ class UpdateMissingData:
             self.con.close()
             self.conn.close()
             raise
-
-    
-
-    def are_updates_available(self):
-        ''' If the manual_update_required.csv file contains rows with values in the LIKELY_MATCH field then the next step is to apply these updates. If there are no
-            values in the LIKELY_MATCH field then the user will be prompted to choose whether to continue on with updating by state sources or exit the function without
-            anychanges being made. This is useful if the user wants to apply the manual updates when there aren't any, this will allow the user to stop the process before
-            making any undesired changes.
-        '''
-        Logger.logger.info(f"\n\n{Logger.hashed}\nFinding tasks to complete\n{Logger.hashed}")
-
-        df = self.manual_update_df
-        total_count = len(df.index)
-        update_rows_count = len(df[~df['LIKELY_MATCH'].isnull()])
-
-        if total_count == 0:
-            msg = "The manual update table is empty, therefore there are no values to update."
-            update_required = False
-        elif update_rows_count == 0:
-            msg = f"The manual update table contains '{total_count}' rows, but '0' rows with a provided update values, therefore there are no values to update."
-            update_required = False
-        else:
-            msg = f"The manual update table contains '{total_count}' rows. '{update_rows_count}' rows have a provided update values which will now be updated."
-            update_required = True
-
-        if update_required:
-            Logger.logger.info(msg)
-            return
-
-        Logger.logger.info(msg)
-        
-        choice = input(f"{msg}\nContinue with state source update ('y/n')? ")
-        
-        if choice.lower() in ['y','yes']:
-            Logger.logger.info(f"The user chose to continue with the state source updates")
-        else:
-            Logger.logger.info(f"The user chose to exit the process. No changes/updates have been made.")
-            sys.exit(1)
 
 
 

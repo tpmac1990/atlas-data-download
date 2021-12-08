@@ -19,6 +19,7 @@ class ExtractUserEdits:
 
     def __init__(self):
         func_start = start_time()
+
         # configs
         self.update_configs = get_json(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
         self.access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
@@ -58,7 +59,7 @@ class ExtractUserEdits:
             raise
 
 
-    
+
     def transfer_user_creations_to_core(self):
         ''' Copy the user created instances from db tables and add to the core file '''
         Logger.logger.info(f"\n{Logger.dashed} Copy user created instances to their core file {Logger.dashed}")
@@ -84,8 +85,6 @@ class ExtractUserEdits:
             df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
             # no need to continue if there are no new rows from the db
             if len(df.index) > 0:
-                # convert dates to d/m/y format
-                # df = format_date_columns_b(df)
                 # concat user edits to the edit file. create new file if it doesn't exist 
                 if file_exist(edit_path):
                     edit_df = pd.read_csv(edit_path,engine='python')
@@ -105,7 +104,8 @@ class ExtractUserEdits:
                 1. This group file is updated by filtering out the edited rows and replacing with their updated rows from the db table and saved as the core file.
                 2. Each of the related tables are looped and the edited ids are filtered in both the db and core files. These df's are then compared and 
                     if there are differences then the changes are applied to the core file and saved
-            There are no recording of changes in the 'Change' file here as this is done in the application when a change is made.
+            There are no recording of changes in the 'Change' file here as this is done in the application when a change is made. These tables changes are copied over in 
+            the next step.
         '''
         Logger.logger.info(f"\n{Logger.dashed} Updating core files with changes in db {Logger.dashed}")
         csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
@@ -155,10 +155,6 @@ class ExtractUserEdits:
 
                 # filter the db data for the necessary ids, format the date columns & add the crs prefix to the geom column
                 group_db_df = group_db_df[group_db_df[pk].isin(keys_df)]
-                # create list of date fields to format for this file
-                # date_columns = [x for x in group_db_df.columns if x in ['date_created','date_modified','lodgedate','startdate','enddate']]
-                # for col in date_columns:
-                #     group_db_df[col] = group_db_df[col].apply(lambda x: format_date(x))
 
                 if is_geospatial:
                     group_db_df = geoDfToDf_wkt(group_db_df).drop(columns=['geometry'])
@@ -242,7 +238,6 @@ class ExtractUserEdits:
         sqlalchemy_con = self.sqlalchemy_con
 
         for table in ['OccurrenceChange','TenementChange','HolderChange']:
-            # if table == 'HolderChange':
             Logger.logger.info(f"Working on: '{table}'")
             # get the date of the last user entry. This is the date the db search will filter from 
             core_path = os.path.join(core_dir,"%s.csv"%(table))
@@ -253,18 +248,13 @@ class ExtractUserEdits:
                     # temp_df['date_created'] = temp_df['date_created'].apply(lambda x: format_date_r(x))
                     last_date = temp_df[['date_created']].max()
                     f_date = last_date[0]
-                    # last_date = core_df[['date_created']].max()
-                    # last_date = pd.to_datetime(last_date)[0]
-                    # f_date = (last_date - timedelta(days=1)).strftime('%Y%m%d')
                 else:
-                    # f_date = date(2000, 2, 1).strftime('%Y%m%d')
                     f_date = '2000-02-01'
             else:
                 core_df = pd.DataFrame()
                 f_date = '2000-02-01'
-                # f_date = date(2000, 2, 1).strftime('%Y%m%d')
 
-            # e_date = (date.today() + timedelta(days=1)).strftime('%Y%m%d')
+
             # Get the latest rows from the Change tables by filtering rows after the last date in the core file. I was not able to query for user = 'user', so i used pandas as below
             sql = "SELECT * FROM gp_%s WHERE CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
             # drop id column and convert all None to Nan
@@ -273,10 +263,6 @@ class ExtractUserEdits:
             # convert all types to string so there are no differences between types when dropping duplicates, then replace 'nan'
             df = df.astype(str).replace('nan', np.nan, regex=True)
             core_df = core_df.astype(str).replace('nan', np.nan, regex=True)
-            # convert the date format of the db table to fit the csv format
-            # # date_columns = [x for x in df.columns if 'date' in x]
-            # # for col in date_columns:
-            # #     df[col] = df[col].apply(lambda x: format_date(x))
             # if the core_df is empty then create core with the db df, otherwise concat the db table with the core file. If there are duplicates, the first will be kept
             #  and the others deleted
             final_core_df = df if core_df.empty else pd.concat((core_df,df)).drop_duplicates(ignore_index=True)

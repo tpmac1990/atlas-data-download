@@ -9,6 +9,7 @@ from functions.build_format import CombineDatasets
 from functions.spatial_relationships import SpatialRelations
 from functions.db_update import ChangesAndUpdate
 from functions.commit_new_values import UpdateMissingData
+from functions.required_task import PromptRequiredTask
 
 from functions.timer import time_past, start_time
 from functions.setup import Logger
@@ -17,12 +18,14 @@ from functions.setup import Logger
 
 def main():
     func_start = start_time()
+    # prompt user on required task to undertake; manual edit update or state source download and update
+    PromptRequiredTask()
+    # save the frontend user edits to the core file
+    ExtractUserEdits()
     # add the missing data updates to the required tables and update the database
     UpdateMissingData()
     # download the data and convert it to WKT in csv
     DataDownload()
-    # save the frontend user edits to the core file
-    ExtractUserEdits()
     # Format required files, compare with the core and create the change files and update file.
     PreformatData()
     # combine all the separate file into single dataset and record the missing values in the missing_all and missing_reduced files used to update values later
