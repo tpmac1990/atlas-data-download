@@ -10,7 +10,7 @@
 
 
 # ignore pycache
-**/__pycache__/
+*.pyc
 
 # database access keys
 db_access_configs.json
