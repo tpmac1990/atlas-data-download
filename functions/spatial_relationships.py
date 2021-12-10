@@ -6,10 +6,9 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.point import Point
 from shapely import wkt
-# import time
-from .timer import time_past, start_time
 from .directory_files import get_json, file_exist
 
+from .timer import Timer
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
 from .clean_geometry import clean_multipolygon_by_df
@@ -26,28 +25,21 @@ class SpatialRelations:
         self.tenement_path = os.path.join(self.new_dir,'Tenement.csv')
         self.occurrence_path = os.path.join(self.new_dir,'Occurrence_pre.csv')
         self.tenement_occurrence_path = os.path.join(self.new_dir,'tenement_occurrence.csv')
-        # # create above files if they don't exist
-        # self.create_if_dont_exist()
-
         # spatial dataframes
         self.ten_gdf = df_to_geo_df_wkt(pd.read_csv(self.tenement_path))
         self.occ_gdf = df_to_geo_df_wkt(pd.read_csv(self.occurrence_path))
-
         # shapefiles
         self.local_gov_gdf = gpd.read_file(os.path.join(SetUp.regions_dir,'LocalGovernment.shp'))
         self.gov_region_gdf = gpd.read_file(os.path.join(SetUp.regions_dir,'GovernmentRegion.shp'))
         self.geo_province_gdf = gpd.read_file(os.path.join(SetUp.regions_dir,'GeologicalProvince.shp'))
         self.geo_state_gdf = gpd.read_file(os.path.join(SetUp.regions_dir,'State.shp'))
-
         # get congif files
         self.region_configs = get_json(os.path.join(SetUp.configs_dir,'region_configs.json'))
-
-        self.build_spatial_relations()
         
 
 
     def build_spatial_relations(self):
-        func_start = start_time()
+        timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nSpatial Relations\n{Logger.hashed}")
 
         # only need to back up the new occurrence and tenement files as they have the srid attached
@@ -69,7 +61,7 @@ class SpatialRelations:
             dbu.restore_data()
             raise
 
-        Logger.logger.info('Spatial Relationships duration: %s' %(time_past(func_start)))
+        Logger.logger.info('Spatial Relationships duration: %s' %(timer.time_past()))
 
 
 
@@ -314,23 +306,6 @@ class SpatialRelations:
             # add the SRID to the geometry
             df['geom'] = ["SRID=4202;%s"%(feature) for feature in df['geom']]
             df.to_csv(path,index=False)
-
-    
-
-    def create_if_dont_exist(self):
-        ''' When no files are required to be downloaded and formatted for either the titles and/or sites datasets then empty files
-            need to be created in their place so there is something to be read and compared to
-        ''' 
-        files = [
-            {
-                'path': self.tenement_path, 'headers': ['ind', 'typ_id', 'status_id', 'state_id', 'shore_id', 'lodgedate', 'startdate', 'enddate', 'geom', 'valid_relations', 'user_edit', 'date_modified'],
-                'path': self.occurrence_path, 'headers': ['geom', 'ind', 'status_id', 'size_id', 'state_id', 'user_name', 'valid_relations', 'valid_instance', 'user_edit', 'date_modified', 'date_created'],
-            }
-        ]
-        for file in files:
-            if not file_exist(file['path']):
-                df = pd.DataFrame([], columns=file['headers'])
-                df.to_csv(file['path'],index=False)
 
 
 

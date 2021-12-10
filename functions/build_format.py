@@ -7,8 +7,8 @@ import time
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-from .directory_files import file_exist, get_json
-from .timer import time_past, start_time
+from .directory_files import file_exist, get_json, write_to_file
+from .timer import Timer
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
 
@@ -27,22 +27,40 @@ class CombineDatasets:
     missing_temp_path = os.path.join(update_dir,'missing_all_temp.csv')
 
 
-    def __init__(self):
+    def combine_datasets(self):
         ''' combine all the separate file into single dataset and record the missing values in the missing_all and missing_reduced files used to update values later '''
-        func_start = start_time()
+        timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nCombine Datasets\n{Logger.hashed}")
+
+        # archive backup
+        DataBackup('archive_combine_datasets').backup_data_archive()
+
+        # stage backup
+        dbu = DataBackup('combine_datasets')
+        dbu.backup_data()
+
         # clear the data in the missing_temp file
         self.clear_missing_temp_file()
-        # combine all title data in to one dataset
-        CombineTitleDatasets()
-        # combine all site data in to one dataset
-        CombineSiteDatasets()
-        # find all the 'new' rows for all the base tables and save them to the 'new' directory
-        BuildBaseTables()
-        # save the missing data to files
-        FinalizeMissingData()
+
+        # if is an update then re-create the empty update file in the output. 
+        if SetUp.isUpdate:
+            write_to_file(os.path.join(SetUp.output_dir,'update','change.csv'), [])
+
+        try:
+            # combine all title data in to one dataset
+            CombineTitleDatasets()
+            # combine all site data in to one dataset
+            CombineSiteDatasets()
+            # find all the 'new' rows for all the base tables and save them to the 'new' directory
+            BuildBaseTables()
+            # save the missing data to files
+            FinalizeMissingData()
+        except:
+            dbu.restore_data()
+            raise
+
         # log the run time
-        Logger.logger.info("Total data compilation run time: %s" %(time_past(func_start)))
+        Logger.logger.info("Total data compilation run time: %s" %(timer.time_past()))
 
 
     def clear_missing_temp_file(self):
@@ -164,7 +182,7 @@ class CombineTitleDatasets:
 
     def combine_title_data(self):
         ''' compile all the separate site files into one dataset '''
-        func_start = start_time()
+        timer = Timer()
         Logger.logger.info(f"\n{Logger.dashed} tenement {Logger.dashed}")
 
         # get list of files that have been downloaded
@@ -185,19 +203,13 @@ class CombineTitleDatasets:
         # if the df is empty then there was no data to format. could also use len(format_files_lst) == 0
         if self.Tenement_nowkt_df.empty:
             Logger.logger.warning(f"The compiled 'tenement' dataframe is empty")
-            Logger.logger.info('Title data compilation: %s' %(time_past(func_start)))
+            Logger.logger.info('Title data compilation: %s' %(timer.time_past()))
             return
 
         self.tenement_oid_df.drop_duplicates(inplace=True)
         self.Tenement_nowkt_df.drop_duplicates(inplace=True)
         self.TenHolder_df['_id'] = np.arange(1, len(self.TenHolder_df) + 1)
 
-        # # add_new_related_ids_to_core(self.tenement_oid_df,"TenOriginalID")
-
-        # # # find all the 'new' rows for all the base tables and save them to the 'new' directory
-        # # self.save_new_base
-
-        # self.Tenement_nowkt_df.to_csv(os.path.join(new_dir,'Tenement_nowkt.csv'),index=False) # can delete
         self.Tenement_nowkt_df.to_csv(os.path.join(CombineDatasets.new_dir,'Tenement.csv'),index=False)
         self.tenement_oid_df.to_csv(os.path.join(CombineDatasets.new_dir,'tenement_oid.csv'),index=False)
         self.TenHolder_df.to_csv(os.path.join(CombineDatasets.new_dir,'TenHolder.csv'),index=False)
@@ -207,7 +219,7 @@ class CombineTitleDatasets:
         # save
         self.missing_df.to_csv(CombineDatasets.missing_temp_path,index=False)
 
-        Logger.logger.info('Tenement data compilation: %s' %(time_past(func_start)))
+        Logger.logger.info('Tenement data compilation: %s' %(timer.time_past()))
 
 
 
@@ -460,7 +472,7 @@ class CombineSiteDatasets():
 
     def combine_site_data(self):
         ''' compile all the separate title files into one dataset '''
-        func_start = start_time()
+        timer = Timer()
         Logger.logger.info(f"\n{Logger.dashed} occurrence {Logger.dashed}")
 
         # get list of files that have been downloaded
@@ -481,7 +493,7 @@ class CombineSiteDatasets():
         # if the df is empty then there was no data to format. could also use len(format_files_lst) == 0
         if self.Occurrence_df.empty:
             Logger.logger.warning(f"The compiled 'occurrence' dataframe is empty")
-            Logger.logger.info('Site data compilation: %s' %(time_past(func_start)))
+            Logger.logger.info('Site data compilation: %s' %(timer.time_past()))
             return
 
         self.occurrence_oid_df.drop_duplicates(inplace=True)
@@ -489,8 +501,6 @@ class CombineSiteDatasets():
         self.occurrence_majmat_df.drop_duplicates(inplace=True)
         self.occurrence_minmat_df.drop_duplicates(inplace=True)
         self.occurrence_typ_df.drop_duplicates(inplace=True)
-
-        # # # # add_new_related_ids_to_core(self.occurrence_oid_df,"OccOriginalID")
 
         self.Occurrence_df.to_csv(os.path.join(CombineDatasets.new_dir,'Occurrence_pre.csv'),index=False)
         self.occurrence_oid_df.to_csv(os.path.join(CombineDatasets.new_dir,'occurrence_oid.csv'),index=False)
@@ -502,7 +512,7 @@ class CombineSiteDatasets():
         # save
         self.missing_df.to_csv(CombineDatasets.missing_temp_path,index=False)
 
-        Logger.logger.info('Site data compilation: %s' %(time_past(func_start)))
+        Logger.logger.info('Site data compilation: %s' %(timer.time_past()))
 
 
 
@@ -531,7 +541,6 @@ class CombineSiteDatasets():
         # formats the tables such as dates and creates new fields from multiple other fields such as for holders and status
         for row in configs['format']:
             func = func_dic[row['format_type']]
-            # print(row['format_type'])
             df[row['new_field']] = df.apply(lambda x: func(x,row['source']), axis=1)
 
         site_df = self.format_site_status(df,configs)
@@ -742,7 +751,7 @@ class FinalizeMissingData():
             missing_reduced: unique missing values. if a new company name appears for multiple titles, it will only be shown in this list once.
             use fuzzywuzzy to find similar names for missing company names
         '''
-        func_start = start_time()
+        timer = Timer()
         Logger.logger.info(f"\n{Logger.dashed} Collect Missing Data {Logger.dashed}")
 
         configs = get_json(os.path.join(SetUp.configs_dir,'commit_updates.json'))
@@ -833,7 +842,7 @@ class FinalizeMissingData():
         complete_df.to_csv(manual_update_required_path,index=False)
 
         # log the run time
-        Logger.logger.info("Finalizing missing data run time: %s" %(time_past(func_start)))
+        Logger.logger.info("Finalizing missing data run time: %s" %(timer.time_past()))
 
 
 
@@ -874,49 +883,6 @@ def add_to_missing_df(df,null_field,raw_field,group,out_field,state,missing_df):
         missing_df = pd.concat((missing_df,temp_df))
         
     return missing_df
-
-
-
-# def add_new_related_ids_to_core(new_related_ids_df,file):
-#         ''' look for related id's that don't exist in the core file and add them 
-#             path: os.path.join(CombineDatasets.core_dir,"OccOriginalID.csv")
-#             new_related_ids_df: occurrence_oid_df
-#         '''
-#         core_path = os.path.join(CombineDatasets.core_dir,f"{file}.csv")
-#         change_path = os.path.join(CombineDatasets.change_dir,f"{file}.csv")
-
-#         # if not file_exist(core_path):
-#         #     Logging.logging.Error(f"'{file}' does not exist in the core directory.")
-#         #     return
-#         try:
-#             # delete the ind field and rename the other to 'code' to merge with the core file
-#             grp_oid_df = new_related_ids_df.drop(new_related_ids_df.columns[0],axis=1)
-#             grp_oid_df.columns = ['_id']
-#             # open the current related_ids core file
-#             current_core_OriginalID_df = pd.read_csv(core_path)
-#             # outer merge to find ids that don't exist in the id_df yet
-#             toadd_OriginalID_df = grp_oid_df.merge(current_core_OriginalID_df,on='_id',how='outer',indicator=True).query("_merge == 'left_only'")[['_id']].drop_duplicates()
-#             # add the other fields
-#             toadd_OriginalID_df['user_name'] = 'ss'
-#             toadd_OriginalID_df['valid_instance'] = True
-#             toadd_OriginalID_df['date_created'] = date.today()
-#             toadd_OriginalID_df['_id'] = toadd_OriginalID_df['_id'].astype(str)
-
-#             core_OriginalID_df = pd.concat((current_core_OriginalID_df, toadd_OriginalID_df))
-#             core_OriginalID_df.to_csv(core_path,index=False)
-
-#             # print(grp_oid_df[grp_oid_df['_id'] == 'ENO0603863'])
-#             # print(core_OriginalID_df[core_OriginalID_df['_id'] == 'ENO0603863'])
-
-#             # if SetUp.isUpdate:
-#             #     # if update then create a file in the 'new' directory with all the new related ids
-#             #     toadd_OriginalID_df.to_csv(change_path,index=False)
-                
-#         except:
-#             Logging.logging.Error(f"'{file}' does not exist in the core directory.")
-#             raise
-
-
 
 
 

@@ -9,8 +9,11 @@
 *.log
 
 
-# ignore pycache
+# pycache
 __pycache__/
+
+# archive
+archive/
 
 # database access keys
 db_access_configs.json

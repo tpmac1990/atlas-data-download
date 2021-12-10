@@ -10,7 +10,7 @@ import csv
 import psycopg2
 import sqlalchemy
 
-from .timer import time_past, start_time
+from .timer import Timer
 from .directory_files import get_json
 from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_psycopg2, update_db_table_by_index_field_and_value_lst
 from .setup import SetUp, Logger
@@ -22,11 +22,7 @@ class UpdateMissingData:
 
     def __init__(self):
         # if task is not 'manual_updates' then skip this step. It has not beed requested
-        run_tracker_config = get_json(os.path.join(SetUp.configs_dir, 'run_tracker.json'))['task']
-        if run_tracker_config != 'manual_updates':
-            return
-
-        func_start = start_time()
+        self.run_tracker_config = get_json(os.path.join(SetUp.configs_dir, 'run_tracker.json'))['task']
 
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.update_dir = os.path.join(SetUp.output_dir,'update')
@@ -54,12 +50,6 @@ class UpdateMissingData:
         self.missing_all_df = missing_all_df.merge(self.manual_update_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH']).drop_duplicates()
         
 
-        self.apply_missing_data_updates()
-
-        Logger.logger.info('Committed missing values to database and files: %s' %(time_past(func_start)))
-        print('Manual data updates complete')
-        sys.exit(1)
-
 
 
     def apply_missing_data_updates(self):
@@ -69,10 +59,15 @@ class UpdateMissingData:
             Files that have no new value applied to the LIKELY_MATCH field will remain in these update files through updates until they have a value
             added to LIKELY_MATCH
         '''
+        if self.run_tracker_config != 'manual_updates':
+            return
+
+        timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nApply Missing Data Updates\n{Logger.hashed}")
 
         dbu = DataBackup('update_missing_data')
         dbu.backup_data()
+        dbu.set_process(process='manual_data_update')
 
         try:
             configs = self.configs
@@ -88,12 +83,18 @@ class UpdateMissingData:
 
             self.con.close()
             self.conn.close()
+            dbu.update_backup_stage()
+            dbu.set_process_successful()
 
         except:
             dbu.restore_data()
             self.con.close()
             self.conn.close()
             raise
+
+        Logger.logger.info('Committed missing values to database and files: %s' %(timer.time_past()))
+        print('Manual data updates complete')
+        sys.exit(1)
 
 
 

@@ -443,7 +443,7 @@
                             "type":"none",
                             "output":"AUS_OSPET_1",
                             "crs": "EPSG:4283",
-                            "files":["PetroleumTitles_Nov2021"]
+                            "files":["PetroleumTitles_Dec2021"]
                         }
                     ]
             }
@@ -684,7 +684,7 @@
                             "type":"none",
                             "output":"AUS_OSPET_1",
                             "crs": "EPSG:4283",
-                            "files":["PetroleumWells_Nov2021"]
+                            "files":["PetroleumWells_Dec2021"]
                         }
                     ]
             }

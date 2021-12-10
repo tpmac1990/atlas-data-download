@@ -8,7 +8,7 @@ import csv
 
 from .directory_files import get_json, file_exist
 from .db_update import sqlalchemy_engine
-from .timer import time_past, start_time
+from .timer import Timer
 
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
@@ -22,8 +22,6 @@ class ExtractUserEdits:
     '''
 
     def __init__(self):
-        func_start = start_time()
-
         # configs
         self.update_configs = get_json(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
         self.access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
@@ -33,13 +31,10 @@ class ExtractUserEdits:
         # db connections
         self.sqlalchemy_con = sqlalchemy_engine(self.access_configs[SetUp.db_location]).connect()
 
-        self.extract_user_edits()
-
-        Logger.logger.info("Total user edits extraction run time: %s" %(time_past(func_start)))
-
-
+        
 
     def extract_user_edits(self):
+        timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nExtract User Edits\n{Logger.hashed}")
         # only relevant if updating
         if not SetUp.isUpdate:
@@ -61,6 +56,8 @@ class ExtractUserEdits:
             # revert files back to last backup stage
             dbu.restore_data()
             raise
+
+        Logger.logger.info("Total user edits extraction run time: %s" %(timer.time_past()))
 
 
 

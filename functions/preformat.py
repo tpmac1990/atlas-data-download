@@ -8,9 +8,9 @@ import numpy as np
 import shutil
 from collections import Counter
 
-from .directory_files import create_multiple_directories, copy_directory, write_to_file, get_json, archive_and_clear_directories
-from .timer import time_past, start_time
+from .directory_files import copy_directory, write_to_file, get_json
 
+from .timer import Timer
 from .schedule import Schedule
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
@@ -21,10 +21,9 @@ csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
 class PreformatData:
 
-    def __init__(self):
+    def all_preformat(self):
         ''' performs all the formatting on the files before they can be merged together into the database ready tables '''
-        func_start = start_time()
-
+        timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
 
         # backup necessary data. This could be split into two
@@ -42,17 +41,17 @@ class PreformatData:
             dbu.restore_data()
             raise
 
-        Logger.logger.info('Preformat time: %s' %(time_past(func_start)))
+        Logger.logger.info('Preformat time: %s' %(timer.time_past()))
 
 
 
     def preformat_files(self,group):        
-        # create necessary folders in the input and output archive directories
-        group.create_required_directories()
-        # archive previous input files
-        group.archive_clear_past_input_files()
-        # archive previous output files
-        group.archive_clear_past_output_files()
+        # # # # # create necessary folders in the input and output archive directories
+        # # # # group.create_required_directories()
+        # # # # # archive previous input files
+        # # # # group.archive_clear_past_input_files()
+        # # # # # archive previous output files
+        # # # # group.archive_clear_past_output_files()
         # preformat the files
         group.preformat_grp_files()
         # add the gplore identifier field
@@ -75,11 +74,11 @@ class PreFormatDataGroup:
         self.change_dir = os.path.join(self.data_group_dir,'change')
         self.new_dir = os.path.join(self.data_group_dir,'new')
         self.update_dir = os.path.join(self.data_group_dir,'update')
-        self.archive_dir = os.path.join(self.data_group_dir,'archive',SetUp.tDate)
+        # self.archive_dir = os.path.join(self.data_group_dir,'archive',SetUp.tDate)
         self.update_path = os.path.join(self.update_dir,'update.csv')
         self.inactive_path = os.path.join(self.update_dir,'inactive.csv')
         self.reactivated_path = os.path.join(self.update_dir,'reactivated.csv')
-        self.output_archive_dir = os.path.join(SetUp.output_dir,'archive',SetUp.tDate)
+        # self.output_archive_dir = os.path.join(SetUp.output_dir,'archive',SetUp.tDate)
         self.configs = get_json(os.path.join(SetUp.configs_dir,'formatting_config.json'))[data_group]
         self.download_configs = configs = get_json(os.path.join(SetUp.configs_dir,'download_config.json'))[data_group]
         self.download_fail_path = os.path.join(self.data_group_dir,'download_fail.csv')
@@ -91,13 +90,13 @@ class PreFormatDataGroup:
         Logger.logger.info(f"\n{Logger.dashed} {data_group} {Logger.dashed}")
 
 
-    def create_required_directories(self):
-        ''' create the 'change', 'core', 'update' folders in both the input and output archive directories
-            if they don't alreay exist.
-        '''
-        Logger.logger.info("Creating 'change, core, update' folders in the 'input, output' archive directories")
-        create_multiple_directories(self.archive_dir,['change','core','update'])
-        create_multiple_directories(self.output_archive_dir,['change','core','update'])
+    # def create_required_directories(self):
+    #     ''' create the 'change', 'core', 'update' folders in both the input and output archive directories
+    #         if they don't alreay exist.
+    #     '''
+    #     Logger.logger.info("Creating 'change, core, update' folders in the 'input, output' archive directories")
+    #     create_multiple_directories(self.archive_dir,['change','core','update'])
+    #     create_multiple_directories(self.output_archive_dir,['change','core','update'])
 
 
 
@@ -510,54 +509,7 @@ class PreFormatDataGroup:
     def save_schedule_configs_to_file(self):
         ''' update the schedule configs '''
         self.Schedule.update_schedule(self.download_schedule_config)
-
-
-    def archive_clear_past_input_files(self):
-        ''' Move input files from last download to the archive. 
-            While this method runs after the new data is downloaded the files to be archived have not been affected. This method could be moved to the data_download module, but it
-                is cleaner to keep both archiving methods together.
-            change: table with only rows that have had a change in the data. currently archived but don't think it needs to be. changes should be the changes between the core and new data????
-            core: core data that is updated with the latest changes on subsequent downloads. archive
-            update: recorded updates that have been made to the core files by the new tables.
-        '''
-        Logger.logger.info("Archiving input files from previous download")
-
-        # copy and compress folders from the archive_lst to the archive folder and then delete all the folders provided in the delete_lst
-        archive_and_clear_directories(
-            archive_lst=['change','core','update'],
-            delete_lst=['change','update','plain'],
-            p_src_dir=self.data_group_dir,
-            p_dest_dir=self.archive_dir
-        )
-
-
-    def archive_clear_past_output_files(self):
-        ''' Clear the output sub directories only leaving the core files. If it is an update then re-create the update.csv file. This is
-                required in the case the macro is run in part in which case it will remain an update.
-            change: records changes made to datasets. archived, holds changes before changes were attempted
-            core: core data that mimics the database fields. archived, exact copy of the db before changes are applied. used when roll back required
-            new: new data to be applied to the core and db. not archived, created and applied within same run
-            ss: a maintined set of core data without the user edits applied. archived, even though the new data has already been downloaded, the changes have not been applied, so this will
-                save a copy before changes are applied. 
-            onew: a copy of the new files before user edits are applied which provides a set of data to compare to the post user edit new data. not archived, created and applied within same run
-            edit: maintained tables of all the user edits. archived, exact copy before changes are made
-        '''   
-        Logger.logger.info("Archiving output files from previous download")
-        
-        # copy and compress folders from the archive_lst to the archive folder and then delete all the folders provided in the delete_lst
-        archive_and_clear_directories(
-            archive_lst=['change','core','update','ss','edit'],
-            delete_lst=['change','update','new','onew'],
-            p_src_dir=SetUp.output_dir,
-            p_dest_dir=self.output_archive_dir
-        )
-
-        # if is an update then re-create the empty update file in the output. 
-        if SetUp.isUpdate:
-            write_to_file(os.path.join(SetUp.output_dir,'update','change.csv'), [])
-
-
-             
+            
 
 
 def runMethodOnDifferentFile(directory,config):

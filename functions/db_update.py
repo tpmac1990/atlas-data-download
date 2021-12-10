@@ -6,15 +6,17 @@ import numpy as np
 import os
 import psycopg2
 from datetime import datetime, date, timedelta
-# import time
 import ctypes
 import csv
 import sys
 
 from .directory_files import copy_directory, get_json, file_exist, copy_directory_in_list
-from .timer import time_past, start_time
+from .db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable
+
+from .timer import Timer
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
+from .migrate_files_db import DatabaseManagement
 
 
 
@@ -22,8 +24,6 @@ from .backup_data import DataBackup
 class ChangesAndUpdate:
 
     def __init__(self):
-        func_start = start_time()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nRecord Changes & Migrate to Database\n{Logger.hashed}")
         # directories
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.ss_dir = os.path.join(SetUp.output_dir,'ss')
@@ -40,9 +40,6 @@ class ChangesAndUpdate:
         self.update_configs = get_json(os.path.join(SetUp.configs_dir,'db_update_configs.json'))
         self.access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
 
-        self.find_changes_update_core_and_database()
-
-        Logger.logger.info('Changes & Updates duration: %s' %(time_past(func_start)))
 
 
     def find_changes_update_core_and_database(self):
@@ -50,44 +47,54 @@ class ChangesAndUpdate:
             reload it with a new batch of data, generally used to insert the initial data.
             if isUpdate is True then only the changes need to be added to the database.
         '''        
-        func_start = start_time()
+        timer = Timer()
+        Logger.logger.info(f"\n\n{Logger.hashed}\nRecord Changes & Migrate to Database\n{Logger.hashed}")
 
         # backup necessary data. A lot of data needs to be backed up, duration could be reduced by splitting between methods
         dbu = DataBackup('change_and_update')
         dbu.backup_data()
+        dbu.set_process()
 
-        try:
-            # get congif files
-            # If less than three files, then all new files will be pushed to db
-            if not SetUp.isUpdate:
-                ''' Copy the files from the new folder to the core & change folder. Then copy the new files to the core folder
-                    and add the user_input, valid & modified columns. Copy these files to the us_change folder which will then be loaded into the database.
-                    lastly, create an empty change.csv file in the change folder.
-                '''
-                Logger.logger.info(f"\n{Logger.dashed} Initial run. Migrating all data to core directory & database {Logger.dashed}")
-                # copy relevant files from the new folder to the core and ss folders
-                self.copy_new_files_to_core()
-                # create qgis compatible files for tenement & occurrence files
-                self.create_qgis_spatial_files()
-                # delete all content in tables and copy all files to the db
-                self.commit_all_files_to_db() 
-                # create empty change file. This will tell the script to update rather than renew everything the next time it is run.
-                self.create_empty_change_file()
-            else:
-                ''' This deals with updating the core and database tables on subsequent downloads. The core files are maintained rather than replaced and the relevant rows of each file/table
-                    that requires updates are updated, while new rows are added. All changes are recorded and this is also updated in the core files and the database.
-                '''
-                Logger.logger.info(f"\n{Logger.dashed} Update run. Migrating new & updated data to the core directory & database {Logger.dashed}")
+        # get congif files
+        # If less than three files, then all new files will be pushed to db
+        if not SetUp.isUpdate:
+            ''' Copy the files from the new folder to the core & change folder. Then copy the new files to the core folder
+                and add the user_input, valid & modified columns. Copy these files to the us_change folder which will then be loaded into the database.
+                lastly, create an empty change.csv file in the change folder.
+            '''
+            Logger.logger.info(f"\n{Logger.dashed} Initial run. Migrating all data to core directory & database {Logger.dashed}")
+            # copy relevant files from the new folder to the core and ss folders
+            self.copy_new_files_to_core()
+            # create qgis compatible files for tenement & occurrence files
+            self.create_qgis_spatial_files()
+            # delete all content in tables and copy all files to the db
+            self.commit_all_files_to_db() 
+            # create empty change file. This will tell the script to update rather than renew everything the next time it is run.
+            self.create_empty_change_file()
+        else:
+            ''' This deals with updating the core and database tables on subsequent downloads. The core files are maintained rather than replaced and the relevant rows of each file/table
+                that requires updates are updated, while new rows are added. All changes are recorded and this is also updated in the core files and the database.
+            '''
+            Logger.logger.info(f"\n{Logger.dashed} Update run. Migrating new & updated data to the core directory & database {Logger.dashed}")
+            try:
                 # add core data to new csv file for Tenement values that were added in the tenement_occurrence relation step
                 self.add_relation_core_rows_to_new_file()
                 # copy new files that will be updated with user edits to a separate folder. This will only be used to compare the new file updated with the user edits and the original
                 self.backup_new_useredit_file()
                 # Compare all the files that don't have changes recorded. Add new rows to db.
+                ''' adds values to OccTenOriginalID tables. this needs to be combined with the other db migration methods '''
                 self.compare_base_tables_add_new() 
                 # makes the changes to the ss files, then update the new files with the user changes from the Change tables/files
-                self.make_ss_file_and_db_changes() # blank in tenement_geoprovince was the result of drop_duplicate replacing value with Nan for no reason
+                self.update_ss_files_apply_user_edits_to_new_files()
                 # builds the files (update and change) that record the additions, removals and changes made for the relevant ids
                 self.build_update_and_change_files()
+                # create qgis compatible files for tenement & occurrence files
+                self.create_qgis_spatial_files()
+            except:
+                dbu.restore_data()
+                raise
+
+            try:
                 # delete the rows from the change, addition and remove files for both data_groups. This will prevent an error in the next step when their foreign keys may be deleted.
                 #   these rows will be added again later.
                 self.delete_updating_rows_from_updating_db_tables()
@@ -95,68 +102,82 @@ class ChangesAndUpdate:
                 self.make_core_file_and_db_changes() 
                 # create the change, add and remove tables and update them in the core files and database 
                 self.build_update_tables_update_db()
-                # create qgis compatible files for tenement & occurrence files
-                self.create_qgis_spatial_files()
+            except:
+                # this will restore the database and the local files back to the last archive point
+                DataBackup('archive_data_download').restore_data_archive()
+                DataBackup('archive_combine_datasets').restore_data_archive()
+                raise
 
-        except:
-            dbu.restore_data()
-            raise
+        # set backup stage to none
+        dbu.update_backup_stage()
+        # record the task as a success. The user will see this on next run. also clear the backup folder as the data is no longer required
+        dbu.set_process_successful()
+
+        Logger.logger.info('Changes & Updates duration: %s' %(timer.time_past()))
 
 
 
     def commit_all_files_to_db(self):
-        db_keys = self.access_configs[SetUp.db_location]
-        con = sqlalchemy_engine(db_keys).connect()
-        conn = connect_psycopg2(db_keys)
-        # print(engine.table_names()) # print all tables in the database
-
-        configs = self.update_configs
-        orig_lst = [ table for table in configs ] # get a list of all the database tables
-
-        ordered_tables, temp_lst = orderTables(configs,orig_lst,[],[]) #orders the tables so there are no conflicts when entering into the database
-
-        Logger.logger.info(f"\n{Logger.dashed} Clearing rows from database {Logger.dashed}")
-        # delete all data in all tables in order
-        for table in ordered_tables[::-1]: 
-            table_name = "gp_%s"%(table.lower())
-            try:
-                clearDatabaseTable(conn,table_name)
-            except OperationalError:
-                Logger.logger.error(f"Server close error on table '{table}'")
-            except Exception as e:
-                Logger.logger.error(f"Error deleting rows in '{table}' in the database\n{repr(e)}")
-                # print(repr(e)) # hides the SQL print out
-                con.close()
-                conn.close()
-                sys.exit(1)
+        # clear database and load tables in change directory
+        DatabaseManagement().clear_db_tables_and_remigrate(src_dir=self.change_dir)
 
 
-        # drop all table names that are to do with updating. These Won't be added on the initial table creation.
-        update_tables_lst = [x for x in configs if configs[x]["update_table"]]
-        ordered_tables = [x for x in ordered_tables if not x in update_tables_lst]
 
-        Logger.logger.info(f"\n{Logger.dashed} Migrating tables to database {Logger.dashed}")
-        for table in ordered_tables:        
-            Logger.logger.info(f"Migrating: {table}")
-            path = os.path.join(self.change_dir,"%s.csv"%(table))
-            table_name = "gp_%s"%(table.lower())
 
-            df = pd.read_csv(path,engine='python')
+    # def commit_all_files_to_db(self):
+    #     db_keys = self.access_configs[SetUp.db_location]
+    #     con = sqlalchemy_engine(db_keys).connect()
+    #     conn = connect_psycopg2(db_keys)
+    #     # print(engine.table_names()) # print all tables in the database
 
-            df = convert_date_fields_to_datetime(df)
+    #     configs = self.update_configs
+    #     orig_lst = [ table for table in configs ] # get a list of all the database tables
 
-            try:
-                df.to_sql(table_name,con,if_exists='append',index=False, method='multi')
-            except Exception as e:
-                # print(e.args)
-                # print the error without all the sql
-                Logger.logger.error(f"Error migrating rows in '{table}' to the database\n{repr(e)}")
-                print(repr(e))
-                con.close()
-                conn.close()
-                sys.exit(1)
+    #     ordered_tables, temp_lst = orderTables(configs,orig_lst,[],[]) #orders the tables so there are no conflicts when entering into the database
 
-        con.close()
+    #     Logger.logger.info(f"\n{Logger.dashed} Clearing rows from database {Logger.dashed}")
+    #     # delete all data in all tables in order
+    #     for table in ordered_tables[::-1]: 
+    #         table_name = "gp_%s"%(table.lower())
+    #         try:
+    #             clearDatabaseTable(conn,table_name)
+    #         except OperationalError:
+    #             Logger.logger.error(f"Server close error on table '{table}'")
+    #         except Exception as e:
+    #             Logger.logger.error(f"Error deleting rows in '{table}' in the database\n{repr(e)}")
+    #             print(repr(e))
+    #             con.close()
+    #             conn.close()
+    #             sys.exit(1)
+
+
+    #     # drop all table names that are to do with updating. These Won't be added on the initial table creation.
+    #     update_tables_lst = [x for x in configs if configs[x]["update_table"]]
+    #     ordered_tables = [x for x in ordered_tables if not x in update_tables_lst]
+
+    #     Logger.logger.info(f"\n{Logger.dashed} Migrating tables to database {Logger.dashed}")
+    #     for table in ordered_tables:        
+    #         Logger.logger.info(f"Migrating: {table}")
+    #         path = os.path.join(self.change_dir,"%s.csv"%(table))
+    #         table_name = "gp_%s"%(table.lower())
+
+    #         df = pd.read_csv(path,engine='python')
+
+    #         df = convert_date_fields_to_datetime(df)
+
+    #         try:
+    #             df.to_sql(table_name,con,if_exists='append',index=False, method='multi')
+    #         except Exception as e:
+    #             # print(e.args)
+    #             # print the error without all the sql
+    #             Logger.logger.error(f"Error migrating rows in '{table}' to the database\n{repr(e)}")
+    #             print(repr(e))
+    #             con.close()
+    #             conn.close()
+    #             sys.exit(1)
+
+    #     con.close()
+    #     conn.close()
 
     
 
@@ -289,7 +310,7 @@ class ChangesAndUpdate:
 
 
 
-    def make_ss_file_and_db_changes(self):
+    def update_ss_files_apply_user_edits_to_new_files(self):
         ''' This method performs two tasks:
             1. updates in the new file are applied to the ss file so the ss file is maintained as a true copy of the state sources. This is used to determine
                 which changes have come from the state sources and which are user edits.
@@ -300,7 +321,6 @@ class ChangesAndUpdate:
                     new-edits-changes-multi: keep the user edits, add new ss rows, remove dropped ss rows if not added by user
                     new-edits-changes-tenholder: only used for TenHolder. It updates the holders and ther percown from the state sources along with carrying forward the user edits
         ''' 
-        # print("Updating the ss files. These are a maintained dataset of the state source data")
         # Configs
         update_configs = self.update_configs
 
@@ -470,15 +490,12 @@ class ChangesAndUpdate:
             the core files so they mimic the db.
                 inactive_ids: only applies to Occurrence & Tenement files. holds the configs on how to deal with entries that have been dropped from the datasets
         '''
-        # print("Creating change files, updating core files and updating the database.")
-        # Logger.logger.error(f"Making ss file and db changes for field '{field}' in table '{file}'")
         # Configs
         update_configs = self.update_configs
         access_configs = self.access_configs
         # db connections
         sqlalchemy_con = sqlalchemy_engine(access_configs[SetUp.db_location]).connect()
         psycopg2_con = connect_psycopg2(access_configs[SetUp.db_location])
-       
 
         # this needs to be reversed so the 'tenement_occurrence' table is entered after the 'Tenement' table
         for data_group in SetUp.data_groups[::-1]:
@@ -631,7 +648,6 @@ class ChangesAndUpdate:
         file_lst = [x for x in update_configs if update_configs[x]["is_base_table"]]
         
         for file in file_lst:
-        # for file in ['OccOriginalID']:
             # set path of the file in the output/new directory
             new_path = os.path.join(self.new_dir,"%s.csv"%(file))
             # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
@@ -954,30 +970,6 @@ class ChangesAndUpdate:
 
 
 
-
-    # Resets the database back to a previous archived core tables.
-    def previous_core_to_db(self):
-        func_start = start_time()
-        Logger.logger.info(f"\n{Logger.hashed}\nReset database to previous core directory\n{Logger.hashed}")
-        # the output archive directory that hold the previous set of core files
-        self.output_archive_dir = os.path.join(SetUp.output_dir,'archive')
-        # get the latest folder archive folder
-        archive_date = os.listdir(self.output_archive_dir)[-1]
-        # output archive directory. The previous core data from the output archive directory
-        previous_core_dir = os.path.join(self.output_archive_dir,archive_date,'core')
-        # configs
-        self.update_configs = get_json(os.path.join(self.configs_dir,'db_update_configs.json'))
-        self.access_configs = get_json(os.path.join(self.configs_dir,'db_access_configs.json'))
-
-        # the archived core directory needs to be set as change_dir so it works with the commit_all_files_to_db function which is used else where.
-        self.change_dir = previous_core_dir
-        # clear the tables from the db and load the latest archived core files.
-        self.commit_all_files_to_db()
-        Logger.logger.info('Find changes and updates: %s' %(time_past(func_start)))
-
-
-
-
     def create_qgis_spatial_files(self):
         ''' create the qgis compatible files for the tenement & occurrence files '''
         Logger.logger.info(f"Creating qgis compatible files")
@@ -1002,19 +994,19 @@ class ChangesAndUpdate:
 
 
 
-def sqlalchemy_engine(db_configs):
-    return sqlalchemy.create_engine('postgresql://%s:%s@%s/%s' %(db_configs['user'], db_configs['password'], db_configs['host'], db_configs['dbname']))
+# def sqlalchemy_engine(db_configs):
+#     return sqlalchemy.create_engine('postgresql://%s:%s@%s/%s' %(db_configs['user'], db_configs['password'], db_configs['host'], db_configs['dbname']))
 
-def connect_psycopg2(db_keys):
-    return psycopg2.connect("dbname='%s' user='%s' password='%s' host='%s'" %(db_keys['dbname'],db_keys['user'],db_keys['password'],db_keys['host']))
+# def connect_psycopg2(db_keys):
+#     return psycopg2.connect("dbname='%s' user='%s' password='%s' host='%s'" %(db_keys['dbname'],db_keys['user'],db_keys['password'],db_keys['host']))
 
 
-def clearDatabaseTable(conn, table_name):
-    cur = conn.cursor()
-    cur.execute("DELETE FROM %s"%(table_name))
-    rows_deleted = cur.rowcount
-    conn.commit()
-    Logger.logger.info(f"'{rows_deleted}' rows cleared from '{table_name}'")
+# def clearDatabaseTable(conn, table_name):
+#     cur = conn.cursor()
+#     cur.execute("DELETE FROM %s"%(table_name))
+#     rows_deleted = cur.rowcount
+#     conn.commit()
+#     Logger.logger.info(f"'{rows_deleted}' rows cleared from '{table_name}'")
 
 
 def clear_db_table_rows_in_lst(conn, table, field, lst):
@@ -1052,20 +1044,20 @@ def update_db_table_by_index_field_and_value_lst(conn, table_name, dic):
 
 
 
-def orderTables(configs,input_lst,carry_lst,temp_lst):
-    for table in input_lst:
-        temp_lst = []
-        if not table in carry_lst:
+# def orderTables(configs,input_lst,carry_lst,temp_lst):
+#     for table in input_lst:
+#         temp_lst = []
+#         if not table in carry_lst:
 
-            sub_tables = configs[table]['related_tables']
+#             sub_tables = configs[table]['related_tables']
             
-            if not len(sub_tables) == 0:
-                carry_lst, temp_lst = orderTables(configs,sub_tables,carry_lst,temp_lst)
-            temp_lst.insert(0,table)
+#             if not len(sub_tables) == 0:
+#                 carry_lst, temp_lst = orderTables(configs,sub_tables,carry_lst,temp_lst)
+#             temp_lst.insert(0,table)
 
-        carry_lst = carry_lst + [x for x in temp_lst[::-1] if not x in carry_lst ]
+#         carry_lst = carry_lst + [x for x in temp_lst[::-1] if not x in carry_lst ]
 
-    return carry_lst, temp_lst
+#     return carry_lst, temp_lst
 
 
 
@@ -1119,13 +1111,6 @@ def assign_ids(add_df,core_df,edit_core_df):
 def stringifyIntLst(lst):
     ''' get the ids that will be deleted from the db table. convert to int to remove the decimal and then to string as that is how it is stored in the db '''
     return [str(int(x)) for x in lst]
-
-
-def convert_date_fields_to_datetime(df):
-    for col in df.columns:
-        if col in ['date_modified','date_created','date']:
-            df[col] = pd.to_datetime(df[col]).copy()
-    return df
 
 
 def drop_id(val):

@@ -21,10 +21,11 @@ import requests
 import fiona
 
 from .directory_files import delete_files_in_directory, file_exist, get_json
-from .timer import time_past, start_time
 
+from .timer import Timer
 from .schedule import Schedule
 from .setup import SetUp, Logger
+from .backup_data import DataBackup
 
 
 
@@ -47,20 +48,32 @@ class DownloadSetUp:
         self.unzipped_dir = os.path.join(self.data_group_dir,'unzipped')
         self.merged_file_dir = os.path.join(self.data_group_dir,'merged')
         self.zip_file_path = os.path.join(self.data_group_dir,'spatial_download.zip')
-        self.download_fail_path = os.path.join(self.data_group_dir,'download_fail.csv')
+        self.archive_dir = os.path.join(SetUp.archive_dir,SetUp.tDate,'input',data_group)
         self.data_group = data_group
 
 
 
 class DataDownload:
 
-    def __init__(self):
+    def all_data_download(self):
+        # archive backup
+        DataBackup('archive_data_download').backup_data_archive()
 
-        self.data_download()
+        # stage backup
+        dbu = DataBackup('data_download')
+        # set the process
+        dbu.set_process(process='state_source_update')
+        dbu.backup_data()
+
+        try:
+            self.data_download()
+        except:
+            dbu.restore_data()
+            raise
 
 
     def data_download(self):
-        func_start = start_time()
+        timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nData Download\n{Logger.hashed}")
         self.Schedule = Schedule()
         
@@ -87,7 +100,6 @@ class DataDownload:
             # loops through each of the groups in the configs.json file for the current data_group
             # for data_import_group in grp_setup.Data_Import:
             for data_import_group in download_datagroups:    
-                # if data_import_group['name'] == 'os_titles':
 
                 # downloads and extracts the data for all the zip files. If the link fails, then it will be added to the download_fail.csv and the formatting will be skipped.
                 failed_file_lst += dl_funcs.download_unzip_link_manual(data_import_group)
@@ -145,7 +157,7 @@ class DataDownload:
         # update the 'download_schedule' config file
         self.Schedule.update_schedule(DownloadSetUp.dl_schedule_config)
 
-        Logger.logger.info(f"Data Download duration: '{time_past(func_start)}'")
+        Logger.logger.info("Data Download duration: '%s'"%(timer.time_past()))
 
 
 
@@ -154,6 +166,7 @@ class DownloadFunctions():
 
     def __init__(self, data_group):
         self.grp_setup = DownloadSetUp(data_group)
+
 
     def get_groups_that_require_downloading(self, data_group):
         ''' find the files that require downloading using the download_schedule. If this is the first download then all files wll be 

@@ -29,6 +29,8 @@ class SetUp:
     regions_dir = os.path.join(BASE_DIR,'regions')
     # backup directory
     backup_dir = os.path.join(BASE_DIR,'backup')
+    # backup directory
+    archive_dir = os.path.join(BASE_DIR,'archive')
     # data groups
     data_groups = ['occurrence','tenement']
     # update is True if there are no files in the output/core directory

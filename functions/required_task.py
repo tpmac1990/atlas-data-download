@@ -15,11 +15,6 @@ class PromptRequiredTask:
     manual_update_df = pd.read_csv(manual_update_path)
 
 
-    def __init__(self):
-
-        self.prompt_user_on_required_task()
-
-
     def prompt_user_on_required_task(self):
         ''' This allows the user to select the task they want to run. The task is saved in the 'required_task.json' file which is read at necessary points in this 
                 application to determine if it is required for the task requested here.

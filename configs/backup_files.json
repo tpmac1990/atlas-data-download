@@ -1,4 +1,15 @@
 {
+    "extract_user_edits": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_core",
+                "src_extension": "output/core",
+                "copy_files": "__all__"
+            }
+        ],
+        "folders_to_clear": [],
+        "db_restore": false
+    },
     "update_missing_data": {
         "folders_to_backup": [
             {
@@ -12,19 +23,19 @@
                 "copy_files": ["manual_update_required","missing_all","missing_reduced"]
             }
         ],
-        "affects_db": false,
-        "dispose_on_success": true
+        "folders_to_clear": [],
+        "db_restore": false
     },
-    "extract_user_edits": {
+    "data_download": {
         "folders_to_backup": [
             {
-                "store_folder": "output_core",
-                "src_extension": "output/core",
-                "copy_files": "__all__"
+                "store_folder": "scripts_configs",
+                "src_extension": "scripts/configs",
+                "copy_files": ["download_schedule"]
             }
         ],
-        "affects_db": false,
-        "dispose_on_success": true
+        "folders_to_clear": [],
+        "db_restore": false
     },
     "preformat": {
         "folders_to_backup": [
@@ -39,8 +50,8 @@
                 "copy_files": "__all__"
             }
         ],
-        "affects_db": false,
-        "dispose_on_success": true
+        "folders_to_clear": [],
+        "db_restore": false
     },
     "combine_datasets": {
         "folders_to_backup": [
@@ -50,8 +61,8 @@
                 "copy_files": "__all__"
             }
         ],
-        "affects_db": false,
-        "dispose_on_success": true
+        "folders_to_clear": [],
+        "db_restore": false
     },
     "spatial_relationships": {
         "folders_to_backup": [
@@ -61,8 +72,8 @@
                 "copy_files": ["Tenement","Occurrence"]
             }
         ],
-        "affects_db": false,
-        "dispose_on_success": true
+        "folders_to_clear": [],
+        "db_restore": false
     },
     "change_and_update": {
         "folders_to_backup": [
@@ -92,8 +103,97 @@
                 "copy_files": "__all__"
             }
         ],
-        "affects_db": true,
-        "dispose_on_success": true
+        "folders_to_clear": [],
+        "db_restore": false
+    },
+    "archive_data_download": {
+        "folders_to_backup": [
+            {
+                "store_folder": "scripts_configs",
+                "src_extension": "scripts/configs",
+                "copy_files": ["download_schedule"]
+            },
+            {
+                "store_folder": "input_occurrence_change",
+                "src_extension": "input/occurrence/change",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "input_occurrence_core",
+                "src_extension": "input/occurrence/core",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "input_occurrence_update",
+                "src_extension": "input/occurrence/update",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "input_tenement_change",
+                "src_extension": "input/tenement/change",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "input_tenement_core",
+                "src_extension": "input/tenement/core",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "input_tenement_update",
+                "src_extension": "input/tenement/update",
+                "copy_files": "__all__"
+            }
+        ],
+        "folders_to_clear": [
+            {
+                "src_extension": "input/occurrence/plain",
+                "clear_files": "__all__"
+            },
+            {
+                "src_extension": "input/tenement/plain",
+                "clear_files": "__all__"
+            }
+        ],
+        "db_restore": false
+    },
+    "archive_combine_datasets": {
+        "folders_to_backup": [
+            {
+                "store_folder": "output_change",
+                "src_extension": "output/change",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_core",
+                "src_extension": "output/core",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_update",
+                "src_extension": "output/update",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_ss",
+                "src_extension": "output/ss",
+                "copy_files": "__all__"
+            },
+            {
+                "store_folder": "output_edit",
+                "src_extension": "output/edit",
+                "copy_files": "__all__"
+            }
+        ],
+        "folders_to_clear": [
+            {
+                "src_extension": "output/new",
+                "clear_files": "__all__"
+            },
+            {
+                "src_extension": "output/onew",
+                "clear_files": "__all__"
+            }
+        ],
+        "db_restore": true
     }
 }
-
