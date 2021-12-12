@@ -66,6 +66,11 @@ def file_exist(path):
     return os.path.isfile(path)
 
 
+def delete_file(path):
+    if file_exist(path):
+        os.remove(path)
+
+
 def delete_files_in_directory(directory):
     for file in os.listdir(directory):
         os.remove(os.path.join(directory,file))

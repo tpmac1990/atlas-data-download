@@ -10,14 +10,13 @@ import ctypes
 import csv
 import sys
 
-from .directory_files import copy_directory, get_json, file_exist, copy_directory_in_list
+from .directory_files import copy_directory, get_json, file_exist, delete_file, copy_directory_in_list
 from .db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable
 
 from .timer import Timer
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
 from .migrate_files_db import DatabaseManagement
-
 
 
 
@@ -63,6 +62,8 @@ class ChangesAndUpdate:
                 lastly, create an empty change.csv file in the change folder.
             '''
             Logger.logger.info(f"\n{Logger.dashed} Initial run. Migrating all data to core directory & database {Logger.dashed}")
+            # delete files from core that should exist yet. these include change & update files
+            self.delete_unrequired_core_files()
             # copy relevant files from the new folder to the core and ss folders
             self.copy_new_files_to_core()
             # create qgis compatible files for tenement & occurrence files
@@ -115,6 +116,18 @@ class ChangesAndUpdate:
 
         Logger.logger.info('Changes & Updates duration: %s' %(timer.time_past()))
 
+
+    def delete_unrequired_core_files(self):
+        ''' delete all the files in the core folder that are not required for the initial run. These files may exist if the core folder 
+            was copied from past runs which have created them. Files such as the TenementChange/Addition are only created on the second
+            and maintained after when there are changes to be recorded.
+            ??? the 'update.csv' and 'change.csv' files are not deleted but this could possible create a problem later 
+        '''
+        # list of files to delete if they exist in the core file
+        files = [f'{x}.csv' for x in self.update_configs if self.update_configs[x]['delete_on_initial_run']]
+        for file in files:
+            path = os.path.join(self.core_dir,f'{file}.csv')
+            delete_file(path)
 
 
     def commit_all_files_to_db(self):
