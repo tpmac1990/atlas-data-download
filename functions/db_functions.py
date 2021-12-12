@@ -1,5 +1,6 @@
 import sqlalchemy
 import psycopg2
+import pandas as pd
 
 from .setup import Logger
 
