@@ -1,4 +1,5 @@
 import os
+import sys
 import geopandas as gpd
 import pandas as pd 
 import json
@@ -171,7 +172,7 @@ class SpatialRelations:
             The first part of the one2many code is to assign the correct state to the offshore areas which are assigned as 'AUS_OSPET' in the vba macro
             ??? If function terminates silently
             The second half cleans the offshore and onshore regions so they are not mixed.
-            ??? solutions to sjoin silently failing ???
+            ??? solutions to sjoin failing silently ???
             switch the order of the sjoin
             re-order the dics in the region_configs.json file. The failing may have something to do with the occurrence file
         '''
@@ -185,10 +186,16 @@ class SpatialRelations:
 
             # set the required data_group df. either 'occurrence' or 'tenement'
             data_group_gdf = self.occ_gdf.copy() if file['data_group'] == 'occurrence' else self.ten_gdf.copy()
+
+            # list of object sizes that will fail in the sjoin. add a row which will be dropped later with drop_duplicates
+            if sys.getsizeof(data_group_gdf) in [24884924]:
+                Logger.logger.info(f"Dataframe size for file '{file['file_name']}' was problematic for the sjoin. A row has been added to bypass error")
+                data_group_gdf = pd.concat((data_group_gdf,data_group_gdf.tail(1)))
                 
             # perform the sjoin for the one-2-many fields which are appended to the existing data_group_gdf
             if file['type'] == 'one2many':
                 for group in file['groups']:
+                    # if group['region'] == 'local_government':
                     Logger.logger.info(f"Working on Occurrence sub group: '{group['region']}'")
                     # edit columns = true is the state column to update the os values to their appropriate state
                     if group['edit_column']:
@@ -196,13 +203,13 @@ class SpatialRelations:
                         gdf_temp = data_group_gdf[data_group_gdf['state_id'] == 'AUS_OSPET'].drop('state_id',1)
                         gdf_trim = data_group_gdf[data_group_gdf['state_id'] != 'AUS_OSPET']
                         # state spatial file
-                        jgdf = gpd.sjoin(gdf_temp, region_gdf, how="inner", op='intersects')[['ind','_id']].rename(columns={'_id': 'state_id'})
+                        jgdf = gpd.sjoin(gdf_temp, region_gdf, how="inner", op='intersects')[['ind','_id']].rename(columns={'_id': 'state_id'}).drop_duplicates()
                         gdf_temp = gdf_temp.merge(jgdf,on=group['merge_on'], how='left')
                         data_group_gdf = pd.concat((gdf_trim,gdf_temp),ignore_index=True)
                         
                     else:
                         region_gdf = self.local_gov_gdf.copy() if group['region'] == 'local_government' else self.gov_region_gdf.copy()
-                        jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',group['merge_on']]] 
+                        jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',group['merge_on']]].drop_duplicates()
                         jgdf.rename(columns={'_id': group['header']},inplace=True)
                         data_group_gdf = data_group_gdf.merge(jgdf, on=group['merge_on'], how='left')
 
@@ -217,11 +224,7 @@ class SpatialRelations:
                 elif file['region'] == 'geological_province':
                     region_gdf = self.geo_province_gdf.copy()
 
-                # For some reason I get a silent error unless I remove the tail row from tenement_localgov
-                # if file['file_name'] == 'tenement_localgov': 
-                #     data_group_gdf.drop(data_group_gdf.tail(20).index,inplace=True)
-
-                jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',file['merge_on']]]
+                jgdf = gpd.sjoin(region_gdf, data_group_gdf, how="inner", op='intersects')[['_id',file['merge_on']]].drop_duplicates()
                 df = pd.DataFrame(jgdf)
                 df.columns = file['headers']
 
@@ -334,7 +337,6 @@ def formatGeomCol(x):
 
 def df_to_geo_df_wkt(df):
     # convert the wkt to geospatial data
-    # df['geom'] = df['geom'].astype(str)
     df['geom'] = df['geom'].apply(wkt.loads)
     # convert to geopandas df
     gdf = gpd.GeoDataFrame(df, geometry='geom',crs="EPSG:4202")
