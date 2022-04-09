@@ -8,12 +8,12 @@ import numpy as np
 import shutil
 from collections import Counter
 
-from .directory_files import copy_directory, write_to_file, get_json
+from functions.common.directory_files import copy_directory, write_to_file, get_json
 
-from .timer import Timer
+from functions.common.timer import Timer
 from .schedule import Schedule
-from .setup import SetUp, Logger
-from .backup_data import DataBackup
+from ..setup import SetUp, Logger
+from functions.common.backup_data import DataBackup
 
 from datetime import date
 
@@ -25,28 +25,25 @@ class PreformatData:
 
     def all_preformat(self):
         ''' performs all the formatting on the files before they can be merged together into the database ready tables '''
-        # timer = Timer()
-        # Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
+        timer = Timer()
+        Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
 
-        # # backup necessary data. This could be split into two
-        # dbu = DataBackup('preformat')
-        # dbu.backup_data()
+        # backup necessary data. This could be split into two
+        dbu = DataBackup('preformat')
+        dbu.backup_data()
         
-        # try:
-        #     occ = PreFormatDataGroup('occurrence')
-        #     self.preformat_files(occ)
+        try:
+            occ = PreFormatDataGroup('occurrence')
+            self.preformat_files(occ)
 
-        #     ten = PreFormatDataGroup('tenement')
-        #     self.preformat_files(ten)
+            ten = PreFormatDataGroup('tenement')
+            self.preformat_files(ten)
 
-        # except:
-        #     dbu.restore_data()
-        #     raise
+        except:
+            dbu.restore_data()
+            raise
 
-        # Logger.logger.info('Preformat time: %s' %(timer.time_past()))
-        print(SetUp.active_atlas_dir)
-        print(SetUp.output_dir)
-        print('made it')
+        Logger.logger.info('Preformat time: %s' %(timer.time_past()))
 
 
 

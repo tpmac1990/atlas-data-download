@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-from .setup import SetUp
+from ..setup import SetUp
 
 
 """ 

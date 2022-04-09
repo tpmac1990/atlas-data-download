@@ -10,11 +10,11 @@ import csv
 import psycopg2
 import sqlalchemy
 
-from .timer import Timer
-from .directory_files import get_json
+from functions.common.timer import Timer
+from functions.common.directory_files import get_json
 from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_psycopg2, update_db_table_by_index_field_and_value_lst
-from .setup import SetUp, Logger
-from .backup_data import DataBackup
+from ..setup import SetUp, Logger
+from functions.common.backup_data import DataBackup
 
 
 

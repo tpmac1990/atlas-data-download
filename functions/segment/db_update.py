@@ -10,12 +10,12 @@ import ctypes
 import csv
 import sys
 
-from .directory_files import copy_directory, get_json, file_exist, delete_file, copy_directory_in_list
-from .db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable
+from functions.common.directory_files import copy_directory, get_json, file_exist, delete_file, copy_directory_in_list
+from functions.common.db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable
 
-from .timer import Timer
-from .setup import SetUp, Logger
-from .backup_data import DataBackup
+from functions.common.timer import Timer
+from ..setup import SetUp, Logger
+from functions.common.backup_data import DataBackup
 from .migrate_files_db import DatabaseManagement
 
 

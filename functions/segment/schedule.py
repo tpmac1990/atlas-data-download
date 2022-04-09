@@ -1,6 +1,6 @@
 import os
-from .directory_files import get_json, write_json
-from .setup import SetUp
+from functions.common.directory_files import get_json, write_json
+from ..setup import SetUp
 
 
 class Schedule:

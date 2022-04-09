@@ -6,7 +6,7 @@
                 "description": "Download a fresh set of data",
                 "dependent": null,
                 "function_to_test": {
-                    "module": "functions.data_download",
+                    "module": "functions.segment.data_download",
                     "class": "DataDownload",
                     "method": "all_data_download"
                 },
@@ -16,7 +16,7 @@
                 "description": "Preformat the raw downloaded data",
                 "dependent": "01_download",
                 "function_to_test": {
-                    "module": "functions.preformat",
+                    "module": "functions.segment.preformat",
                     "class": "PreformatData",
                     "method": "all_preformat"
                 }
@@ -25,7 +25,7 @@
                 "description": "Combine the numerous files in to database setup files",
                 "dependent": "02_preformat",
                 "function_to_test": {
-                    "module": "functions.build_format",
+                    "module": "functions.segment.build_format",
                     "class": "CombineDatasets",
                     "method": "combine_datasets"
                 }
@@ -34,7 +34,7 @@
                 "description": "Create the spatial relationship files",
                 "dependent": "03_combine_data",
                 "function_to_test": {
-                    "module": "functions.spatial_relationships",
+                    "module": "functions.segment.spatial_relationships",
                     "class": "SpatialRelations",
                     "method": "build_spatial_relations"
                 }
@@ -43,7 +43,7 @@
                 "description": "Find and record difference between the current core files and the last downloaded data. Update the database with the formatted data",
                 "dependent": "04_build_spatial_data",
                 "function_to_test": {
-                    "module": "functions.db_update",
+                    "module": "functions.segment.db_update",
                     "class": "ChangesAndUpdate",
                     "method": "find_changes_update_core_and_database"
                 }
@@ -53,7 +53,7 @@
                 "dependent": null,
                 "pre-function": "load_user_edits",
                 "function_to_test": {
-                    "module": "functions.apply_user_updates",
+                    "module": "functions.segment.apply_user_updates",
                     "class": "ExtractUserEdits",
                     "method": "extract_user_edits"
                 }
@@ -62,7 +62,7 @@
                 "description": "Apply the manual updates to the database for the new data from the last data download",
                 "dependent": null,
                 "function_to_test": {
-                    "module": "functions.commit_new_values",
+                    "module": "functions.segment.commit_new_values",
                     "class": "UpdateMissingData",
                     "method": "apply_missing_data_updates"
                 }

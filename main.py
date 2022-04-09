@@ -1,16 +1,16 @@
 import os
 import logging
 
-from functions.data_download import DataDownload
-from functions.apply_user_updates import ExtractUserEdits
-from functions.preformat import PreformatData
-from functions.build_format import CombineDatasets
-from functions.spatial_relationships import SpatialRelations
-from functions.db_update import ChangesAndUpdate
-from functions.commit_new_values import UpdateMissingData
-from functions.required_task import PromptRequiredTask
+from functions.segment.data_download import DataDownload
+from functions.segment.apply_user_updates import ExtractUserEdits
+from functions.segment.preformat import PreformatData
+from functions.segment.build_format import CombineDatasets
+from functions.segment.spatial_relationships import SpatialRelations
+from functions.segment.db_update import ChangesAndUpdate
+from functions.segment.commit_new_values import UpdateMissingData
+from functions.segment.required_task import PromptRequiredTask
 
-from functions.timer import Timer
+from functions.common.timer import Timer
 from functions.setup import Logger
 
 

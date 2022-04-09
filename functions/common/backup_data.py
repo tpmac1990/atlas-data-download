@@ -4,8 +4,8 @@ import shutil
 from .directory_files import get_json, write_json, copy_directory, clear_directory, delete_files_in_directory, create_directory_tree, clear_all_directory
 from .timer import Timer
 
-from .setup import SetUp, Logger
-from .migrate_files_db import DatabaseManagement
+from ..setup import SetUp, Logger
+from functions.segment.migrate_files_db import DatabaseManagement
 
 
 

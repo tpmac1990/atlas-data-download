@@ -4,10 +4,10 @@ import sys
 import sqlalchemy
 import psycopg2
 
-from .directory_files import get_json
-from .db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable, convert_date_fields_to_datetime
+from functions.common.directory_files import get_json
+from functions.common.db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable, convert_date_fields_to_datetime
 
-from .setup import SetUp, Logger
+from ..setup import SetUp, Logger
 
 
 

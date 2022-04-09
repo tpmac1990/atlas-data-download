@@ -1,11 +1,9 @@
 import os
 import pandas as pd
 import json
-from .directory_files import get_json
-from .setup import SetUp, Logger
-from pprint import pprint
-from .db_functions import connect_psycopg2
-
+from functions.common.directory_files import get_json
+from ..setup import SetUp, Logger
+from functions.common.db_functions import connect_psycopg2
 
 
 class ManualUpdates:

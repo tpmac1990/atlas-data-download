@@ -2,9 +2,9 @@ import os
 import re
 import pandas as pd
 import numpy as np
-from .directory_files import get_json
-from .setup import SetUp, Logger
-from .timer import Timer
+from functions.common.directory_files import get_json
+from ..setup import SetUp, Logger
+from functions.common.timer import Timer
 
 
 

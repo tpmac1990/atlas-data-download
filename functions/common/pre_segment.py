@@ -2,9 +2,9 @@ import os
 import pandas as pd
 import json
 from .directory_files import get_json, file_exist
-from .setup import SetUp, Logger
+from ..setup import SetUp, Logger
 from .db_functions import connect_psycopg2, sqlalchemy_engine
-from .commit_new_values import append_to_db
+from functions.segment.commit_new_values import append_to_db
 
 
 

@@ -5,10 +5,10 @@ import pandas as pd
 import importlib
 import datetime
 
-from .directory_files import get_json, write_json, file_exist
-from .database_commands import drop_and_restore_db
-from .setup import SetUp, Logger, update_setup
-from . import pre_segment
+from functions.common.directory_files import get_json, write_json, file_exist
+from functions.common.database_commands import drop_and_restore_db
+from ..setup import SetUp, Logger, update_setup
+from functions.common import pre_segment
 
 
 

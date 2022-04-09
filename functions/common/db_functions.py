@@ -2,7 +2,7 @@ import sqlalchemy
 import psycopg2
 import pandas as pd
 
-from .setup import Logger
+from ..setup import Logger
 
 
 def sqlalchemy_engine(db_configs):

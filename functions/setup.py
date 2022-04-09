@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 import re
 
-from .directory_files import file_exist, get_json
+from functions.common.directory_files import file_exist, get_json
 
 
 class SetUp:    

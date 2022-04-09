@@ -7,10 +7,10 @@ import time
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-from .directory_files import file_exist, get_json, write_to_file
-from .timer import Timer
-from .setup import SetUp, Logger
-from .backup_data import DataBackup
+from functions.common.directory_files import file_exist, get_json, write_to_file
+from functions.common.timer import Timer
+from ..setup import SetUp, Logger
+from functions.common.backup_data import DataBackup
 from .missing_data_formatting import MissingDataFormatting
 
 

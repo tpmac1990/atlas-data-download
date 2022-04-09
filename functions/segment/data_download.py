@@ -20,12 +20,12 @@ import urllib.request
 import requests
 import fiona
 
-from .directory_files import delete_files_in_directory, file_exist, get_json, write_json
+from functions.common.directory_files import delete_files_in_directory, file_exist, get_json, write_json
 
-from .timer import Timer
+from functions.common.timer import Timer
 from .schedule import Schedule
-from .setup import SetUp, Logger
-from .backup_data import DataBackup
+from ..setup import SetUp, Logger
+from functions.common.backup_data import DataBackup
 
 
 
