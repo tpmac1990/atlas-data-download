@@ -7,7 +7,7 @@ import datetime
 
 from .directory_files import get_json, write_json, file_exist
 from .database_commands import drop_and_restore_db
-from .setup import SetUp, Logger
+from .setup import SetUp, Logger, update_setup
 from . import pre_segment
 
 
@@ -339,24 +339,5 @@ class PromptRequiredTask:
     def save_run_tracker_configs(self):
         ''' save the run configs to the run_tracker.json file and reload SetUp with the new configs '''
         write_json(self.run_tracker_path,self.run_tracker_config)
-        self.update_setup()
-        
-    
-    def update_setup(self):
-        run_tracker_config = self.run_tracker_config
-        SetUp.active_atlas_dir = os.path.join(SetUp.BASE_DIR, "directories", run_tracker_config["active_atlas_directory_name"])
-        SetUp.input_dir = os.path.join(SetUp.active_atlas_dir,'input')
-        SetUp.output_dir = os.path.join(SetUp.active_atlas_dir,'output')
-        SetUp.convert_dir = os.path.join(SetUp.active_atlas_dir,'conversion')
-        SetUp.regions_dir = os.path.join(SetUp.active_atlas_dir,'regions')
-        SetUp.backup_dir = os.path.join(SetUp.active_atlas_dir,'backup')
-        SetUp.archive_dir = os.path.join(SetUp.active_atlas_dir,'archive')
-        SetUp.db_dumps_dir = os.path.join(SetUp.active_atlas_dir,'db_dumps')
-        SetUp.active_atlas_directory_name = run_tracker_config["active_atlas_directory_name"]
-        SetUp.active_directory_configs = run_tracker_config[SetUp.active_atlas_directory_name]
-        SetUp.last_download_date = SetUp.active_directory_configs["last_download_date"]
-        SetUp.task = SetUp.active_directory_configs["task"]
-        SetUp.run_module = SetUp.active_directory_configs["run_module"]
-        SetUp.pyDate = datetime.datetime.strptime(SetUp.last_download_date, "%d-%m-%Y").date()
-        SetUp.tDate = SetUp.pyDate.strftime("%y%m%d")
+        update_setup()
         
