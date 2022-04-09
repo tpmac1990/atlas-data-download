@@ -1,9 +1,9 @@
 {
-    "qld_titles": "https://qldspatial.information.qld.gov.au/DownloadService/Download.aspx?token=YXMOJZZgYKjTIvTW2nVLZ%2BpkbqryXnBIAKTXV1LJ1LnESopJ7XHSgaJ4AnTbuQGU8iO76Cf7FWj%2F%0A38hOA5zWfRaIcfBE6z8d96UoSejhU9BrxY6yRzoH5M8xv9CDF%2BAumLMXL8N%2BhNTqJSgZHKYsBm4c%0AnwAgE13MZ8ZfSXi26HnFs%2BAD9K6LzmmmQIiN7BaDv2eHQJMq04WUsNQlGHFzn42Phcfgsgp4%2BXt%2F%0AVINVBlzwj41MUoySxpY%2FkceQ6hENW5TMaEeRCfySci6xXr5lArOdIUWsuIJjRMz1TVGVMZ9Uodpp%0Au4cXrwEBrIC0zi8KTEITmNHFk7pd9hCixgJY2vLQZbj053FAT%2B0kMSqYwi77AT%2FQqwuuOv2wiy8v%0AtjBWXgFyW9wfmmFz%2FeEiRsMO66BSkkzMU4Ll1%2BZc00w4Ih8zmrYkK46N%2F0g9tAek%2BFynJVSo06Jt%0AjAflODoEvXUa4UgC64AcwFs%2Fk3EPFbdyaEnKDf%2FMslmIvt6aZjMqf4Vfo6Gc4gzALo2Ev1y6zkMq%0ABJYvqgrODZME7lcdCo06iQ6rWHq0uM1mEMd%2FFvtI39dx3EA3FAQ0jO7niHBoJB%2FYhS6t4tkhBU%2F7%0AtZ2pzx5o23LEA%2F9rrovPBL4%2FYzj0PHz%2F9a3aHJD2IL13h4BoZM2PPozHoTnhOuaKyZcGtGKw4T8%3D%0A",
-    "qld_sites": "https://gisservices2.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20211210_162806192000-17136.zip",
+    "qld_titles": "https://qldspatial.information.qld.gov.au/DownloadService/Download.aspx?token=DyKoaanpU2by%2Fn5hMktOYjwFw0k%2FrHmg4O7%2FChdVxKF5v3IDw3lSO5swnEVz66noxE6Gm6Mch4xg%0AUGe3P3dKP64bocbqQg%2Bykwy5EkXbE3QvTqtbI1KLmCZ58hMFG8XANa3nGylEzwK3ZuF0TfhFjLqc%0AXQU0w%2BHJ4BlU1%2FCXkO5mIslCBqqlttuMQj%2BXjyq9udW27b4JiFqJ4%2FA0Pt7I8FDvDtmZuyp%2B8JC5%0AqRGYPAcKn5JIyx7o6Ov8tCqrdbKLoFU%2BE80Yc7jW4%2B1yXS0p7oKokx0TW%2FNJDhHkeTRO%2BCV0De8P%0A3WGCIQD3L8VOHJdVzRPzXDffRLR1Boum075X0bJQumHDgvZ9bcVtV9rNPlbq04R2Ant%2B50eMWxyN%0Agor9fxivWmisXvWiCGaPoiRZ6n5EzunaO5kcg3nhYSl6HqIycOSp73yZlfjDMe%2BArK3SwoySsgzR%0AyKxEUnNrD0MV%2FsaQxOcPXFkPLpTsoRTUh7DOWvGc%2BEnxUbtNC%2F4e6GGqqMeo1h%2BQjD4UjZNSa8Ns%0A9%2FzA5e3BPhNzDwd9Uve%2FUUjeApBO1BfAIzptVC6Tifxn4zU50d5gCb0za00diWMr89z7x5sHmuNw%0ABmVAvzH2ckoWVNPcE1fA9fnyjXRX1alWzsKZ2SJzsa2pOEc8Txl7O%2B9EYAWCoIDEgFVu%2FSQAtlI%3D%0A",
+    "qld_sites": "https://gisservices2.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20220215_181735525000-16588.zip",
     "vic_all": "https://s3-ap-southeast-2.amazonaws.com/cl-isd-prd-datashare-s3-delivery/Order_E56230.zip",
-    "nsw_sites": "https://dwh2.geoscience.nsw.gov.au/fmedatadownload/results/FME_68185551_1639117736919_3900.zip",
-    "nsw_wells": "https://dwh2.geoscience.nsw.gov.au/fmedatadownload/results/FME_68185551_1639117851821_3900.zip",
-    "os_titles": "https://www.nopta.gov.au/maps-and-public-data/shape-files/PetroleumTitles_Dec2021.zip",
-    "os_wells": "https://www.nopta.gov.au/maps-and-public-data/shape-files/PetroleumWells_Dec2021.zip" 
+    "nsw_sites": "https://dwh2.geoscience.nsw.gov.au/fmedatadownload/results/FME_68185551_164491313882_2308.zip",
+    "nsw_wells": "https://dwh2.geoscience.nsw.gov.au/fmedatadownload/results/FME_68185551_1644913267155_2308.zip",
+    "os_titles": "https://www.nopta.gov.au/maps-and-public-data/shape-files/PetroleumTitles_Feb2022.zip",
+    "os_wells": "https://www.nopta.gov.au/maps-and-public-data/shape-files/PetroleumWells_Feb2022.zip" 
 }

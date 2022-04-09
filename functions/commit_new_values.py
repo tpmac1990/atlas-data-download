@@ -31,7 +31,7 @@ class UpdateMissingData:
         self.configs = get_json(os.path.join(SetUp.configs_dir,'commit_updates.json'))
 
         # update the database tables to match the csv files
-        db_keys = access_configs[SetUp.db_location]
+        db_keys = access_configs[SetUp.active_atlas_directory_name]
         self.con = sqlalchemy_engine(db_keys).connect()
         self.conn = connect_psycopg2(db_keys)
 
@@ -288,7 +288,7 @@ def open_file_as_df(path):
 def insert_date_in_date_fields(dic):
     ''' replace dic value 'date' with todays date. This is required as the date can not be stored in json config file '''
     for x in dic:
-        dic[x] = date.today() if dic[x] == 'date' else dic[x]
+        dic[x] = SetUp.pyDate if dic[x] == 'date' else dic[x]
     return dic
 
 
@@ -327,7 +327,7 @@ def append_to_db(con,file_name,df):
         except Exception as e: 
             # print representation of error only to exclude the massive print out of the failed sql query
             print(repr(e))
-            con.close()
+            # con.close()
             sys.exit(1)
 
         # except psycopg2.errors.NotNullViolation as e:

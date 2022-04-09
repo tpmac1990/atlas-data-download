@@ -11,6 +11,7 @@ from .directory_files import file_exist, get_json, write_to_file
 from .timer import Timer
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
+from .missing_data_formatting import MissingDataFormatting
 
 
 
@@ -331,7 +332,7 @@ class CombineTitleDatasets:
         new_df = df[['ind','typ_id','status_id','state_id','shore_id','lodgedate','startdate','enddate','geom']].copy()
         new_df['valid_relations'] = True
         new_df['user_edit'] = False
-        new_df['date_modified'] = date.today()
+        new_df['date_modified'] = SetUp.pyDate
         new_df[['lodgedate','startdate','enddate']] = new_df[['lodgedate','startdate','enddate']].replace(np.nan,'2999-01-01')
         new_df['shore_id'] = new_df['shore_id'].replace(np.nan,self.shore_uk)
         return new_df
@@ -399,7 +400,7 @@ class CombineTitleDatasets:
             missing_holders_df = missing_holders_df.merge(self.Holder_df,on='name',how='outer',indicator=True).query('_merge == "left_only"')[['name']]
             next_id = self.Holder_df['_id'].max() + 1
             missing_holders_df['_id'] = np.arange(next_id, len(missing_holders_df) + next_id)
-            dic = {'user_name': 'ss', 'valid_relations': True, 'valid_instance': True, 'user_edit': False, 'date_modified': date.today(), 'date_created': date.today()}
+            dic = {'user_name': 'ss', 'valid_relations': True, 'valid_instance': True, 'user_edit': False, 'date_modified': SetUp.pyDate, 'date_created': SetUp.pyDate}
             for i in dic:
                 missing_holders_df[i] = dic[i]
             self.Holder_df = pd.concat((self.Holder_df,missing_holders_df)) # This will be saved to file once files have been added
@@ -598,8 +599,8 @@ class CombineSiteDatasets():
         new_df['valid_relations'] = True
         new_df['valid_instance'] = True
         new_df['user_edit'] = False
-        new_df['date_modified'] = date.today()
-        new_df['date_created'] = date.today()
+        new_df['date_modified'] = SetUp.pyDate
+        new_df['date_created'] = SetUp.pyDate
         return new_df
 
     def format_names(self,df_main,configs):
@@ -779,7 +780,7 @@ class FinalizeMissingData():
         # missing_df = pd.read_csv(os.path.join(update_dir,'missing_all.csv'))
         # miss_df = pd.read_csv(os.path.join(update_dir,'missing_reduced.csv'))
 
-        complete_df = pd.DataFrame([],columns=['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH'])
+        complete_df = pd.DataFrame([],columns=['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH','ORIGINAL_F'])
         columns_lst = ['MATCH_%s'%(x) for x in list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')]
 
         for FIELD in configs:
@@ -839,6 +840,9 @@ class FinalizeMissingData():
             complete_df = pd.concat((required_past_df,complete_df))
         # create a file for user to make final changes before they are commited
         complete_df.drop_duplicates(subset=['STATE','GROUP','FIELD','ORIGINAL'],inplace=True)
+        # format ORIGINAL value so values with no near match can mostly be copied and pasted to the LIKELY_MATCH field
+        complete_df = MissingDataFormatting().format_original_values(complete_df)
+        # save file
         complete_df.to_csv(manual_update_required_path,index=False)
 
         # log the run time
@@ -902,6 +906,7 @@ def find_similar_values(missing_df,lookup_df,lookup_field,lst):
             max_ratio = top_df['ratio'].max()
             top_df = top_df[[lookup_field]].T
             top_df.columns = ['MATCH_A','MATCH_B','MATCH_C','MATCH_D','MATCH_E']
+            max_ratio = None if max_ratio < 90 else max_ratio
             top_df['MAX_RATIO'] = [max_ratio]
 
             final_df = pd.concat((final_df,top_df))
@@ -909,7 +914,7 @@ def find_similar_values(missing_df,lookup_df,lookup_field,lst):
         final_df['ORIGINAL'] = missing_df['VALUE'].to_list()
         # final_df['LIKELY_MATCH'] = final_df.apply(lambda x: x['MATCH_A'] if x['MAX_RATIO'] >= 85 else np.nan,axis=1) # leaving LIKELY_MATCH empty so values aren't updated without checking first
         final_df['LIKELY_MATCH'] = np.nan
-        final_df = final_df[['ORIGINAL','LIKELY_MATCH','MATCH_A','MATCH_B','MATCH_C','MATCH_D','MATCH_E']]
+        final_df = final_df[['ORIGINAL','LIKELY_MATCH','MAX_RATIO','MATCH_A','MATCH_B','MATCH_C','MATCH_D','MATCH_E']]
     return final_df
 
 
@@ -1002,14 +1007,14 @@ def nsw_1_date_format(x,source):
 def nsw_1_date_status(x,source):
     if x[source[0]] != "Renewal Sought":
         return "Active"
-    elif datetime.strptime(x[source[1]],'%Y-%m-%d').date() < date.today():
+    elif datetime.strptime(x[source[1]],'%Y-%m-%d').date() < SetUp.pyDate:
         return "Expired - Renewal Sought"
     else:
         return "Active - Renewal Sought"
 
 
 def nsw_2_date_status(x,source):
-    if datetime.strptime(x[source],'%Y-%m-%d').date() < (date.today() - timedelta(days=365)):
+    if datetime.strptime(x[source],'%Y-%m-%d').date() < (SetUp.pyDate - timedelta(days=365)):
         return "Application - Pending over 1 year"
     else:
         return "Application - Pending under 1 year"
@@ -1024,9 +1029,9 @@ def WA_1_status(x,source):
     targ_date = datetime.strptime(x[source],'%Y-%m-%d').date()
     if targ_date == date(2999,12,31):
         return "Application - Pending Unknown"
-    elif targ_date < (date.today() - timedelta(days=365)):
+    elif targ_date < (SetUp.pyDate - timedelta(days=365)):
         return "Application - Pending over 1 year"
-    elif targ_date < date.today():
+    elif targ_date < SetUp.pyDate:
         return "Application - Pending under 1 year"
     else:
         return "Active"
@@ -1034,7 +1039,7 @@ def WA_1_status(x,source):
 
 def WA_1_date(x,source):
     targ_date = datetime.strptime(x[source],'%Y-%m-%d').date()
-    if targ_date == date(2999,12,31) or targ_date < date.today():
+    if targ_date == date(2999,12,31) or targ_date < SetUp.pyDate:
         return "2999-01-01" 
     else:
         return x[source]
@@ -1044,9 +1049,9 @@ def WA_5_status(x,source):
     if type(x[source]) == float:
         return "Active"
     targ_date = datetime.strptime(x[source],'%Y-%m-%d').date()
-    if targ_date < (date.today() - timedelta(days=365)):
+    if targ_date < (SetUp.pyDate - timedelta(days=365)):
         return "Expired over 1 year - "
-    elif targ_date < date.today():
+    elif targ_date < SetUp.pyDate:
         return "Expired under 1 year - "
     else:
         return "Active - "
@@ -1095,9 +1100,9 @@ def SA_2_holder(x,source):
 def time_since_expiry_desc(x,source):
     if type(x[source]) == float:
         return ""
-    elif datetime.strptime(x[source],'%Y-%m-%d').date() < (date.today() - timedelta(days=365)):
+    elif datetime.strptime(x[source],'%Y-%m-%d').date() < (SetUp.pyDate - timedelta(days=365)):
         return "Expired over 1 year - "
-    elif datetime.strptime(x[source],'%Y-%m-%d').date() < date.today():
+    elif datetime.strptime(x[source],'%Y-%m-%d').date() < SetUp.pyDate:
         return "Expired under 1 year - "
     else:
         return "Active - "
@@ -1113,9 +1118,9 @@ def time_since_expiry_desc_noexpiry(x,source):
 def time_since_lodge_desc(x,source):
     if type(x[source]) == float:
         return ""
-    elif datetime.strptime(x[source],'%Y-%m-%d').date() < (date.today() - timedelta(days=365)):
+    elif datetime.strptime(x[source],'%Y-%m-%d').date() < (SetUp.pyDate - timedelta(days=365)):
         return "lodged over 1 year - "
-    elif datetime.strptime(x[source],'%Y-%m-%d').date() < date.today():
+    elif datetime.strptime(x[source],'%Y-%m-%d').date() < SetUp.pyDate:
         return "lodged under 1 year - "
     else:
         return "Active - "

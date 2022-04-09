@@ -85,7 +85,7 @@ class DataBackup:
             src_extension = group['src_extension']
             copy_files = group['copy_files']
 
-            src_dir = os.path.join(SetUp.BASE_DIR,src_extension)
+            src_dir = os.path.join(SetUp.active_atlas_dir,src_extension)
             dest_dir = os.path.join(Data.backup_dir,store_folder)
 
             # slice to remove either the .csv or .jsom extension
@@ -120,7 +120,7 @@ class DataBackup:
         for group in Data.folders_to_clear:
             src_extension = group['src_extension']
             clear_files = group['clear_files']
-            src_dir = os.path.join(SetUp.BASE_DIR,src_extension)
+            src_dir = os.path.join(SetUp.active_atlas_dir,src_extension)
             delete_files_in_directory(src_dir)
 
 

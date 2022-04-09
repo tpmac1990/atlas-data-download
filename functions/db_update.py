@@ -73,6 +73,7 @@ class ChangesAndUpdate:
             # create empty change file. This will tell the script to update rather than renew everything the next time it is run.
             self.create_empty_change_file()
         else:
+            print('#'*100)
             ''' This deals with updating the core and database tables on subsequent downloads. The core files are maintained rather than replaced and the relevant rows of each file/table
                 that requires updates are updated, while new rows are added. All changes are recorded and this is also updated in the core files and the database.
             '''
@@ -449,8 +450,8 @@ class ChangesAndUpdate:
         update_configs = self.update_configs
         access_configs = self.access_configs
         # db connections
-        sqlalchemy_con = sqlalchemy_engine(access_configs[SetUp.db_location]).connect()
-        psycopg2_con = connect_psycopg2(access_configs[SetUp.db_location])
+        sqlalchemy_con = sqlalchemy_engine(access_configs[SetUp.active_atlas_directory_name]).connect()
+        psycopg2_con = connect_psycopg2(access_configs[SetUp.active_atlas_directory_name])
 
         # this needs to be reversed so the 'tenement_occurrence' table is entered after the 'Tenement' table
         for data_group in SetUp.data_groups[::-1]:
@@ -598,7 +599,7 @@ class ChangesAndUpdate:
         access_configs = self.access_configs
 
         # db connections
-        sqlalchemy_con = sqlalchemy_engine(access_configs[SetUp.db_location]).connect()
+        sqlalchemy_con = sqlalchemy_engine(access_configs[SetUp.active_atlas_directory_name]).connect()
 
         file_lst = [x for x in update_configs if update_configs[x]["is_base_table"]]
         
@@ -805,7 +806,7 @@ class ChangesAndUpdate:
         update_configs = self.update_configs
         access_configs = self.access_configs
         # db connections
-        psycopg2_con = connect_psycopg2(access_configs[SetUp.db_location])
+        psycopg2_con = connect_psycopg2(access_configs[SetUp.active_atlas_directory_name])
 
         # loop through the datagroups i.e. occurrence and tenements
         for data_group in SetUp.data_groups:
@@ -839,7 +840,7 @@ class ChangesAndUpdate:
         self.update_df = pd.read_csv(self.updates_path)
         self.change_df = pd.read_csv(self.changes_path)
         # db connection
-        self.sqlalchemy_con = sqlalchemy_engine(self.access_configs[SetUp.db_location]).connect()
+        self.sqlalchemy_con = sqlalchemy_engine(self.access_configs[SetUp.active_atlas_directory_name]).connect()
         
         for data_group in SetUp.data_groups:
             self.data_group = data_group

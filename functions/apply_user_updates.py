@@ -12,6 +12,7 @@ from .timer import Timer
 
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
+from .data_download import geoDfToDf_wkt
 
 
 
@@ -29,7 +30,7 @@ class ExtractUserEdits:
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.edit_dir = os.path.join(SetUp.output_dir,'edit')
         # db connections
-        self.sqlalchemy_con = sqlalchemy_engine(self.access_configs[SetUp.db_location]).connect()
+        self.sqlalchemy_con = sqlalchemy_engine(self.access_configs[SetUp.active_atlas_directory_name]).connect()
 
         
 
@@ -196,7 +197,11 @@ class ExtractUserEdits:
                             if len(keys_df) == 1:
                                 if is_geospatial:
                                     # I have to cast to text otherwise i get an error even if i pass the key as a string
-                                    sql = "SELECT * FROM gp_%s WHERE %s = CAST(%s as text)"%(table.lower(),target_field,keys_df[0])
+                                    if type(keys_df[0]) == int:
+                                        sql = "SELECT * FROM gp_%s WHERE %s = %s"%(table.lower(),target_field,keys_df[0])
+                                    else:
+                                        sql = "SELECT * FROM gp_%s WHERE %s = '%s'"%(table.lower(),target_field,keys_df[0])
+                                        
                                 else:
                                     sql = "SELECT * FROM gp_%s WHERE %s = %s"%(table.lower(),target_field,keys_df[0])
                             else:

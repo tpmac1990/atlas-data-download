@@ -15,6 +15,8 @@ from .schedule import Schedule
 from .setup import SetUp, Logger
 from .backup_data import DataBackup
 
+from datetime import date
+
 csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
 
@@ -23,25 +25,28 @@ class PreformatData:
 
     def all_preformat(self):
         ''' performs all the formatting on the files before they can be merged together into the database ready tables '''
-        timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
+        # timer = Timer()
+        # Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
 
-        # backup necessary data. This could be split into two
-        dbu = DataBackup('preformat')
-        dbu.backup_data()
+        # # backup necessary data. This could be split into two
+        # dbu = DataBackup('preformat')
+        # dbu.backup_data()
         
-        try:
-            occ = PreFormatDataGroup('occurrence')
-            self.preformat_files(occ)
+        # try:
+        #     occ = PreFormatDataGroup('occurrence')
+        #     self.preformat_files(occ)
 
-            ten = PreFormatDataGroup('tenement')
-            self.preformat_files(ten)
+        #     ten = PreFormatDataGroup('tenement')
+        #     self.preformat_files(ten)
 
-        except:
-            dbu.restore_data()
-            raise
+        # except:
+        #     dbu.restore_data()
+        #     raise
 
-        Logger.logger.info('Preformat time: %s' %(timer.time_past()))
+        # Logger.logger.info('Preformat time: %s' %(timer.time_past()))
+        print(SetUp.active_atlas_dir)
+        print(SetUp.output_dir)
+        print('made it')
 
 
 
@@ -217,17 +222,18 @@ class PreFormatDataGroup:
             Logger.logger.info(f"Assigning unique identifier for '{key}'")
             try:
                 unique_col = self.configs[key]['preformat']['unique_column']
-                # if unique_col:
-                path = os.path.join(self.new_dir, key + '_WKT.csv')
-                df = pd.read_csv(path,dtype=str)
-                # copy 'unique_col' field to create a unique column
-                df['NEW_IDENTIFIER'] = df[unique_col]
-                # create the gplore ind value
-                last_ind = len(df.index) + i
-                df['NEW_ID'] = np.arange(i, last_ind)
-                i = last_ind
-                
-                df.to_csv(path,index=False)
+                # only run if a unique_col is required. e.g. qld_2 in tenements does not need one, so skip
+                if unique_col:
+                    path = os.path.join(self.new_dir, key + '_WKT.csv')
+                    df = pd.read_csv(path,dtype=str)
+                    # copy 'unique_col' field to create a unique column
+                    df['NEW_IDENTIFIER'] = df[unique_col]
+                    # create the gplore ind value
+                    last_ind = len(df.index) + i
+                    df['NEW_ID'] = np.arange(i, last_ind)
+                    i = last_ind
+                    
+                    df.to_csv(path,index=False)
 
             except:
                 try:

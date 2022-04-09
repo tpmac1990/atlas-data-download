@@ -1,0 +1,60 @@
+{
+    "NSW": {
+        "HOLDER": [
+            "pty_ltd_conversions",
+            "proper_text"
+        ],
+        "NAME": []
+    },
+    "NT": {
+        "HOLDER": [
+            "pty_ltd_conversions",
+            "proper_text"
+        ],
+        "NAME": [
+            "delete_unnamed"
+        ]
+    },
+    "SA": {
+        "HOLDER": [
+            "pty_ltd_conversions"
+        ],
+        "NAME": [
+            "proper_text"
+        ]
+    },
+    "VIC": {
+        "HOLDER": [
+            "pty_ltd_conversions"
+        ],
+        "NAME": [
+            "proper_text"
+        ]
+    },
+    "QLD": {
+        "HOLDER": [
+            "pty_ltd_conversions",
+            "proper_text"
+        ],
+        "NAME": []
+    },
+    "WA": {
+        "HOLDER": [
+            "pty_ltd_conversions",
+            "proper_text"
+        ],
+        "NAME": []
+    },
+    "TAS": {
+        "HOLDER": [
+            "pty_ltd_conversions"
+        ],
+        "NAME": []
+    },
+    "AUS_OSPET": {
+        "HOLDER": [
+            "pty_ltd_conversions"
+        ],
+        "NAME": []
+    }
+}

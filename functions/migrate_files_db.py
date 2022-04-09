@@ -24,7 +24,7 @@ class DatabaseManagement:
     def clear_db_tables_and_remigrate(self, src_dir):
         ''' clear all tables in the database and re-migrate them from the requested directory '''
 
-        db_keys = self.access_configs[SetUp.db_location]
+        db_keys = self.access_configs[SetUp.active_atlas_directory_name]
         con = sqlalchemy_engine(db_keys).connect()
         conn = connect_psycopg2(db_keys)
         # print(engine.table_names()) # print all tables in the database

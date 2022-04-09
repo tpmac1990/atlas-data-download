@@ -20,7 +20,7 @@ import urllib.request
 import requests
 import fiona
 
-from .directory_files import delete_files_in_directory, file_exist, get_json
+from .directory_files import delete_files_in_directory, file_exist, get_json, write_json
 
 from .timer import Timer
 from .schedule import Schedule
@@ -48,7 +48,7 @@ class DownloadSetUp:
         self.unzipped_dir = os.path.join(self.data_group_dir,'unzipped')
         self.merged_file_dir = os.path.join(self.data_group_dir,'merged')
         self.zip_file_path = os.path.join(self.data_group_dir,'spatial_download.zip')
-        self.archive_dir = os.path.join(SetUp.archive_dir,SetUp.tDate,'input',data_group)
+        self.archive_dir = os.path.join(SetUp.archive_dir,SetUp.tDate,'input',data_group) # this is the only place that uses the date from setup. use date from run_tracker as this can be maintained using testing
         self.data_group = data_group
 
 
@@ -67,6 +67,8 @@ class DataDownload:
 
         try:
             self.data_download()
+            # update the last_download_date in run_tracker to todays date.
+            self.update_download_date()
         except:
             dbu.restore_data()
             raise
@@ -289,7 +291,7 @@ class DownloadFunctions():
             # Remove all null or empty geometries
             gdf1 = gdf1[~(gdf1["geometry"].is_empty | gdf1["geometry"].isna())]
             # Convert the geometry field to wkt
-            df = self.geoDfToDf_wkt(gdf1) if "geometry" in list(gdf1.columns) else pd.DataFrame(gdf1)
+            df = geoDfToDf_wkt(gdf1) if "geometry" in list(gdf1.columns) else pd.DataFrame(gdf1)
 
         return df
 
@@ -342,17 +344,17 @@ class DownloadFunctions():
 
 
 
-    def geoDfToDf_wkt(self,gdf):
-        df = pd.DataFrame(gdf.assign(geometry=gdf.geometry.apply(wkt.dumps)))
-        if 'geometry' in df.columns:
-            df.rename(columns={"geometry": "geom"})
-        # move the geom to the first column
-        cols = list(df.columns)
-        if 'geom' in cols:
-            cols.remove('geom')
-            cols.insert(0,'geom')
-            df = df[cols]
-        return df
+    # def geoDfToDf_wkt(self,gdf):
+    #     df = pd.DataFrame(gdf.assign(geometry=gdf.geometry.apply(wkt.dumps)))
+    #     if 'geometry' in df.columns:
+    #         df.rename(columns={"geometry": "geom"})
+    #     # move the geom to the first column
+    #     cols = list(df.columns)
+    #     if 'geom' in cols:
+    #         cols.remove('geom')
+    #         cols.insert(0,'geom')
+    #         df = df[cols]
+    #     return df
 
 
 
@@ -369,6 +371,23 @@ class DownloadFunctions():
         # extract all from zip file and save to output_directory
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(output_directory)
+            
+            
+    def update_download_date(self):
+        """ 
+        As the download has been successsful, the date in the run_tracker file can be updated to todays date. This is the date used
+        in the preformatting stage. Saving it here rather than using todays date is useful for testing where the date used will not be
+        todays date but the date the datawas downloaded.
+        """
+        Logger.logger.info("update the last download date to todays date")
+        
+        run_tracker_path = os.path.join(SetUp.configs_dir,'run_tracker.json')
+        run_tracker_config = get_json(run_tracker_path)
+        run_tracker_config['last_download_date'] = datetime.datetime.now().strftime("%d-%m-%Y")
+        write_json(run_tracker_path,run_tracker_config)
+        
+        
+        
 
 
 
@@ -378,4 +397,17 @@ def get_all_ouput_file_names(data_import_lst):
         for item in group['groups']:
             lst.append(item['output'])
     return list(set(lst))
+
+
+def geoDfToDf_wkt(gdf):
+        df = pd.DataFrame(gdf.assign(geometry=gdf.geometry.apply(wkt.dumps)))
+        if 'geometry' in df.columns:
+            df.rename(columns={"geometry": "geom"})
+        # move the geom to the first column
+        cols = list(df.columns)
+        if 'geom' in cols:
+            cols.remove('geom')
+            cols.insert(0,'geom')
+            df = df[cols]
+        return df
     

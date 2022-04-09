@@ -9,7 +9,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false  
+        "delete_on_initial_run": false,
+        "db_name": "gp_exchange"
     },
     "GeologicalProvince": {
         "record_changes": null,
@@ -21,7 +22,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_geologicalprovince"
     },
     "GeologicalProvinceSpatial": {
         "record_changes": null,
@@ -33,7 +35,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": null
     },
     "GovernmentRegion": {
         "record_changes": null,
@@ -45,7 +48,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_governmentregion"
     },
     "GovernmentRegionSpatial": {
         "record_changes": null,
@@ -57,7 +61,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": null
     },
     "Holder": {
         "record_changes": null,
@@ -74,7 +79,8 @@
         },
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_holder"
     },
     "holder_listed": {
         "record_changes": null,
@@ -86,7 +92,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_holder_listed"
     },
     "Listed": {
         "record_changes": null,
@@ -98,7 +105,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_listed"
     },
     "LocalGovernment": {
         "record_changes": null,
@@ -110,7 +118,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_localgovernment"
     },
     "LocalGovernmentSpatial": {
         "record_changes": null,
@@ -122,7 +131,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": null
     },
     "Material": {
         "record_changes": null,
@@ -134,7 +144,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_material"
     },
     "material_category": {
         "record_changes": null,
@@ -146,7 +157,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_material_category"
     },
     "MaterialCategory": {
         "record_changes": null,
@@ -158,7 +170,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_materialcategory"
     },
     "OccName": {
         "record_changes": null,
@@ -170,7 +183,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occname"
     },
     "OccOriginalID": {
         "record_changes": null,
@@ -187,7 +201,8 @@
             "rename_field": "_id",
             "additional_fields": ["user_name", "valid_instance", "date_created"]
         },
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occoriginalid"
     },
     "OccSize": {
         "record_changes": null,
@@ -199,7 +214,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occsize"
     },
     "OccStatus": {
         "record_changes": null,
@@ -211,7 +227,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occstatus"
     },
     "OccStatusSimp": {
         "record_changes": null,
@@ -223,7 +240,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occstatussimp"
     },
     "OccType": {
         "record_changes": null,
@@ -235,7 +253,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occtype"
     },
     "OccTypeSimp": {
         "record_changes": null,
@@ -247,7 +266,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_occtypesimp"
     },
     "Occurrence": {
         "record_changes": {
@@ -280,7 +300,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence"
     },
     "OccurrenceAddition": {
         "record_changes": null,
@@ -295,7 +316,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_occurrenceaddition"
     },
     "OccurrenceRemoval": {
         "record_changes": null,
@@ -310,7 +332,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_occurrenceremoval"
     },
     "OccurrenceChange": {
         "record_changes": null,
@@ -326,7 +349,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_occurrencechange"
     },
     "occurrence_geoprovince": {
         "record_changes": {
@@ -351,7 +375,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence_geoprovince"
     },
     "occurrence_majmat": {
         "record_changes": {
@@ -376,7 +401,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence_majmat"
     },
     "occurrence_minmat": {
         "record_changes": {
@@ -401,7 +427,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence_minmat"
     },
     "occurrence_name": {
         "record_changes": {
@@ -426,7 +453,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence_name"
     },
     "occurrence_oid": {
         "record_changes": {
@@ -451,7 +479,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence_oid"
     },
     "occurrence_typ": {
         "record_changes": {
@@ -476,7 +505,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "occurrence"
+        "check_changes_group": "occurrence",
+        "db_name": "gp_occurrence_typ"
     },
     "Parent": {
         "record_changes": null,
@@ -488,7 +518,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_parent"
     },
     "Shore": {
         "record_changes": null,
@@ -500,7 +531,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_shore"
     },
     "State": {
         "record_changes": null,
@@ -512,7 +544,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_state"
     },
     "StateSpatial": {
         "record_changes": null,
@@ -524,7 +557,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_statespatial"
     },
     "TenAct": {
         "record_changes": null,
@@ -536,7 +570,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tenact"
     },
     "Tenement": {
         "record_changes": {
@@ -570,7 +605,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement"
     },
     "TenementChange": {
         "record_changes": null,
@@ -586,7 +622,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_tenementchange"
     },
     "TenementAddition": {
         "record_changes": null,
@@ -601,7 +638,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_tenementaddition"
     },
     "TenementRemoval": {
         "record_changes": null,
@@ -616,7 +654,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_tenementremoval"
     },
     "tenement_geoprovince": {
         "record_changes": {
@@ -641,7 +680,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement_geoprovince"
     },
     "tenement_govregion": {
         "record_changes": {
@@ -662,7 +702,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement_govregion"
     },
     "tenement_localgov": {
         "record_changes": {
@@ -683,7 +724,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement_localgov"
     },
     "tenement_majmat": {
         "record_changes": {
@@ -704,7 +746,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement_majmat"
     },
     "tenement_minmat": {
         "record_changes": {
@@ -725,7 +768,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement_minmat"
     },
     "tenement_occurrence": {
         "record_changes": {
@@ -749,7 +793,8 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tenement_occurrence"
     },
     "tenement_oid": {
         "record_changes": {
@@ -774,7 +819,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenement_oid"
     },
     "TenHolder": {
         "record_changes": {
@@ -799,7 +845,8 @@
         "is_base_table": false,
         "extract_new_data": null,
         "delete_on_initial_run": false,
-        "check_changes_group": "tenement"
+        "check_changes_group": "tenement",
+        "db_name": "gp_tenholder"
     },
     "TenOriginalID": {
         "record_changes": null,
@@ -816,7 +863,8 @@
             "rename_field": "_id",
             "additional_fields": ["user_name", "valid_instance", "date_created"]
         },
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tenoriginalid"
     },
     "TenStatus": {
         "record_changes": null,
@@ -828,7 +876,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tenstatus"
     },
     "TenStatusSimp": {
         "record_changes": null,
@@ -840,7 +889,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tenstatussimp"
     },
     "TenType": {
         "record_changes": null,
@@ -852,7 +902,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tentype"
     },
     "TenTypeSimp": {
         "record_changes": null,
@@ -864,7 +915,8 @@
         "db_to_core_transfer": null,
         "is_base_table": true,
         "extract_new_data": null,
-        "delete_on_initial_run": false
+        "delete_on_initial_run": false,
+        "db_name": "gp_tentypesimp"
     },
     "HolderChange": {
         "record_changes": null,
@@ -879,6 +931,7 @@
         "db_to_core_transfer": null,
         "is_base_table": false,
         "extract_new_data": null,
-        "delete_on_initial_run": true
+        "delete_on_initial_run": true,
+        "db_name": "gp_holderchange"
     }
 }

@@ -1,3 +1,31 @@
 {
-    "task": "manual_updates"
+    "active_atlas_directory_name": "local",
+    "production": {
+        "task": "state_source_updates",
+        "run_module": "",
+        "last_download_date": "16-02-2022",
+        "segments": "not supported for production"
+    },
+    "local": {
+        "task": "",
+        "run_module": "segment",
+        "last_download_date": "16-02-2022",
+        "segments": {
+            "group": "01_initial",
+            "subgroups": [
+                "06_extract_user_edits"
+            ]
+        }
+    },
+    "testing": {
+        "task": "",
+        "run_module": "segment",
+        "last_download_date": "16-02-2022",
+        "segments": {
+            "group": "01_initial",
+            "subgroups": [
+                "02_preformat"
+            ]
+        }
+    }
 }

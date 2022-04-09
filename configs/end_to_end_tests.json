@@ -1,0 +1,74 @@
+{
+    "01_initial": {
+        "description": "The initial download of a complete set of data",
+        "tests": {
+            "01_download": {
+                "description": "Download a fresh set of data",
+                "dependent": null,
+                "function_to_test": {
+                    "module": "functions.data_download",
+                    "class": "DataDownload",
+                    "method": "all_data_download"
+                },
+                "pre-run_prompt": "This test requires the download links to be updated first. Has this been done?"
+            },
+            "02_preformat": {
+                "description": "Preformat the raw downloaded data",
+                "dependent": "01_download",
+                "function_to_test": {
+                    "module": "functions.preformat",
+                    "class": "PreformatData",
+                    "method": "all_preformat"
+                }
+            },
+            "03_combine_data": {
+                "description": "Combine the numerous files in to database setup files",
+                "dependent": "02_preformat",
+                "function_to_test": {
+                    "module": "functions.build_format",
+                    "class": "CombineDatasets",
+                    "method": "combine_datasets"
+                }
+            },
+            "04_build_spatial_data": {
+                "description": "Create the spatial relationship files",
+                "dependent": "03_combine_data",
+                "function_to_test": {
+                    "module": "functions.spatial_relationships",
+                    "class": "SpatialRelations",
+                    "method": "build_spatial_relations"
+                }
+            },
+            "05_find_changes_and_update_database": {
+                "description": "Find and record difference between the current core files and the last downloaded data. Update the database with the formatted data",
+                "dependent": "04_build_spatial_data",
+                "function_to_test": {
+                    "module": "functions.db_update",
+                    "class": "ChangesAndUpdate",
+                    "method": "find_changes_update_core_and_database"
+                }
+            },
+            "06_extract_user_edits": {
+                "description": "Extract user edits from the database and update the core files",
+                "dependent": null,
+                "pre-function": "load_user_edits",
+                "function_to_test": {
+                    "module": "functions.apply_user_updates",
+                    "class": "ExtractUserEdits",
+                    "method": "extract_user_edits"
+                }
+            },
+            "07_apply_missing_data": {
+                "description": "Apply the manual updates to the database for the new data from the last data download",
+                "dependent": null,
+                "function_to_test": {
+                    "module": "functions.commit_new_values",
+                    "class": "UpdateMissingData",
+                    "method": "apply_missing_data_updates"
+                }
+            }
+        }
+    }
+}
+
+

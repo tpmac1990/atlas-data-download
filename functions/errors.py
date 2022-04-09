@@ -7,10 +7,11 @@ import csv
 from .directory_files import file_exist
 
 
-def check_csvs_for_errors(self):
+def check_csvs_for_errors():
     ''' checks for errors in the data before it it loaded to the database. This inludes blanks and primary keys that 
         don't exist in the related file.
     '''
+    print('poo')
     pass
     # csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
