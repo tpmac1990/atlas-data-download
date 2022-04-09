@@ -10,7 +10,6 @@ from fuzzywuzzy import process
 from functions.common.directory_files import file_exist, get_json, write_to_file
 from functions.common.timer import Timer
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 from .missing_data_formatting import MissingDataFormatting
 
 
@@ -33,13 +32,6 @@ class CombineDatasets:
         timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nCombine Datasets\n{Logger.hashed}")
 
-        # archive backup
-        DataBackup('archive_combine_datasets').backup_data_archive()
-
-        # stage backup
-        dbu = DataBackup('combine_datasets')
-        dbu.backup_data()
-
         # clear the data in the missing_temp file
         self.clear_missing_temp_file()
 
@@ -57,7 +49,7 @@ class CombineDatasets:
             # save the missing data to files
             FinalizeMissingData()
         except:
-            dbu.restore_data()
+            # dbu.restore_data()
             raise
 
         # log the run time
@@ -727,16 +719,10 @@ class CombineSiteDatasets():
 class FinalizeMissingData():
 
     def __init__(self):
-        # backup necessary data
-        DataBackup('combine_datasets')
-
-        dbu = DataBackup('combine_datasets')
-        dbu.backup_data()
-
         try:
             self.finalize_missing_data()
         except:
-            dbu.restore_data()
+            # dbu.restore_data()
             raise
 
 

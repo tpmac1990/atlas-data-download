@@ -11,7 +11,6 @@ from functions.common.directory_files import get_json, file_exist
 
 from functions.common.timer import Timer
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 from functions.common.clean_geometry import clean_multipolygon_by_df
 
 
@@ -43,10 +42,6 @@ class SpatialRelations:
         timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nSpatial Relations\n{Logger.hashed}")
 
-        # only need to back up the new occurrence and tenement files as they have the srid attached
-        dbu = DataBackup('spatial_relationships')
-        dbu.backup_data()
-
         try:
             # create the occurrence tenement relation file
             self.create_tenement_occurrence_file()
@@ -59,7 +54,7 @@ class SpatialRelations:
             # add crs to each of the geometires in the WKT field and reduce points in Tenement polygons
             self.add_crs_clean_polygons()
         except:
-            dbu.restore_data()
+            # dbu.restore_data()
             raise
 
         Logger.logger.info('Spatial Relationships duration: %s' %(timer.time_past()))

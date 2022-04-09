@@ -11,7 +11,6 @@ from .db_update import sqlalchemy_engine
 from functions.common.timer import Timer
 
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 from .data_download import geoDfToDf_wkt
 
 
@@ -42,10 +41,6 @@ class ExtractUserEdits:
             Logger.logger.info("This is the initial download. No User edits to extract")
             return
 
-        # backup necessary data
-        dbu = DataBackup('extract_user_edits')
-        dbu.backup_data()
-
         try:
             # update the core files for db tables which the user can create new instances e.g. Holder, OccName
             self.transfer_user_creations_to_core()
@@ -55,7 +50,7 @@ class ExtractUserEdits:
             self.transfer_changes_to_core()
         except:
             # revert files back to last backup stage
-            dbu.restore_data()
+            # dbu.restore_data()
             raise
 
         Logger.logger.info("Total user edits extraction run time: %s" %(timer.time_past()))

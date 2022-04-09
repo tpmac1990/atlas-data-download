@@ -13,7 +13,6 @@ from functions.common.directory_files import copy_directory, write_to_file, get_
 from functions.common.timer import Timer
 from .schedule import Schedule
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 
 from datetime import date
 
@@ -27,10 +26,6 @@ class PreformatData:
         ''' performs all the formatting on the files before they can be merged together into the database ready tables '''
         timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
-
-        # backup necessary data. This could be split into two
-        dbu = DataBackup('preformat')
-        dbu.backup_data()
         
         try:
             occ = PreFormatDataGroup('occurrence')
@@ -40,7 +35,7 @@ class PreformatData:
             self.preformat_files(ten)
 
         except:
-            dbu.restore_data()
+            # dbu.restore_data()
             raise
 
         Logger.logger.info('Preformat time: %s' %(timer.time_past()))

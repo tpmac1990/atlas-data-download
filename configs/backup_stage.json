@@ -1,7 +1,0 @@
-{
-    "stage": "extract_user_edits",
-    "last_process": {
-        "process": "state_source_update",
-        "successful": true
-    }
-}

@@ -25,7 +25,6 @@ from functions.common.directory_files import delete_files_in_directory, file_exi
 from functions.common.timer import Timer
 from .schedule import Schedule
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 
 
 
@@ -56,21 +55,12 @@ class DownloadSetUp:
 class DataDownload:
 
     def all_data_download(self):
-        # archive backup
-        DataBackup('archive_data_download').backup_data_archive()
-
-        # stage backup
-        dbu = DataBackup('data_download')
-        # set the process
-        dbu.set_process(process='state_source_update')
-        dbu.backup_data()
-
         try:
             self.data_download()
             # update the last_download_date in run_tracker to todays date.
             self.update_download_date()
         except:
-            dbu.restore_data()
+            # dbu.restore_data()
             raise
 
 

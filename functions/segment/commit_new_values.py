@@ -14,7 +14,6 @@ from functions.common.timer import Timer
 from functions.common.directory_files import get_json
 from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_psycopg2, update_db_table_by_index_field_and_value_lst
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 
 
 
@@ -65,10 +64,6 @@ class UpdateMissingData:
         timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nApply Missing Data Updates\n{Logger.hashed}")
 
-        dbu = DataBackup('update_missing_data')
-        dbu.backup_data()
-        dbu.set_process(process='manual_data_update')
-
         try:
             configs = self.configs
 
@@ -83,11 +78,11 @@ class UpdateMissingData:
 
             self.con.close()
             self.conn.close()
-            dbu.update_backup_stage()
-            dbu.set_process_successful()
+            # dbu.update_backup_stage()
+            # dbu.set_process_successful()
 
         except:
-            dbu.restore_data()
+            # dbu.restore_data()
             self.con.close()
             self.conn.close()
             raise

@@ -15,7 +15,6 @@ from functions.common.db_functions import sqlalchemy_engine, connect_psycopg2, o
 
 from functions.common.timer import Timer
 from ..setup import SetUp, Logger
-from functions.common.backup_data import DataBackup
 from .migrate_files_db import DatabaseManagement
 
 
@@ -48,11 +47,6 @@ class ChangesAndUpdate:
         '''        
         timer = Timer()
         Logger.logger.info(f"\n\n{Logger.hashed}\nRecord Changes & Migrate to Database\n{Logger.hashed}")
-
-        # backup necessary data. A lot of data needs to be backed up, duration could be reduced by splitting between methods
-        dbu = DataBackup('change_and_update')
-        dbu.backup_data()
-        dbu.set_process()
 
         # get congif files
         # If less than three files, then all new files will be pushed to db
@@ -93,7 +87,7 @@ class ChangesAndUpdate:
                 # create qgis compatible files for tenement & occurrence files
                 self.create_qgis_spatial_files()
             except:
-                dbu.restore_data()
+                # dbu.restore_data()
                 raise
 
             try:
@@ -105,15 +99,16 @@ class ChangesAndUpdate:
                 # create the change, add and remove tables and update them in the core files and database 
                 self.build_update_tables_update_db()
             except:
-                # this will restore the database and the local files back to the last archive point
-                DataBackup('archive_data_download').restore_data_archive()
-                DataBackup('archive_combine_datasets').restore_data_archive() # commented out 211211 for trouble shooting
+                # dbu
+                # # this will restore the database and the local files back to the last archive point
+                # DataBackup('archive_data_download').restore_data_archive()
+                # DataBackup('archive_combine_datasets').restore_data_archive() # commented out 211211 for trouble shooting
                 raise
 
-        # set backup stage to none
-        dbu.update_backup_stage()
-        # record the task as a success. The user will see this on next run. also clear the backup folder as the data is no longer required
-        dbu.set_process_successful()
+        # # set backup stage to none
+        # dbu.update_backup_stage()
+        # # record the task as a success. The user will see this on next run. also clear the backup folder as the data is no longer required
+        # dbu.set_process_successful()
 
         Logger.logger.info('Changes & Updates duration: %s' %(timer.time_past()))
 
