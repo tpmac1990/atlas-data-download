@@ -16,6 +16,7 @@ def load_user_edits(**kwargs):
         2. set user_edit to true
         3. append 'change' & 'addition' tables to db. These are currently manually built
     """
+    Logger.logger.info(f"\n\n{Logger.hashed}\nApplying Dummy User Edits\n{Logger.hashed}")
     segment_dir = kwargs.get("segment_dir")
     user_edits = os.path.join(segment_dir,"USER_EDITS.csv")
     df = pd.read_csv(user_edits)
@@ -24,8 +25,16 @@ def load_user_edits(**kwargs):
     
     conn = connect_psycopg2(access_configs[SetUp.active_atlas_directory_name])
     con = sqlalchemy_engine(access_configs[SetUp.active_atlas_directory_name])
-    table_lst = _get_unique_values(df,'TABLE')
     
+    record_changes = _apply_dummy_user_edit_changes_to_database(conn, db_update_configs, df)
+    
+    _set_altered_user_edits_field_true(conn, record_changes)
+
+    _append_change_files_to_db_tables(con, segment_dir)
+
+    
+def _apply_dummy_user_edit_changes_to_database(conn, db_update_configs, df):
+    Logger.logger.info(f"")
     configs = db_update_configs
     # key = db name, value = model/csv name
     model_db_name_dic = { configs[x]['db_name']:x for x in configs}
@@ -33,6 +42,8 @@ def load_user_edits(**kwargs):
     record_changes = []
     
     df_lst = df.to_dict('records')
+    Logger.logger.info("Applying '%s' rows of dummy data to database"%((len(df_lst))))
+    
     for row in df_lst:
         action = row['ACTION']
         table = row['TABLE']
@@ -78,8 +89,12 @@ def load_user_edits(**kwargs):
         cur.execute(command)
         # rows_deleted = cur.rowcount
         conn.commit()
+        
+        return record_changes
     
+def _set_altered_user_edits_field_true(conn, record_changes):
     # change 'user_edit' to true for fields that have had a change
+    Logger.logger.info("Setting altered fields 'user_edit' to 'true'")
     for row in record_changes:
         table = "gp_" + row["dataset"]
         ind = row["id"]
@@ -88,7 +103,8 @@ def load_user_edits(**kwargs):
         cur = conn.cursor()
         cur.execute(command)
         conn.commit()
-
+            
+def _append_change_files_to_db_tables(con, segment_dir):
     # append the 'change' files to the database tables
     for change_file in ["HolderChange","OccurrenceAddition","OccurrenceChange","TenementAddition","TenementChange","TenementRemoval"]:
         path = os.path.join(segment_dir,"{}.csv".format(change_file))
@@ -96,9 +112,6 @@ def load_user_edits(**kwargs):
             change_df = pd.read_csv(path,dtype=str)
             table = "gp_%s"%(change_file.lower())
             append_to_db(con,change_file,change_df)
-        
-def _get_unique_values(df,field):
-    return df[field].drop_duplicates().tolist()
 
 def _json_to_keys_and_values(value, **kwargs):
     result = json.loads(value)
@@ -133,8 +146,4 @@ def _get_core_field(obj):
     for field in ["ind","tenement_id","occurrence_id"]:
         if field in obj:
             return field
-    
-
-        
-        
     

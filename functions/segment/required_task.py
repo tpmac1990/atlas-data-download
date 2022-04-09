@@ -207,6 +207,7 @@ class PromptRequiredTask:
             
         # check for any pre-run_prompts before starting
         for segment_name in segment_choices:
+            print(f"Starting: {segment_name}")
             if not 'pre-run_prompt' in segments_configs[segment_name].keys():
                 continue;
             pre_run_prompt = segments_configs[segment_name]['pre-run_prompt']
