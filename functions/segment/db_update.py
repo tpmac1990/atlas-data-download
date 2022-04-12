@@ -12,6 +12,7 @@ import sys
 
 from functions.common.directory_files import copy_directory, get_json, file_exist, delete_file, copy_directory_in_list
 from functions.common.db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable
+from functions.common.backup import complete_script__restore
 
 from functions.common.timer import Timer
 from ..setup import SetUp, Logger
@@ -87,7 +88,7 @@ class ChangesAndUpdate:
                 # create qgis compatible files for tenement & occurrence files
                 self.create_qgis_spatial_files()
             except:
-                # dbu.restore_data()
+                complete_script__restore()
                 raise
 
             try:
@@ -99,16 +100,10 @@ class ChangesAndUpdate:
                 # create the change, add and remove tables and update them in the core files and database 
                 self.build_update_tables_update_db()
             except:
-                # dbu
-                # # this will restore the database and the local files back to the last archive point
-                # DataBackup('archive_data_download').restore_data_archive()
-                # DataBackup('archive_combine_datasets').restore_data_archive() # commented out 211211 for trouble shooting
+                complete_script__restore()
                 raise
 
-        # # set backup stage to none
-        # dbu.update_backup_stage()
-        # # record the task as a success. The user will see this on next run. also clear the backup folder as the data is no longer required
-        # dbu.set_process_successful()
+        complete_script__restore()
 
         Logger.logger.info('Changes & Updates duration: %s' %(timer.time_past()))
 

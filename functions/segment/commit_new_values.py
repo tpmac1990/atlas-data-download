@@ -12,6 +12,7 @@ import sqlalchemy
 
 from functions.common.timer import Timer
 from functions.common.directory_files import get_json
+from functions.common.backup import complete_script__restore
 from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_psycopg2, update_db_table_by_index_field_and_value_lst
 from ..setup import SetUp, Logger
 
@@ -78,11 +79,10 @@ class UpdateMissingData:
 
             self.con.close()
             self.conn.close()
-            # dbu.update_backup_stage()
-            # dbu.set_process_successful()
+            complete_script__restore()
 
         except:
-            # dbu.restore_data()
+            complete_script__restore()
             self.con.close()
             self.conn.close()
             raise

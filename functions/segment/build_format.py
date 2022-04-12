@@ -11,6 +11,7 @@ from functions.common.directory_files import file_exist, get_json, write_to_file
 from functions.common.timer import Timer
 from ..setup import SetUp, Logger
 from .missing_data_formatting import MissingDataFormatting
+from functions.common.backup import complete_script__restore
 
 
 
@@ -49,7 +50,7 @@ class CombineDatasets:
             # save the missing data to files
             FinalizeMissingData()
         except:
-            # dbu.restore_data()
+            complete_script__restore()
             raise
 
         # log the run time
@@ -722,7 +723,7 @@ class FinalizeMissingData():
         try:
             self.finalize_missing_data()
         except:
-            # dbu.restore_data()
+            complete_script__restore()
             raise
 
 

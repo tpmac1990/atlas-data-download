@@ -9,6 +9,7 @@ from functions.common.directory_files import get_json, write_json, file_exist
 from functions.common.database_commands import drop_and_restore_db
 from ..setup import SetUp, Logger, update_setup
 from functions.common import pre_segment
+from functions.common.backup import complete_script__backup
 
 
 
@@ -26,6 +27,7 @@ class PromptRequiredTask:
         Logger.logger.info(f"\n\n{Logger.hashed}\nSetting run configurations\n{Logger.hashed}")
         
         if self.use_last_configs():
+            complete_script__backup()
             return
 
         self.set_directory_to_use()
@@ -36,6 +38,9 @@ class PromptRequiredTask:
         
         self.set_segments_to_run()
         
+        complete_script__backup()
+        
+    
     
     def use_last_configs(self):
         """
@@ -63,7 +68,6 @@ class PromptRequiredTask:
             return self.yes_no_boolean(input(msg))
         
         return False
-
 
     
     def set_directory_to_use(self):
@@ -106,8 +110,16 @@ class PromptRequiredTask:
         if run_module == "segment":
             self.run_tracker_config[directory]["task"] = ""
             
+        # create back up of files and database before running complete script. They will be re-instated on error
+        if run_module == "complete_script":
+            """
+             1. copy folders from one place to another if they exist
+             2. create database dump and save it to db_dumps
+             3. backup folder: SetUp.backup_dir
+            """
+            complete_script__backup()
 
-
+            
 
     def set_task_to_run(self):
         ''' This allows the user to select the task they want to run. The task is saved in the 'required_task.json' file which is read at necessary points in this 

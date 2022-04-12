@@ -7,6 +7,7 @@ import numpy as np
 import csv
 
 from functions.common.directory_files import get_json, file_exist
+from functions.common.backup import complete_script__restore
 from .db_update import sqlalchemy_engine
 from functions.common.timer import Timer
 
@@ -50,7 +51,7 @@ class ExtractUserEdits:
             self.transfer_changes_to_core()
         except:
             # revert files back to last backup stage
-            # dbu.restore_data()
+            complete_script__restore()
             raise
 
         Logger.logger.info("Total user edits extraction run time: %s" %(timer.time_past()))

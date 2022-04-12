@@ -9,6 +9,7 @@ import shutil
 from collections import Counter
 
 from functions.common.directory_files import copy_directory, write_to_file, get_json
+from functions.common.backup import complete_script__restore
 
 from functions.common.timer import Timer
 from .schedule import Schedule
@@ -35,7 +36,7 @@ class PreformatData:
             self.preformat_files(ten)
 
         except:
-            # dbu.restore_data()
+            complete_script__restore()
             raise
 
         Logger.logger.info('Preformat time: %s' %(timer.time_past()))

@@ -21,7 +21,7 @@ import requests
 import fiona
 
 from functions.common.directory_files import delete_files_in_directory, file_exist, get_json, write_json
-
+from functions.common.backup import complete_script__restore
 from functions.common.timer import Timer
 from .schedule import Schedule
 from ..setup import SetUp, Logger
@@ -60,7 +60,7 @@ class DataDownload:
             # update the last_download_date in run_tracker to todays date.
             self.update_download_date()
         except:
-            # dbu.restore_data()
+            complete_script__restore()
             raise
 
 
