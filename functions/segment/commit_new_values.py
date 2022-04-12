@@ -21,8 +21,7 @@ from ..setup import SetUp, Logger
 class UpdateMissingData:
 
     def __init__(self):
-        # if task is not 'manual_updates' then skip this step. It has not beed requested
-        self.run_tracker_config = get_json(os.path.join(SetUp.configs_dir, 'run_tracker.json'))['task']
+        # # if task is not 'manual_updates' then skip this step. It has not beed requested
 
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.update_dir = os.path.join(SetUp.output_dir,'update')
@@ -59,7 +58,8 @@ class UpdateMissingData:
             Files that have no new value applied to the LIKELY_MATCH field will remain in these update files through updates until they have a value
             added to LIKELY_MATCH
         '''
-        if self.run_tracker_config != 'manual_updates':
+        # if task is not 'manual_updates' then skip this step. It has not beed requested
+        if SetUp.task != 'manual_updates':
             return
 
         timer = Timer()
