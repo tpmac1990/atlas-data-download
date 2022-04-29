@@ -11,8 +11,9 @@ from functions.common.directory_files import get_json, file_exist
 from functions.common.backup import complete_script__restore
 
 from functions.common.timer import Timer
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from functions.common.clean_geometry import clean_multipolygon_by_df
+from functions.logging.logger import logger
 
 
 
@@ -41,8 +42,8 @@ class SpatialRelations:
 
     def build_spatial_relations(self):
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nSpatial Relations\n{Logger.hashed}")
-
+        logger(message="Spatial Relations", category=1)
+        
         try:
             # create the occurrence tenement relation file
             self.create_tenement_occurrence_file()
@@ -58,7 +59,7 @@ class SpatialRelations:
             complete_script__restore()
             raise
 
-        Logger.logger.info('Spatial Relationships duration: %s' %(timer.time_past()))
+        logger(message='Spatial Relationships duration: %s' %(timer.time_past()), category=4)
 
 
 
@@ -71,7 +72,7 @@ class SpatialRelations:
             Once the sjoin has been performed, the df is filtered for only the new occurrence & tenement ind values which is then saved in the
             'new' directory as tenement_occurrence.csv
         '''
-        Logger.logger.info("Creating 'tenement_occurrence.csv' file")
+        logger(message="Creating 'tenement_occurrence.csv' file", category=4)
         occ_gdf = self.occ_gdf
         ten_gdf = self.ten_gdf
         if SetUp.isUpdate:
@@ -84,7 +85,7 @@ class SpatialRelations:
 
         # for some reason if there are 144621 rows in the occurrence_pre file then it fill exit the function. temp fix = remove row
         if len(occ_gdf.index) == 144621:
-            Logger.logger.warning("Occurrence df has 144621 rows. last row dropped to prevent error. May be related to storage issues")
+            logger(message="Occurrence df has 144621 rows. last row dropped to prevent error. May be related to storage issues", level=WARNING, category=4)
             occ_gdf.drop(occ_gdf.tail(1).index,inplace=True)
 
         ''' split the petroleum & material data in the occurrence & tenement df's. This will prevent material occurrences being attributed petroleum tenements '''
@@ -133,7 +134,7 @@ class SpatialRelations:
             The new occurence material data is firstly added to the core data to make a complete up to date dataset before running the join so no 
             data is missed.
         '''
-        Logger.logger.info("Creating Tenement material files")
+        logger(message="Creating Tenement material files", category=4)
         ten_occ_df = pd.read_csv(self.tenement_occurrence_path)
         for category in ['majmat','minmat']:
             occ_material_path = os.path.join(self.new_dir,"occurrence_%s.csv"%(category))
@@ -178,21 +179,21 @@ class SpatialRelations:
         region = 60
 
         for file in self.region_configs['files']:
-            Logger.logger.info(f"Creating the '{file['file_name']}' spatial file")
+            logger(message=f"Creating the '{file['file_name']}' spatial file", category=4)
 
             # set the required data_group df. either 'occurrence' or 'tenement'
             data_group_gdf = self.occ_gdf.copy() if file['data_group'] == 'occurrence' else self.ten_gdf.copy()
 
             # list of object sizes that will fail in the sjoin. add a row which will be dropped later with drop_duplicates
             if sys.getsizeof(data_group_gdf) in [24884924]:
-                Logger.logger.info(f"Dataframe size for file '{file['file_name']}' was problematic for the sjoin. A row has been added to bypass error")
+                logger(message=f"Dataframe size for file '{file['file_name']}' was problematic for the sjoin. A row has been added to bypass error", category=4)
                 data_group_gdf = pd.concat((data_group_gdf,data_group_gdf.tail(1)))
                 
             # perform the sjoin for the one-2-many fields which are appended to the existing data_group_gdf
             if file['type'] == 'one2many':
                 for group in file['groups']:
                     # if group['region'] == 'local_government':
-                    Logger.logger.info(f"Working on Occurrence sub group: '{group['region']}'")
+                    logger(message=f"Working on Occurrence sub group: '{group['region']}'", category=4)
                     # edit columns = true is the state column to update the os values to their appropriate state
                     if group['edit_column']:
                         region_gdf = self.geo_state_gdf.copy()
@@ -225,7 +226,7 @@ class SpatialRelations:
                 df.columns = file['headers']
 
             else:
-                Logger.logger.error("Relation type in the config file is incorrect")
+                logger(message="Relation type in the config file is incorrect", level=ERROR, category=4)
 
 
             # titles on the edge of onshore and offshore sometimes have both in their local government and regions. This fixes this
@@ -264,7 +265,7 @@ class SpatialRelations:
             database. A qgis version is also created.
         '''
         if SetUp.isUpdate:
-            Logger.logger.info("No need to create region files as this is only an update")
+            logger(message="No need to create region files as this is only an update", category=4)
             return
 
         dic = {
@@ -276,7 +277,7 @@ class SpatialRelations:
 
         for file in self.region_configs['shapes']:
             file_name = file['file_name']
-            Logger.logger.info(f"Creating '{file_name}' region file")
+            logger(message=f"Creating '{file_name}' region file", category=4)
             gdf = dic[file_name]
             gdf = gdf[file['columns']]
             gdf['geom'] = gdf['geometry'].apply(lambda x: formatGeomCol(x))
@@ -295,12 +296,12 @@ class SpatialRelations:
     def add_crs_clean_polygons(self):
         ''' This inserts the crs code to the start of the wkt for each geometry feature in the table '''
         for file in ['Tenement','Occurrence']:
-            Logger.logger.info(f"Adding crs to '{file}' geometry field")
+            logger(message=f"Adding crs to '{file}' geometry field", category=4)
             path = os.path.join(self.new_dir,"%s.csv"%(file))
             df = pd.read_csv(path)
             # reduce the redundant points along the polygons straight sides
             if file == 'Tenement':
-                Logger.logger.info(f"Reducing vertices in polygons")
+                logger(message=f"Reducing vertices in polygons", category=4)
                 df = clean_multipolygon_by_df(df,'geom')
             # add the SRID to the geometry
             df['geom'] = ["SRID=4202;%s"%(feature) for feature in df['geom']]

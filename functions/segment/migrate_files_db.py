@@ -7,7 +7,8 @@ import psycopg2
 from functions.common.directory_files import get_json
 from functions.common.db_functions import sqlalchemy_engine, connect_psycopg2, orderTables, clearDatabaseTable, convert_date_fields_to_datetime
 
-from ..setup import SetUp, Logger
+from ..setup import SetUp
+from functions.logging.logger import logger
 
 
 
@@ -34,16 +35,16 @@ class DatabaseManagement:
 
         ordered_tables, temp_lst = orderTables(configs,orig_lst,[],[]) #orders the tables so there are no conflicts when entering into the database
 
-        Logger.logger.info(f"\n{Logger.dashed} Clearing rows from database {Logger.dashed}")
+        logger(message="Clearing rows from database", category=2)
         # delete all data in all tables in order
         for table in ordered_tables[::-1]: 
             table_name = "gp_%s"%(table.lower())
             try:
                 clearDatabaseTable(conn,table_name)
             except OperationalError:
-                Logger.logger.error(f"Server close error on table '{table}'")
+                logger(message=f"Server close error on table '{table}'", level=ERROR, category=4)
             except Exception as e:
-                Logger.logger.error(f"Error deleting rows in '{table}' in the database\n{repr(e)}")
+                logger(message=f"Error deleting rows in '{table}' in the database\n{repr(e)}", level=ERROR, category=4)
                 print(repr(e))
                 con.close()
                 conn.close()
@@ -54,9 +55,9 @@ class DatabaseManagement:
         update_tables_lst = [x for x in configs if configs[x]["update_table"]]
         ordered_tables = [x for x in ordered_tables if not x in update_tables_lst]
 
-        Logger.logger.info(f"\n{Logger.dashed} Migrating tables to database {Logger.dashed}")
+        logger(message="Migrating tables to database", category=2)
         for table in ordered_tables:        
-            Logger.logger.info(f"Migrating: {table}")
+            logger(message=f"Migrating: {table}", category=4)
             path = os.path.join(src_dir,"%s.csv"%(table))
             table_name = "gp_%s"%(table.lower())
 
@@ -69,7 +70,7 @@ class DatabaseManagement:
             except Exception as e:
                 # print(e.args)
                 # print the error without all the sql
-                Logger.logger.error(f"Error migrating rows in '{table}' to the database\n{repr(e)}")
+                logger(message=f"Error migrating rows in '{table}' to the database\n{repr(e)}", level=ERROR, category=4)
                 print(repr(e))
                 con.close()
                 conn.close()

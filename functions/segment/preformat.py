@@ -13,7 +13,8 @@ from functions.common.backup import complete_script__restore
 
 from functions.common.timer import Timer
 from .schedule import Schedule
-from ..setup import SetUp, Logger
+from ..setup import SetUp
+from functions.logging.logger import logger
 
 from datetime import date
 
@@ -26,7 +27,7 @@ class PreformatData:
     def all_preformat(self):
         ''' performs all the formatting on the files before they can be merged together into the database ready tables '''
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nPreformat Data\n{Logger.hashed}")
+        logger(message="Preformat Data", category=1)
         
         try:
             occ = PreFormatDataGroup('occurrence')
@@ -39,7 +40,7 @@ class PreformatData:
             complete_script__restore()
             raise
 
-        Logger.logger.info('Preformat time: %s' %(timer.time_past()))
+        logger(message='Preformat time: %s' %(timer.time_past()), category=4)
 
 
 
@@ -85,14 +86,14 @@ class PreFormatDataGroup:
         self.Schedule = Schedule()
         self.download_schedule_config = self.Schedule.open_schedule()
 
-        Logger.logger.info(f"\n{Logger.dashed} {data_group} {Logger.dashed}")
+        logger(message=data_group, category=2)
 
 
     # def create_required_directories(self):
     #     ''' create the 'change', 'core', 'update' folders in both the input and output archive directories
     #         if they don't alreay exist.
     #     '''
-    #     Logger.logger.info("Creating 'change, core, update' folders in the 'input, output' archive directories")
+        # logger(message="Creating 'change, core, update' folders in the 'input, output' archive directories", category=4)
     #     create_multiple_directories(self.archive_dir,['change','core','update'])
     #     create_multiple_directories(self.output_archive_dir,['change','core','update'])
 
@@ -113,13 +114,13 @@ class PreFormatDataGroup:
             except TypeError:
                 # This error can only occur if a file that doesn't require formatting is added to the schedule after running the 'data_download' step. Usually, these files would
                 #   be removed from the 'now' schedule in the data_download step
-                Logger.logger.error(f"file '{key}' does not require formatting")
+                logger(message=f"file '{key}' does not require formatting", level=ERROR, category=4)
                 self.download_schedule_config = self.Schedule.unrequired_file(key, self.data_group, self.download_schedule_config)
                 continue
 
             # only format files if formatting is required
             if len(config_lst) > 0:
-                Logger.logger.info(f"preformatting '{key}'")
+                logger(message=f"preformatting '{key}'", category=4)
                 path = os.path.join(self.new_dir,key+'_WKT.csv')
                 try:
                     df = pd.read_csv(path,dtype=str)
@@ -130,11 +131,11 @@ class PreFormatDataGroup:
                         raise
 
                     except FileNotFoundError:
-                        Logger.logger.warning(f"file '{key}' was not found. Unable to preformat")
+                        logger(message=f"file '{key}' was not found. Unable to preformat", level=WARNING, category=4)
                         continue
 
                     except pd.errors.EmptyDataError:
-                        Logger.logger.warning(f"file '{key}' was empty. Unable to preformat")
+                        logger(message=f"file '{key}' was empty. Unable to preformat", level=WARNING, category=4)
                         continue
 
                 # loop through all the required formatting methods for the file
@@ -210,9 +211,9 @@ class PreFormatDataGroup:
         format_files_lst = self.download_schedule_config[self.data_group]['now'].copy()
         for key in format_files_lst:
             if not self.configs[key]['preformat']:
-                Logger.logger.info(f"No preformatting required for '{key}'")
+                logger(message=f"No preformatting required for '{key}'", category=4)
                 continue
-            Logger.logger.info(f"Assigning unique identifier for '{key}'")
+            logger(message=f"Assigning unique identifier for '{key}'", category=4)
             try:
                 unique_col = self.configs[key]['preformat']['unique_column']
                 # only run if a unique_col is required. e.g. qld_2 in tenements does not need one, so skip
@@ -236,13 +237,13 @@ class PreFormatDataGroup:
             
                 except FileNotFoundError:
                     # non-existing files should have already been removed from the schedule config before this point
-                    Logger.logger.warning(f"Unable to assign unique identifier. file '{key}' does not exist")
+                    logger(message=f"Unable to assign unique identifier. file '{key}' does not exist", level=WARNING, category=4)
                     
                 except KeyError as e:
-                    Logger.logger.exception(f"{str(e)} field is missing in table '{key}'")
+                    logger(message=f"{str(e)} field is missing in table '{key}'", level=EXCEPTION, category=4)
 
                 except TypeError:
-                    Logger.logger.exception(f"Files '{key}' configs in 'formatting_configs' are incorrect")
+                    logger(message=f"{str(e)} field is missing in table '{key}'", level=EXCEPTION, category=4)
 
 
 
@@ -276,7 +277,7 @@ class PreFormatDataGroup:
             be updated on later updates. The files in the new directory are also copied to the change directory as
             these files will be exported to the db
         '''
-        Logger.logger.info("Copying files from the new to the core & change directory. Initial download")
+        logger(message="Copying files from the new to the core & change directory. Initial download", category=4)
         copy_directory(self.new_dir,self.core_dir)
         copy_directory(self.new_dir,self.change_dir)
 
@@ -284,7 +285,7 @@ class PreFormatDataGroup:
 
     def createUpdateFile_updateCore(self):
         ''' compares the newly downloaded file to their matching core file, searches for differences and records them '''
-        Logger.logger.info(f"\nComparing the new and core files to build the change & update files {Logger.dashed}")
+        logger(message="Comparing the new and core files to build the change & update files", category=3)
         high_value = self.findHighestIdentifier()
 
         config_file_lst = [f'{x}_WKT.csv' for x in self.configs if self.configs[x]['preformat']]
@@ -305,7 +306,7 @@ class PreFormatDataGroup:
             # if file[:-8] in ['WA_1']:
             if file in core_files:
                 dic_key = file[:-8]
-                Logger.logger.info(f"Comparing new to core for '{file}'")
+                logger(message=f"Comparing new to core for '{file}'", category=4)
 
                 new_path = os.path.join(self.new_dir,file)
                 core_path = os.path.join(self.core_dir,file)
@@ -316,7 +317,7 @@ class PreFormatDataGroup:
                 try:
                     new_df = pd.read_csv(new_path,dtype=str,encoding = "ISO-8859-1")
                 except pd.errors.EmptyDataError:
-                    Logger.logger.warning(f"The dataframe of '{file}' was empty. Unable to compare to core file")
+                    logger(message=f"The dataframe of '{file}' was empty. Unable to compare to core file", level=WARNING, category=4)
                     continue
                 core_df = pd.read_csv(core_path,dtype=str,encoding = "ISO-8859-1")
                 
@@ -501,7 +502,7 @@ class PreFormatDataGroup:
                 if file_high > high_value:
                     high_value = file_high
             except pd.errors.EmptyDataError:
-                Logger.logger.warning(f"Unable to find the highest identifier in an empty file '{file}'")
+                logger(message=f"Unable to find the highest identifier in an empty file '{file}'", level=WARNING, category=4)
         return high_value
 
 

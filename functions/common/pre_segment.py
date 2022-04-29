@@ -1,10 +1,12 @@
 import os
 import pandas as pd
 import json
+
 from .directory_files import get_json, file_exist
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from .db_functions import connect_psycopg2, sqlalchemy_engine
 from functions.segment.commit_new_values import append_to_db
+from functions.logging.logger import logger
 
 
 
@@ -16,7 +18,7 @@ def load_user_edits(**kwargs):
         2. set user_edit to true
         3. append 'change' & 'addition' tables to db. These are currently manually built
     """
-    Logger.logger.info(f"\n\n{Logger.hashed}\nApplying Dummy User Edits\n{Logger.hashed}")
+    logger(message="Applying Dummy User Edits", category=1)
     segment_dir = kwargs.get("segment_dir")
     user_edits = os.path.join(segment_dir,"USER_EDITS.csv")
     df = pd.read_csv(user_edits)
@@ -34,15 +36,13 @@ def load_user_edits(**kwargs):
 
     
 def _apply_dummy_user_edit_changes_to_database(conn, db_update_configs, df):
-    Logger.logger.info(f"")
     configs = db_update_configs
     # key = db name, value = model/csv name
     model_db_name_dic = { configs[x]['db_name']:x for x in configs}
-    
     record_changes = []
-    
     df_lst = df.to_dict('records')
-    Logger.logger.info("Applying '%s' rows of dummy data to database"%((len(df_lst))))
+    logger(message="Applying '%s' rows of dummy data to database"%((len(df_lst))), category=4)
+    
     
     for row in df_lst:
         action = row['ACTION']
@@ -94,12 +94,11 @@ def _apply_dummy_user_edit_changes_to_database(conn, db_update_configs, df):
     
 def _set_altered_user_edits_field_true(conn, record_changes):
     # change 'user_edit' to true for fields that have had a change
-    Logger.logger.info("Setting altered fields 'user_edit' to 'true'")
+    logger(message="Setting altered fields 'user_edit' to 'true'", category=4)
     for row in record_changes:
         table = "gp_" + row["dataset"]
         ind = row["id"]
         command = f"UPDATE {table} SET user_edit=true WHERE ind={ind}"
-        
         cur = conn.cursor()
         cur.execute(command)
         conn.commit()

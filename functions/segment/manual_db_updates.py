@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import json
 from functions.common.directory_files import get_json
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from functions.common.db_functions import connect_psycopg2
 
 

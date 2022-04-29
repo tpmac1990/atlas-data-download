@@ -2,7 +2,7 @@ import sqlalchemy
 import psycopg2
 import pandas as pd
 
-from ..setup import Logger
+from functions.logging.logger import logger
 
 
 def sqlalchemy_engine(db_configs):
@@ -32,7 +32,7 @@ def clearDatabaseTable(conn, table_name):
     cur.execute("DELETE FROM %s"%(table_name))
     rows_deleted = cur.rowcount
     conn.commit()
-    Logger.logger.info(f"'{rows_deleted}' rows cleared from '{table_name}'")
+    logger(message=f"'{rows_deleted}' rows cleared from '{table_name}'", category=4)
 
 
 def convert_date_fields_to_datetime(df):

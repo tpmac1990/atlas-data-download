@@ -11,8 +11,9 @@ from functions.common.backup import complete_script__restore
 from .db_update import sqlalchemy_engine
 from functions.common.timer import Timer
 
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from .data_download import geoDfToDf_wkt
+from functions.logging.logger import logger
 
 
 
@@ -36,10 +37,10 @@ class ExtractUserEdits:
 
     def extract_user_edits(self):
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nExtract User Edits\n{Logger.hashed}")
+        logger(message="Extract User Edits", category=1)
         # only relevant if updating
         if not SetUp.isUpdate:
-            Logger.logger.info("This is the initial download. No User edits to extract")
+            logger(message="This is the initial download. No User edits to extract", category=4)
             return
 
         try:
@@ -54,13 +55,13 @@ class ExtractUserEdits:
             complete_script__restore()
             raise
 
-        Logger.logger.info("Total user edits extraction run time: %s" %(timer.time_past()))
+        logger(message="Total user edits extraction run time: %s" %(timer.time_past()), category=4)
 
 
 
     def transfer_user_creations_to_core(self):
         ''' Copy the user created instances from db tables and add to the core file '''
-        Logger.logger.info(f"\n{Logger.dashed} Copy user created instances to their core file {Logger.dashed}")
+        logger(message="Copy user created instances to their core file", category=1)
 
         update_configs = self.update_configs 
         access_configs = self.access_configs 
@@ -69,7 +70,7 @@ class ExtractUserEdits:
         sqlalchemy_con = self.sqlalchemy_con
 
         for table in ['OccName','OccOriginalID','TenOriginalID','Listed','Holder']:
-            Logger.logger.info(f"Updating table '{table}'")
+            logger(message=f"Updating table '{table}'", category=4)
             core_path = os.path.join(core_dir,"%s.csv"%(table))
             edit_path = os.path.join(edit_dir,"%s.csv"%(table))
             core_df = pd.read_csv(core_path,engine='python')
@@ -105,7 +106,7 @@ class ExtractUserEdits:
             There are no recording of changes in the 'Change' file here as this is done in the application when a change is made. These tables changes are copied over in 
             the next step.
         '''
-        Logger.logger.info(f"\n{Logger.dashed} Updating core files with changes in db {Logger.dashed}")
+        logger(message="Updating core files with changes in db", category=2)
         csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
         update_configs = self.update_configs 
@@ -119,7 +120,7 @@ class ExtractUserEdits:
 
         for group in creation_tables:
             # if group == 'Holder':
-            Logger.logger.info(f"Working on Group {group}")
+            logger(message=f"Working on Group {group}", category=4)
 
             dic = update_configs[group]['db_to_core_transfer']
             pk = dic['pk']
@@ -174,7 +175,7 @@ class ExtractUserEdits:
                 final_edit.to_csv(edit_path,index=False)
 
                 for table in table_lst:
-                    Logger.logger.info(f"Working on related table: {table}")
+                    logger(message=f"Working on related table: {table}", category=4)
                     # get the values from the core file
                     core_path = os.path.join(core_dir,"%s.csv"%(table))
                     # loop through all the possible fields. 
@@ -231,7 +232,7 @@ class ExtractUserEdits:
 
     def transfer_changes_to_core(self):
         ''' Copy the Change tables from the db and concatenate the user additions to the core file '''
-        Logger.logger.info(f"\n{Logger.dashed} Updating the core Change files with the latest db updates {Logger.dashed}")
+        logger(message="Updating the core Change files with the latest db updates", category=2)
 
         update_configs = self.update_configs 
         access_configs = self.access_configs 
@@ -240,7 +241,7 @@ class ExtractUserEdits:
         sqlalchemy_con = self.sqlalchemy_con
 
         for table in ['OccurrenceChange','TenementChange','HolderChange']:
-            Logger.logger.info(f"Working on: '{table}'")
+            logger(message=f"Working on: '{table}'", category=4)
             # get the date of the last user entry. This is the date the db search will filter from 
             core_path = os.path.join(core_dir,"%s.csv"%(table))
             if file_exist(core_path):

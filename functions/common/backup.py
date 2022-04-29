@@ -1,20 +1,20 @@
 import os
 import shutil
 
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from functions.common.directory_files import delete_files_in_directory, copy_directory
 from .database_commands import pg_dump, drop_and_restore_db
 
 
 def complete_script__backup():
-    if SetUp.complete_script != "complete_script":
+    if SetUp.task != "complete_script":
         return
     shutil.rmtree(SetUp.backup_dir)
     _copy_relevant_directories_to_backup()
     pg_dump(filename="atlas_dump.sql", directory=SetUp.backup_dir)
     
 def complete_script__restore():
-    if SetUp.complete_script != "complete_script":
+    if SetUp.task != "complete_script":
         return
     shutil.rmtree(SetUp.active_atlas_dir)
     _copy_relevant_directories_to_backup(reverse=True)

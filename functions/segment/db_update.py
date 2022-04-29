@@ -15,8 +15,9 @@ from functions.common.db_functions import sqlalchemy_engine, connect_psycopg2, o
 from functions.common.backup import complete_script__restore
 
 from functions.common.timer import Timer
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from .migrate_files_db import DatabaseManagement
+from functions.logging.logger import logger
 
 
 
@@ -47,7 +48,7 @@ class ChangesAndUpdate:
             if isUpdate is True then only the changes need to be added to the database.
         '''        
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nRecord Changes & Migrate to Database\n{Logger.hashed}")
+        logger(message="Record Changes & Migrate to Database", category=1)
 
         # get congif files
         # If less than three files, then all new files will be pushed to db
@@ -56,7 +57,7 @@ class ChangesAndUpdate:
                 and add the user_input, valid & modified columns. Copy these files to the us_change folder which will then be loaded into the database.
                 lastly, create an empty change.csv file in the change folder.
             '''
-            Logger.logger.info(f"\n{Logger.dashed} Initial run. Migrating all data to core directory & database {Logger.dashed}")
+            logger(message="Initial run. Migrating all data to core directory & database", category=2)
             # delete files from core that should exist yet. these include change & update files
             self.delete_unrequired_core_files()
             # copy relevant files from the new folder to the core and ss folders
@@ -72,7 +73,7 @@ class ChangesAndUpdate:
             ''' This deals with updating the core and database tables on subsequent downloads. The core files are maintained rather than replaced and the relevant rows of each file/table
                 that requires updates are updated, while new rows are added. All changes are recorded and this is also updated in the core files and the database.
             '''
-            Logger.logger.info(f"\n{Logger.dashed} Update run. Migrating new & updated data to the core directory & database {Logger.dashed}")
+            logger(message="Update run. Migrating new & updated data to the core directory & database", category=2)
             try:
                 # add core data to new csv file for Tenement values that were added in the tenement_occurrence relation step
                 self.add_relation_core_rows_to_new_file()
@@ -105,7 +106,7 @@ class ChangesAndUpdate:
 
         complete_script__restore()
 
-        Logger.logger.info('Changes & Updates duration: %s' %(timer.time_past()))
+        logger(message='Changes & Updates duration: %s' %(timer.time_past()), category=4)
 
 
     def delete_unrequired_core_files(self):
@@ -172,7 +173,7 @@ class ChangesAndUpdate:
                 new_path = os.path.join(self.new_dir,"%s.csv"%(file))
                 # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
                 if file_exist(new_path):
-                    Logger.logger.info(f"Build update and change files for {file}")
+                    logger(message=f"Build update and change files for {file}", category=4)
                     # set the key (index) column and the fields to drop from the db_update_configs file
                     key = record_changes["key"]
                     drop_fields = record_changes["drop_fields"]
@@ -316,7 +317,7 @@ class ChangesAndUpdate:
 
                 for field in field_lst:
                     # print("Working on: %s, Field: %s"%(file,field))
-                    Logger.logger.info(f"Making ss file and db changes for field '{field}' in table '{file}'")
+                    logger(message=f"Making ss file and db changes for field '{field}' in table '{file}'", category=4)
                     # the action to determine how the field is updated. See in the desciption above for more details
                     action = update_configs[file]['record_changes']['user_edits']['actions'][field]
 
@@ -445,7 +446,7 @@ class ChangesAndUpdate:
 
         # this needs to be reversed so the 'tenement_occurrence' table is entered after the 'Tenement' table
         for data_group in SetUp.data_groups[::-1]:
-            Logger.logger.info(f"\n{Logger.dashed} {data_group} {Logger.dashed}")
+            logger(message=data_group, category=2)
             self.data_group = data_group
             # initialise dictionary to hold the change file dfs
             change_dic = {}
@@ -468,10 +469,10 @@ class ChangesAndUpdate:
 
                 # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
                 if not file_exist(new_path):
-                    Logger.logger.info(f"file '{file}' does not exist in the new directory")
+                    logger(message=f"file '{file}' does not exist in the new directory", category=4)
                     continue
 
-                Logger.logger.info(f"Creating change file & updating core file for '{file}'")
+                logger(message=f"Creating change file & updating core file for '{file}'", category=4)
 
                 # set the paths
                 change_file_path = os.path.join(self.change_dir,"%s.csv"%(file))
@@ -541,7 +542,7 @@ class ChangesAndUpdate:
 
             # write dfs to db in order
             for file in ordered_file_lst:
-                Logger.logger.info(f"Appending data to database for table '{file}'")
+                logger(message=f"Appending data to database for table '{file}'", category=4)
                 table = "gp_%s"%(file.lower())
                 df = change_dic[file]
 
@@ -582,7 +583,7 @@ class ChangesAndUpdate:
             Also excludes the Change, Addition & Removal tables
         '''
         # print("Finding new entries for the base tables and updating the core file and database.")
-        Logger.logger.info(f"\n{Logger.dashed} Find new entries {Logger.dashed}")
+        logger(message="Find new entries", category=2)
         
         # Configs
         update_configs = self.update_configs
@@ -598,10 +599,10 @@ class ChangesAndUpdate:
             new_path = os.path.join(self.new_dir,"%s.csv"%(file))
             # only progress if the new file exists. If it doesn't, there may be no changes, or there may be an error i.e. vba macro hasn't been run
             if not file_exist(new_path):
-                Logger.logger.info(f"'{file}' doesn't exist. No new entires could be found")
+                logger(message=f"'{file}' doesn't exist. No new entires could be found", category=4)
                 continue
 
-            Logger.logger.info(f"Searching for new entries in '{file}'")
+            logger(message=f"Searching for new entries in '{file}'", category=4)
             # Set the paths
             core_path = os.path.join(self.core_dir,"%s.csv"%(file))
             change_file_path = os.path.join(self.change_dir,"%s.csv"%(file))
@@ -645,7 +646,7 @@ class ChangesAndUpdate:
             fields pandas will not allow the conversion of a mixture of Nonetypes/Nans and strings to integers and therefore will throw an error when appending to the db table. 
         '''
         # print("Creating the database ready change file for data group %s"%(self.data_group))
-        Logger.logger.info(f"\n{Logger.dashed} Build {self.data_group} Change record tables {Logger.dashed}")
+        logger(message=f"Build {self.data_group} Change record tables", category=2)
 
         file_name = "%sChange"%(self.data_group.capitalize())
         self.group_change_path = os.path.join(self.update_dir,"%s.csv"%(file_name))
@@ -710,7 +711,8 @@ class ChangesAndUpdate:
             if db_field in int_fields:
                 select_df[db_field] = select_df[db_field].astype(float).astype(int)
             select_df.to_sql(table, self.sqlalchemy_con, if_exists='append', index=False, method='multi')
-        Logger.logger.info("Successfully appended '%s' rows to '%s'"%(len(df.index),table))
+
+        logger(message="Successfully appended '%s' rows to '%s'"%(len(df.index),table), category=4)
 
 
 
@@ -720,8 +722,8 @@ class ChangesAndUpdate:
             This data is then split between datagroup and whether it was added or deleted and then added to the core file and the db table.
         '''
         data_group = self.data_group
-        Logger.logger.info(f"\n{Logger.dashed} Create database ready addition & removal files for {data_group} {Logger.dashed}")
-
+        logger(message=f"Create database ready addition & removal files for {data_group}", category=2)
+        
         # filter the df for the current data group
         add_remove_df = self.update_df[self.update_df["GROUP"] == data_group]
         # removal is only required in Tenement dataset, No occurrences are by states dataset changes
@@ -743,7 +745,8 @@ class ChangesAndUpdate:
             # final_df = format_date_columns(final_df) # delete this
             table = "gp_%s"%(file_name.lower())
             final_df.to_sql(table, self.sqlalchemy_con, if_exists='append', index=False, method='multi')
-            Logger.logger.info("Successfully added '%s' rows to '%s'"%(len(final_df.index),table))
+            
+            logger(message="Successfully added '%s' rows to '%s'"%(len(final_df.index),table), category=4)
         
 
 
@@ -790,7 +793,7 @@ class ChangesAndUpdate:
         ''' This will get the ids of the rows that are to be updated which comes from the update & change files created in the previous step. Rows with these ids 
             are then removed from the Change, Remove & Addition tables.
         '''
-        Logger.logger.info(f"\n{Logger.dashed} Delete all change & remove id rows from database {Logger.dashed}")
+        logger(message="Delete all change & remove id rows from database", category=2)
 
         # Configs
         update_configs = self.update_configs
@@ -847,7 +850,7 @@ class ChangesAndUpdate:
         ''' Copy entire files from the new directory to the core directory when in the db_update_configs file_type = update or replace.
             This is only used on the initial creation on of tables, after, the core files are update with changes only.
         '''
-        Logger.logger.info("Copy required files from new to core, change & ss directories")
+        logger(message="Copy required files from new to core, change & ss directories", category=4)
         update_configs = self.update_configs
         # files to copy from new directory to core directory
         copy_files = ["%s.csv"%(x) for x in update_configs if update_configs[x]['file_type'] in ['update','replace']]
@@ -862,7 +865,7 @@ class ChangesAndUpdate:
 
     def backup_new_useredit_file(self):
         ''' This is designed to copy the new files to the onew folder before user edits are applied. This will provide a set of data to compare to the post user edit new data '''
-        Logger.logger.info(f"\n{Logger.dashed} Copy required files from new to onew directory before user edits are applied {Logger.dashed}")
+        logger(message="Copy required files from new to onew directory before user edits are applied", category=2)
         update_configs = self.update_configs
         # files to copy from new directory to core directory
         file_lst = ["%s.csv"%(x) for x in update_configs if update_configs[x]['record_changes'] and update_configs[x]['record_changes']['user_edits']]
@@ -880,7 +883,7 @@ class ChangesAndUpdate:
             in the 'new' files. So later on, these rows are removed from the database but are not reinstated again as it does not exist in the 'new' file. 
             This method finds these 'ind' values, loops through all relevant files and adds all the rows of data with the ind value.
         '''
-        Logger.logger.info(f"\n{Logger.dashed} Add spatial additions to new files {Logger.dashed}")
+        logger(message="Add spatial additions to new files", category=2)
         # Configs
         update_configs = self.update_configs
 
@@ -901,7 +904,7 @@ class ChangesAndUpdate:
         file_lst = [x for x in update_configs if update_configs[x]['record_changes'] and update_configs[x]['record_changes']['relation_update']]
 
         for file in file_lst:
-            Logger.logger.info(f"Working on: {file}")
+            logger(message=f"Working on: {file}", category=4)
 
             new_path = os.path.join(self.new_dir,'%s.csv'%(file))
             new_df = pd.read_csv(new_path)
@@ -918,7 +921,7 @@ class ChangesAndUpdate:
 
     def create_qgis_spatial_files(self):
         ''' create the qgis compatible files for the tenement & occurrence files '''
-        Logger.logger.info(f"Creating qgis compatible files")
+        logger(message=f"Creating qgis compatible files", category=4)
 
         for directory in [self.core_dir,self.new_dir]:
             for file in ['Occurrence','Tenement']:
@@ -952,7 +955,8 @@ class ChangesAndUpdate:
 #     cur.execute("DELETE FROM %s"%(table_name))
 #     rows_deleted = cur.rowcount
 #     conn.commit()
-#     Logger.logger.info(f"'{rows_deleted}' rows cleared from '{table_name}'")
+    # logger(message=f"'{rows_deleted}' rows cleared from '{table_name}'", category=4)
+
 
 
 def clear_db_table_rows_in_lst(conn, table, field, lst):
@@ -970,7 +974,7 @@ def clear_db_table_rows_in_lst(conn, table, field, lst):
         cur.execute(command)
         rows_deleted = cur.rowcount
         conn.commit()
-    Logger.logger.info(f"'{rows_deleted}' rows cleared from '{table}'")
+    logger(message=f"'{rows_deleted}' rows cleared from '{table}'", category=4)
 
 
 def update_db_table_by_index_field_and_value_lst(conn, table_name, dic):
@@ -985,7 +989,7 @@ def update_db_table_by_index_field_and_value_lst(conn, table_name, dic):
             command = "UPDATE %s SET %s = %s WHERE %s = '%s'"%(table_name.lower(),update_field,x[1],update_index,x[0])
         cur.execute(command)
         conn.commit()
-    Logger.logger.info("'%s' rows updated for '%s'"%(len(dic['lst']),table_name))
+    logger(message="'%s' rows updated for '%s'"%(len(dic['lst']),table_name), category=4)
 
 
 

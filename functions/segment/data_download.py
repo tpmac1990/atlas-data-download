@@ -24,7 +24,8 @@ from functions.common.directory_files import delete_files_in_directory, file_exi
 from functions.common.backup import complete_script__restore
 from functions.common.timer import Timer
 from .schedule import Schedule
-from ..setup import SetUp, Logger
+from ..setup import SetUp
+from functions.logging.logger import logger
 
 
 
@@ -66,11 +67,11 @@ class DataDownload:
 
     def data_download(self):
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nData Download\n{Logger.hashed}")
+        logger(message="Data Download", category=1)
         self.Schedule = Schedule()
         
         for data_group in SetUp.data_groups:
-            Logger.logger.info(f"\n{Logger.dashed} {data_group} {Logger.dashed}")
+            logger(message=data_group, category=2)
 
             grp_setup = DownloadSetUp(data_group)
 
@@ -83,7 +84,7 @@ class DataDownload:
             try:
                 delete_files_in_directory(grp_setup.wkt_csv_dir)
             except FileNotFoundError:
-                Logger.logger.exception(f'Could not locate directory {grp_setup.wkt_csv_dir} to delete files within')
+                logger(message=f'Could not locate directory {grp_setup.wkt_csv_dir} to delete files within', level=EXCEPTION, category=4)
                 raise FileNotFoundError(f'directory does not exist: {grp_setup.wkt_csv_dir}')
 
             # record the files that failed to load. these will be added to the download_schedule config today list to try them again on next download
@@ -110,7 +111,7 @@ class DataDownload:
                     # only continue if df is not empty
                     if df.empty:
                         # no point in adding empty tables
-                        Logger.logger.warning(f"Successfully downloaded '{file_name}', but it contains '0' rows. Not exported to input directory")
+                        logger(message=f"Successfully downloaded '{file_name}', but it contains '0' rows. Not exported to input directory", level=WARNING, category=4)
                         # remove the file from the schedule so no further steps are attempted on it. It is not added to 'today' as there is no point running it again on next download
                         file_dl_lst.remove(file_name)
 
@@ -122,13 +123,13 @@ class DataDownload:
                             required_fields_lst.remove('NEW_IDENTIFIER')
                         for required_field in required_fields_lst:
                             if not required_field in df.columns:
-                                Logger.logger.error(f"Required field '{required_field}' is missing in '{file_name}'")
+                                logger(message=f"Required field '{required_field}' is missing in '{file_name}'", level=ERROR, category=4)
                                 # add file name to the failed_list to add it to the download_schedule today list so it will be attempted again tomorrow
                                 failed_file_lst.append(file_name)
 
                         # save to csv
                         df.to_csv(os.path.join(grp_setup.wkt_csv_dir,file_name + '_WKT.csv'),index=False)
-                        Logger.logger.info(f"Successfully downloaded '{file_name}' with '{len(df.index)}' rows")
+                        logger(message=f"Successfully downloaded '{file_name}' with '{len(df.index)}' rows", category=4)
 
             # update 'today' key in the download_schedule file. erase the current values and add incorrectly formatted values so they can be attempted again next time
             grp_setup.grp_schedule_config['today'] = failed_file_lst
@@ -140,16 +141,16 @@ class DataDownload:
 
         # log the files and the count that were not successful
         if failed_count > 0:
-            Logger.logger.error(f"'{failed_count}' files failed to download")
+            logger(message=f"'{failed_count}' files failed to download", level=ERROR, category=4)
         else:
-            Logger.logger.info("All files downloaded successfully")
+            logger(message="All files downloaded successfully", category=4)
 
         # update the 'last_run' to todays date
         DownloadSetUp.dl_schedule_config['last_run'] = datetime.now().strftime('%d-%m-%Y')
         # update the 'download_schedule' config file
         self.Schedule.update_schedule(DownloadSetUp.dl_schedule_config)
 
-        Logger.logger.info("Data Download duration: '%s'"%(timer.time_past()))
+        logger(message="Data Download duration: '%s'"%(timer.time_past()), category=4)
 
 
 
@@ -241,10 +242,10 @@ class DownloadFunctions():
                 self.download_and_unzip(link,grp_setup.zip_file_path,unzipped_directory)
                 # delete the no longer required zip file
                 os.remove(grp_setup.zip_file_path)
-                Logger.logger.info("Link was successful for group '%s'. Building files '%s'"%(data_import_group['name'], ','.join(files_lst)))
+                logger(message="Link was successful for group '%s'. Building files '%s'"%(data_import_group['name'], ','.join(files_lst)), category=4)
             except (urllib.error.HTTPError, urllib.error.URLError, ValueError):
                 failed_files_lst += files_lst
-                Logger.logger.error("Link failed for group '%s'. Not possible to build files '%s'. Check download_config.json file"%(data_import_group['name'], ','.join(files_lst)))
+                logger(message="Link failed for group '%s'. Not possible to build files '%s'. Check download_config.json file"%(data_import_group['name'], ','.join(files_lst)), level=ERROR, category=4)
         return failed_files_lst
 
 
@@ -320,14 +321,14 @@ class DownloadFunctions():
                     f1.write(xml_data)
                 gdf = gpd.read_file('data.gml')
 
-                Logger.logger.info(f"WFS was successful for group '{data_import_group['name']}'. File '{file}'")
+                logger(message=f"WFS was successful for group '{data_import_group['name']}'. File '{file}'", category=4)
 
             else:
                 message = f"The 'data_source' value '{{data_import_group['data_source']}}' in the download_configs is incorrect for group {data_import_group['name']}"
                 raise
 
         except Exception:
-            Logger.logger.exception(message)
+            logger(message=message, level=EXCEPTION, category=4)
             raise Exception('Failed to save geopandas dataframe')
 
         return gdf
@@ -369,7 +370,7 @@ class DownloadFunctions():
         in the preformatting stage. Saving it here rather than using todays date is useful for testing where the date used will not be
         todays date but the date the datawas downloaded.
         """
-        Logger.logger.info("update the last download date to todays date")
+        logger(message="update the last download date to todays date", category=4)
         
         run_tracker_path = os.path.join(SetUp.configs_dir,'run_tracker.json')
         run_tracker_config = get_json(run_tracker_path)

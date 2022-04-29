@@ -84,6 +84,18 @@ def get_json(path):
 def write_json(path,obj):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(obj, f, ensure_ascii=False, indent=4)
+        
+
+def delete_last_file_in_directory(directory):
+    """ used to delete last .log file when it isn't required """
+    dir_lst = os.listdir(directory)
+    if len(dir_lst) > 0:
+        os.remove(os.path.join(directory, dir_lst[-1]))
+        return True
+    return False
+    
+
+    
 
 
 # def archive_and_clear_directories(archive_lst:str, delete_lst:list, p_src_dir:str, p_dest_dir:str) -> (None):

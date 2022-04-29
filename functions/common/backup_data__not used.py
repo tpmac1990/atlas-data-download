@@ -4,9 +4,9 @@ import shutil
 from .directory_files import get_json, write_json, copy_directory, clear_directory, delete_files_in_directory, create_directory_tree, clear_all_directory
 from .timer import Timer
 
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from functions.segment.migrate_files_db import DatabaseManagement
-
+from functions.logging.logger import logger
 
 
 class Data:
@@ -34,31 +34,32 @@ class DataBackup:
 
     def backup_data(self):
         timer = Timer()
-        Logger.logger.info(f"backing up data for stage: {Data.stage}")
+        logger(message=f"backing up data for stage: {Data.stage}", category=4)
         Data.backup_dir = os.path.join(SetUp.backup_dir,Data.stage)
         self.move_data_between(restore=False)
         self.update_backup_stage(Data.stage)
-        Logger.logger.info('Data backup time duration: %s' %(timer.time_past()))
+        logger(message='Data backup time duration: %s' %(timer.time_past()), category=4)
+        
 
     def restore_data(self):
         timer = Timer()
-        Logger.logger.info(f"An error occurred during stage: {Data.stage}. Data will be restored to last backup point")
+        logger(message=f"An error occurred during stage: {Data.stage}. Data will be restored to last backup point", category=4)
         Data.backup_dir = os.path.join(SetUp.backup_dir,Data.stage)
         self.move_data_between()
-        Logger.logger.info('Data restore time duration: %s' %(timer.time_past()))
+        logger(message='Data restore time duration: %s' %(timer.time_past()), category=4)
 
     def backup_data_archive(self):
         timer = Timer()
-        Logger.logger.info(f"archiving data for stage: {Data.stage}")
+        logger(message=f"archiving data for stage: {Data.stage}", category=4)
         Data.backup_dir = os.path.join(SetUp.archive_dir,SetUp.tDate,Data.stage)
         create_directory_tree(Data.backup_dir)
         self.move_data_between(restore=False)
-        Logger.logger.info('Data archive backup time duration: %s' %(timer.time_past()))
+        logger(message='Data archive backup time duration: %s' %(timer.time_past()), category=4)
 
     def restore_data_archive(self):
         ''' restores the local files to the last successful archive point and set the backup_stage back to 'data_download' '''
         timer = Timer()
-        Logger.logger.info(f"An error occurred during stage: {Data.stage}. Data will be restored to last archive point")
+        logger(message=f"An error occurred during stage: {Data.stage}. Data will be restored to last archive point", category=4)
         # get the name of the latest archive folder
         archive_folder = os.listdir(SetUp.archive_dir)[-1]
         Data.backup_dir = os.path.join(SetUp.archive_dir,archive_folder,Data.stage)
@@ -69,7 +70,7 @@ class DataBackup:
             DatabaseManagement().clear_db_tables_and_remigrate(src_dir=core_dir)
             # set the stage back to 'data_download' so the restart will begin at that point
             self.update_backup_stage('data_download')
-        Logger.logger.info('Data archive restore time duration: %s' %(timer.time_past()))
+        logger(message='Data archive restore time duration: %s' %(timer.time_past()), category=4)
 
 
 

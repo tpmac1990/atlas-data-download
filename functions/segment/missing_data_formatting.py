@@ -3,8 +3,9 @@ import re
 import pandas as pd
 import numpy as np
 from functions.common.directory_files import get_json
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from functions.common.timer import Timer
+from functions.logging.logger import logger
 
 
 
@@ -39,9 +40,9 @@ class MissingDataFormatting:
         """ Apply formatting to ORIGINAL field in manual_update_required file """
         # format each of the ORIGINAL values accordingly and output in new field
         timer = Timer()
-        Logger.logger.info("Format ORIGINAL field values where necessary")
+        logger(message="Format ORIGINAL field values where necessary", category=4)
         df['ORIGINAL_F'] = df.apply(lambda x: self.format_missing_row(x['STATE'],x['FIELD'],x['ORIGINAL']), axis=1)
-        Logger.logger.info("Total ORIGINAL_F field creation run time: %s" %(timer.time_past()))
+        logger(message="Total ORIGINAL_F field creation run time: %s" %(timer.time_past()), category=4)
         return df
         
     

@@ -14,7 +14,8 @@ from functions.common.timer import Timer
 from functions.common.directory_files import get_json
 from functions.common.backup import complete_script__restore
 from .db_update import clear_db_table_rows_in_lst, sqlalchemy_engine, connect_psycopg2, update_db_table_by_index_field_and_value_lst
-from ..setup import SetUp, Logger
+from ..setup import SetUp
+from functions.logging.logger import logger
 
 
 
@@ -63,14 +64,14 @@ class UpdateMissingData:
             return
 
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nApply Missing Data Updates\n{Logger.hashed}")
+        logger(message="Apply Missing Data Updates", category=1)
 
         try:
             configs = self.configs
 
             # commit changes to the database
             for x in configs:
-                Logger.logger.info(f"Working on field '{x}'")
+                logger(message=f"Working on field '{x}'", category=4)
                 self.commit_fields_updated_data(x,configs[x])
 
             # overwrite the update files with the remaining rows that had no new value to apply, the user will then be able to update the value at a later date
@@ -87,7 +88,7 @@ class UpdateMissingData:
             self.conn.close()
             raise
 
-        Logger.logger.info('Committed missing values to database and files: %s' %(timer.time_past()))
+        logger(message='Committed missing values to database and files: %s' %(timer.time_past()), category=4)
         print('Manual data updates complete')
         sys.exit(1)
 
@@ -316,7 +317,7 @@ def append_to_db(con,file_name,df):
         df.to_sql(table_name,con,if_exists='append',index=False, method='multi')
     except:
         try:
-            Logger.logger.error(f'error when appending to table {table_name}')
+            logger(message=f'error when appending to table {table_name}', level=ERROR, category=4)
             raise
 
         except Exception as e: 
@@ -330,7 +331,7 @@ def append_to_db(con,file_name,df):
         # except sqlalchemy.exc.IntegrityError as e:
 
         
-    Logger.logger.info("'%s' rows appended to '%s'"%(len(df.index),table_name))
+    logger(message="'%s' rows appended to '%s'"%(len(df.index),table_name), category=4)
 
 
 def clear_db_rows(conn,file_name,table_index,index_lst):

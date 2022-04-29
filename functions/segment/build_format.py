@@ -9,10 +9,11 @@ from fuzzywuzzy import process
 
 from functions.common.directory_files import file_exist, get_json, write_to_file
 from functions.common.timer import Timer
-from ..setup import SetUp, Logger
+from ..setup import SetUp
 from .missing_data_formatting import MissingDataFormatting
 from functions.common.backup import complete_script__restore
-
+from functions.logging.logger import logger
+from functions.common.constants import *
 
 
 
@@ -31,7 +32,7 @@ class CombineDatasets:
     def combine_datasets(self):
         ''' combine all the separate file into single dataset and record the missing values in the missing_all and missing_reduced files used to update values later '''
         timer = Timer()
-        Logger.logger.info(f"\n\n{Logger.hashed}\nCombine Datasets\n{Logger.hashed}")
+        logger(message="Combine Datasets", category=1)
 
         # clear the data in the missing_temp file
         self.clear_missing_temp_file()
@@ -54,7 +55,8 @@ class CombineDatasets:
             raise
 
         # log the run time
-        Logger.logger.info("Total data compilation run time: %s" %(timer.time_past()))
+        logger(message="Total data compilation run time: %s" %(timer.time_past()), category=4)
+        
 
 
     def clear_missing_temp_file(self):
@@ -88,7 +90,7 @@ class BuildBaseTables:
     }
 
     def __init__(self):
-        Logger.logger.info(f"\n{Logger.dashed} Build necessary new tables {Logger.dashed}")
+        logger(message="Build necessary new tables", category=2)
 
         self.create_base_new_files()
 
@@ -108,7 +110,7 @@ class BuildBaseTables:
                 output_path = os.path.join(self.new_dir, f'{table}.csv')
 
                 if not file_exist(related_file_path):
-                    Logger.logger.info(f"'{file}' does not exist in the new directory, therefore there was no data to build the '{table}' file")
+                    logger(message=f"'{file}' does not exist in the new directory, therefore there was no data to build the '{table}' file", category=4)
                     continue
 
                 # read the related file to df. e.g. read occurrence_oid to extract all the unique related ids to create the OccOriginalID table
@@ -121,10 +123,10 @@ class BuildBaseTables:
 
                 # save to the new directory
                 output_df.to_csv(output_path, index=False)
-                Logger.logger.info(f"Successfully created '{table}' file in the new directory")
+                logger(message=f"Successfully created '{table}' file in the new directory", category=4)
 
             except:
-                Logger.logger.exception(f"An error occurred when attempting to build table '{table}'")
+                logger(message=f"An error occurred when attempting to build table '{table}'", level=EXCEPTION , category=4)
                 raise
 
     
@@ -177,7 +179,7 @@ class CombineTitleDatasets:
     def combine_title_data(self):
         ''' compile all the separate site files into one dataset '''
         timer = Timer()
-        Logger.logger.info(f"\n{Logger.dashed} tenement {Logger.dashed}")
+        logger(message="tenement", category=2)
 
         # get list of files that have been downloaded
         download_schedule_configs = get_json(os.path.join(SetUp.configs_dir,'download_schedule.json'))
@@ -191,13 +193,13 @@ class CombineTitleDatasets:
 
             # read the csv file to pandas df
             if configs:
-                Logger.logger.info(f"Appending '{file}' data")
+                logger(message=f"Appending '{file}' data", category=4)
                 self.format_file_to_combine(file,configs)
 
         # if the df is empty then there was no data to format. could also use len(format_files_lst) == 0
         if self.Tenement_nowkt_df.empty:
-            Logger.logger.warning(f"The compiled 'tenement' dataframe is empty")
-            Logger.logger.info('Title data compilation: %s' %(timer.time_past()))
+            logger(message=f"The compiled 'tenement' dataframe is empty", level=WARNING, category=4)
+            logger(message='Title data compilation: %s' %(timer.time_past()), category=4)
             return
 
         self.tenement_oid_df.drop_duplicates(inplace=True)
@@ -213,7 +215,7 @@ class CombineTitleDatasets:
         # save
         self.missing_df.to_csv(CombineDatasets.missing_temp_path,index=False)
 
-        Logger.logger.info('Tenement data compilation: %s' %(timer.time_past()))
+        logger(message='Tenement data compilation: %s' %(timer.time_past()), category=4)
 
 
 
@@ -223,10 +225,10 @@ class CombineTitleDatasets:
         try:
             df = pd.read_csv(os.path.join(self.change_dir,('%s_WKT.csv')%(file)), dtype=str) # ,engine='python' 
         except pd.errors.EmptyDataError:
-            Logger.logger.warning(f"'{file}' is empty")
+            logger(message=f"'{file}' is empty", level=WARNING, category=4)
             return 
         except FileNotFoundError:
-            Logger.logger.warning(f"'{file}' does not exist")
+            logger(message=f"'{file}' does not exist", level=WARNING, category=4)
             return
 
         if df.empty:
@@ -467,7 +469,7 @@ class CombineSiteDatasets():
     def combine_site_data(self):
         ''' compile all the separate title files into one dataset '''
         timer = Timer()
-        Logger.logger.info(f"\n{Logger.dashed} occurrence {Logger.dashed}")
+        logger(message="occurrence", category=2)
 
         # get list of files that have been downloaded
         download_schedule_configs = get_json(os.path.join(SetUp.configs_dir,'download_schedule.json'))
@@ -481,13 +483,13 @@ class CombineSiteDatasets():
 
             # read the csv file to pandas df
             if configs:
-                Logger.logger.info(f"Appending '{file}' data")
+                logger(message=f"Appending '{file}' data", category=4)
                 self.format_site_file_to_combine(file,configs)
         
         # if the df is empty then there was no data to format. could also use len(format_files_lst) == 0
         if self.Occurrence_df.empty:
-            Logger.logger.warning(f"The compiled 'occurrence' dataframe is empty")
-            Logger.logger.info('Site data compilation: %s' %(timer.time_past()))
+            logger(message=f"The compiled 'occurrence' dataframe is empty", level=WARNING, category=4)
+            logger(message='Site data compilation: %s' %(timer.time_past()), category=4)
             return
 
         self.occurrence_oid_df.drop_duplicates(inplace=True)
@@ -506,7 +508,7 @@ class CombineSiteDatasets():
         # save
         self.missing_df.to_csv(CombineDatasets.missing_temp_path,index=False)
 
-        Logger.logger.info('Site data compilation: %s' %(timer.time_past()))
+        logger(message='Site data compilation: %s' %(timer.time_past()), category=4)
 
 
 
@@ -515,10 +517,10 @@ class CombineSiteDatasets():
         try:
             df = pd.read_csv(os.path.join(self.change_dir,(f'{file}_WKT.csv')), dtype=str).fillna('')
         except pd.errors.EmptyDataError:
-            Logger.logger.warning(f"'{file}' is empty")
+            logger(message=f"'{file}' is empty", level=WARNING, category=4)
             return
         except FileNotFoundError:
-            Logger.logger.warning(f"'{file}' does not exist")
+            logger(message=f"'{file}' does not exist", level=WARNING, category=4)
             return
 
 
@@ -740,7 +742,7 @@ class FinalizeMissingData():
             use fuzzywuzzy to find similar names for missing company names
         '''
         timer = Timer()
-        Logger.logger.info(f"\n{Logger.dashed} Collect Missing Data {Logger.dashed}")
+        logger(message="Collect Missing Data", category=2)
 
         configs = get_json(os.path.join(SetUp.configs_dir,'commit_updates.json'))
         update_dir = CombineDatasets.update_dir
@@ -775,7 +777,7 @@ class FinalizeMissingData():
             # if FIELD == 'MAJOR_MATERIAL':
             field_miss_df = miss_df.query('FIELD == "%s"'%(FIELD))
             if not field_miss_df.empty:
-                Logger.logger.info(f"Recording values that need to be updated for field '{FIELD}'")
+                logger(message=f"Recording values that need to be updated for field '{FIELD}'", category=4)
                 config = configs[FIELD]['find_matches']
                 match_type = config['type']
                 file = config['file']
@@ -833,7 +835,7 @@ class FinalizeMissingData():
         complete_df.to_csv(manual_update_required_path,index=False)
 
         # log the run time
-        Logger.logger.info("Finalizing missing data run time: %s" %(timer.time_past()))
+        logger(message="Finalizing missing data run time: %s" %(timer.time_past()), category=4)
 
 
 
@@ -1168,7 +1170,7 @@ def merge_files(self,df,merg):
             df['STATUS'] = df.apply(lambda x: NT_2_3_merge_cleanup(x), axis=1)
             df = df.drop('_merge', 1).drop_duplicates()
         except FileNotFoundError:
-            Logger.logger.info(f"file '{merg['file']}' does not exist")
+            logger(message=f"file '{merg['file']}' does not exist", category=4)
             
 
     elif merg['clean_up'] == 'WA_merge_1':
@@ -1178,7 +1180,7 @@ def merge_files(self,df,merg):
             df = df.query('_merge != "right_only"').copy()
             df = df.drop('_merge', 1).drop_duplicates()
         except FileNotFoundError:
-            Logger.logger.info(f"file '{merg['file']}' does not exist")
+            logger(message=f"file '{merg['file']}' does not exist", category=4)
 
     return df
 

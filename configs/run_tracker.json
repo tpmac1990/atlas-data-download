@@ -13,7 +13,7 @@
         "segments": {
             "group": "01_initial",
             "subgroups": [
-                "06_extract_user_edits"
+                "04_build_spatial_data"
             ]
         }
     },

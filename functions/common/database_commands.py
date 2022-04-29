@@ -1,7 +1,8 @@
 import subprocess
 import os
 
-from ..setup import SetUp, Logger
+from ..setup import SetUp
+from functions.logging.logger import logger
 
 
 """ 
@@ -16,17 +17,19 @@ def pg_dump(filename,
             username='postgres', 
             port='5432'
             ):
-    """ dumps will be saved by default to the db_dumps directory in the root directory """
-    Logger.logger.info(f"Creating .sql dump file for '{dbname}'")
+    """ 
+    dumps will be saved by default to the db_dumps directory in the root directory 
+    use to create dump manually: pg_dump --port=5432 --username=postgres --host=localhost --dbname=atlas > atlas_dump.sql
+    """
+    logger(message=f"Creating .sql dump file for '{dbname}'", category=4)
     path=os.path.join(directory,filename)
     command = f"pg_dump --port={port} --username={username} --host={host} --dbname={dbname} > {path}"
     subprocess.run(command, shell=True)
     
-    
 def drop_db(dbname='atlas', 
             username='postgres'
             ):
-    Logger.logger.info(f"Dropping database '{dbname}'")
+    logger(message=f"Dropping database '{dbname}'", category=4)
     close_db_connections(dbname=dbname,username=username)
     command = f'psql --username={username} --command="DROP DATABASE IF EXISTS {dbname}"'
     subprocess.run(command, shell=True, capture_output=True)
@@ -37,7 +40,7 @@ def create_db(dbname='atlas',
             port='5432',
             host='localhost'
             ):
-    Logger.logger.info(f"Creating database '{dbname}'")
+    logger(message=f"Creating database '{dbname}'", category=4)
     command = f"createdb --host={host} --port={port} --username={username} {dbname}"
     subprocess.run(command, shell=True, capture_output=True)
 
@@ -50,7 +53,7 @@ def restore_db_sql(
             username='postgres', 
             port='5432'
             ):
-    Logger.logger.info(f"Restoring .sql dump to database '{dbname}'")
+    logger(message=f"Restoring .sql dump to database '{dbname}'", category=4)
     path=os.path.join(directory,filename).replace('/','\\')
     command = f'psql --dbname={dbname} --port={port} --username={username} --host={host} < {path}'
     subprocess.run(command, shell=True, capture_output=True)
@@ -60,7 +63,7 @@ def close_db_connections(
             dbname='atlas', 
             username='postgres', 
             ):
-    Logger.logger.info(f"Closing all database connections for database '{dbname}'")
+    logger(message=f"Closing all database connections for database '{dbname}'", category=4)
     sql = f"SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname='{dbname}' AND pid <> pg_backend_pid();"
     command = f'psql --username={username} --command="{sql}"'
     subprocess.run(command, shell=True, capture_output=True)
