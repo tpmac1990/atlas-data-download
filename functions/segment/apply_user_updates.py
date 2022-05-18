@@ -8,7 +8,8 @@ import csv
 
 from functions.common.directory_files import get_json, file_exist
 from functions.common.backup import complete_script__restore
-from .db_update import sqlalchemy_engine
+# from .db_update import sqlalchemy_engine
+from functions.common.db_functions import sqlalchemy_engine
 from functions.common.timer import Timer
 
 from ..setup import SetUp
@@ -62,39 +63,49 @@ class ExtractUserEdits:
     def transfer_user_creations_to_core(self):
         ''' Copy the user created instances from db tables and add to the core file '''
         logger(message="Copy user created instances to their core file", category=1)
-
-        update_configs = self.update_configs 
-        access_configs = self.access_configs 
+        for table in [OCCNAME, OCCORIGINALID, TENORIGINALID, LISTED, HOLDER]:
+            _transfer_user_creations_to_core_table(self, table)
+            
+            
+    def _transfer_user_creations_to_core_table(self, table):
+        """ 
+        collect all user edits from the database table and add them to the edit and core file.
+        A newly created value should never have a duplicate id to another as _id are assigned 
+        in the front-end with an id using max() + 1.
+        Duplicate _ids will occurr if something has been altered e.g. date_created or valid_instance.
+        If there is a duplicate, the value from the core table in the database will overwrite the
+        value in the core and edit file.
+        """
         core_dir = self.core_dir 
         edit_dir = self.edit_dir
         sqlalchemy_con = self.sqlalchemy_con
-
-        for table in ['OccName','OccOriginalID','TenOriginalID','Listed','Holder']:
-            logger(message=f"Updating table '{table}'", category=4)
-            core_path = os.path.join(core_dir,"%s.csv"%(table))
-            edit_path = os.path.join(edit_dir,"%s.csv"%(table))
-            core_df = pd.read_csv(core_path,engine='python')
-            temp_df = core_df.copy()
-            # temp_df['date_created'] = temp_df['date_created'].apply(lambda x: format_date_r(x))
-            last_date = temp_df[['date_created']].max()
-            f_date = last_date[0]
-            # Get the latest rows entered by users by filtering from the latest date in the core file and where user_name is 'user'
-            sql = "SELECT * FROM gp_%s WHERE user_name = 'user' AND CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
-            # convert the blanks to Nan
-            df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
-            # no need to continue if there are no new rows from the db
-            if len(df.index) > 0:
-                # concat user edits to the edit file. create new file if it doesn't exist 
-                if file_exist(edit_path):
-                    edit_df = pd.read_csv(edit_path,engine='python')
-                    final_edit = pd.concat((edit_df,df)).drop_duplicates(ignore_index=True)
-                else:
-                    final_edit = df
-                final_edit.to_csv(edit_path,index=False)
-                # concat the new rows from the db table to the core file and drop the duplicates
-                final_core_df = pd.concat((core_df,df)).drop_duplicates(ignore_index=True)
-                # overwrite the core file with the updates
-                final_core_df.to_csv(core_path,index=False)
+        
+        logger(message=f"Updating table '{table}'", category=4)
+        core_path = os.path.join(core_dir,"%s.csv"%(table))
+        edit_path = os.path.join(edit_dir,"%s.csv"%(table))
+        core_df = pd.read_csv(core_path,engine='python')
+        temp_df = core_df.copy()
+        last_date = temp_df[['date_created']].max()
+        f_date = last_date[0]
+        # Get the latest rows entered by users by filtering from the latest date in the core file and where user_name is 'user'
+        sql = "SELECT * FROM gp_%s WHERE user_name = 'user' AND CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
+        # convert the blanks to Nan
+        df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
+        # no need to continue if there are no new rows from the db
+        if len(df.index) > 0:
+            # concat user edits to the edit file. create new file if it doesn't exist 
+            if file_exist(edit_path):
+                edit_df = pd.read_csv(edit_path,engine='python')
+                # see doc string on why we drop by _id
+                final_edit = pd.concat((edit_df,df)).drop_duplicates(subset=['_id'], keep='last')
+            else:
+                final_edit = df
+            final_edit.to_csv(edit_path,index=False)
+            # concat the new rows from the db table to the core file and drop the duplicates
+            final_core_df = pd.concat((core_df,df)).drop_duplicates(subset=['_id'], keep='last')
+            # overwrite the core file with the updates
+            final_core_df.to_csv(core_path,index=False)
+            
 
 
     def transfer_user_edits_to_core(self):
@@ -110,7 +121,7 @@ class ExtractUserEdits:
         csv.field_size_limit(int(ctypes.c_ulong(-1).value//2))
 
         update_configs = self.update_configs 
-        access_configs = self.access_configs 
+        # access_configs = self.access_configs 
         core_dir = self.core_dir 
         edit_dir = self.edit_dir
         sqlalchemy_con = self.sqlalchemy_con
@@ -119,7 +130,6 @@ class ExtractUserEdits:
         creation_tables = [x for x in update_configs if update_configs[x]['db_to_core_transfer'] != None]
 
         for group in creation_tables:
-            # if group == 'Holder':
             logger(message=f"Working on Group {group}", category=4)
 
             dic = update_configs[group]['db_to_core_transfer']
@@ -137,7 +147,7 @@ class ExtractUserEdits:
             if user_edit_df.empty:
                 sql = "SELECT * FROM gp_%s WHERE user_edit = True"%(group.lower())
             else:
-                # latest_date = format_date_r(user_edit_df['date_modified'].max())
+                # if values already exist in the edit file, then get only values from the db from the latest 'date_modified'. No need getting all values
                 latest_date = user_edit_df['date_modified'].max()
                 sql = "SELECT * FROM gp_%s WHERE user_edit = True AND date_modified >= '%s'"%(group.lower(), latest_date)
 
@@ -218,7 +228,7 @@ class ExtractUserEdits:
                             if len(diff_df.index) > 0:
                                 reduced_core_df = core_df[~core_df[target_field].isin(keys_df)]
                                 final_df = pd.concat((reduced_core_df,db_df))
-                                final_df.to_csv(core_path,index=False) # uncomment this
+                                final_df.to_csv(core_path,index=False)
                                 # save edits to the edit file. This is only used to view the edits separatly
                                 edit_path = os.path.join(edit_dir,"%s.csv"%(table))
                                 if file_exist(edit_path):
