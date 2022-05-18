@@ -1,8 +1,10 @@
 import sqlalchemy
 import psycopg2
+from psycopg2 import Error
 import pandas as pd
 
 from functions.logging.logger import logger
+from functions.common.database_commands import close_db_connections
 
 
 def sqlalchemy_engine(db_configs):
@@ -40,3 +42,25 @@ def convert_date_fields_to_datetime(df):
         if col in ['date_modified','date_created','date']:
             df[col] = pd.to_datetime(df[col]).copy()
     return df
+
+
+def drop_all_db_tables(configs, _exclude=[]):
+    """ drop all db tables in the database except for those in exclude """
+    try:
+        db_conn = connect_psycopg2(configs)
+        db_conn.autocommit = True
+        db_cursor = db_conn.cursor()
+        # returns a query for the tables to drop
+        s = "SELECT CONCAT('DROP TABLE ', TABLE_NAME , ';') FROM information_schema.tables WHERE table_schema = 'public' AND TABLE_NAME NOT IN ('geography_columns', 'geometry_columns', 'spatial_ref_sys');"
+        db_cursor.execute(s)  
+        list_tables = db_cursor.fetchall()   
+        for table_action in list_tables:
+            db_cursor.execute(table_action[0])
+    except (Exception, Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if (db_conn):
+            db_cursor.close()
+            db_conn.close()
+    
+                                                                                      
