@@ -21,53 +21,48 @@ from .common import *
 # print(self.make_3_row_df_from_file('Parent'))
 
 
+
 class ExtractUserEditsTests(DataframeTest):
     
     @pytest.mark.parametrize(
         "fixture", 
         [
-            FIXTURES_1,
-            FIXTURES_2
+            USER_CREATIONS_TO_EDIT_CORE_FILES__NO_EXISTING_EDITS__FIXTURE,
+            USER_CREATIONS_TO_EDIT_CORE_FILES__NO_NEW_EDITS__FIXTURE
         ]
     ) 
     @mock.patch.object(ExtractUserEdits, "__init__", return_value=None)
     def _transfer_user_creations_to_core_table_test(self, mock_1, tmpdir, sqlalchemy_engine, fixture):
         obj = self.create_obj_with_sqlalchemy_engine(obj_name=ExtractUserEdits, sqlalchemy_engine=sqlalchemy_engine)
-        
         self.populate_files_and_db_tables(data=fixture, obj=obj, temp_dir=tmpdir)
-        
         obj._transfer_user_creations_to_core_table(TEST_TABLE)
+        for assertion in self.assert_output_values(obj=obj, data=fixture):
+            assert assertion['result'], assertion['msg']
         
-        for item in fixture.file_output:
-            result, msg = self.assert_df_values(
-                                directory=getattr(obj, item['directory']), 
-                                table_name=item['table'], 
-                                expected=item['result']
-                            )
-            assert result, msg
+        
   
         
         
-    @pytest.mark.parametrize(
-        "fixture", 
-        [
-            FIXTURES_HOLDER_1,
-            FIXTURES_HOLDER_2
-        ]
-    ) 
-    @mock.patch.object(ExtractUserEdits, "__init__", return_value=None)
-    def transfer_user_edits_to_core_test(self, mock_1, tmpdir, sqlalchemy_engine, fixture):
-        obj = self.create_obj_with_sqlalchemy_engine(obj_name=ExtractUserEdits, sqlalchemy_engine=sqlalchemy_engine)
-        obj.update_configs = UPDATE_CONFIGS_1
-        self.populate_files_and_db_tables(data=fixture, obj=obj, temp_dir=tmpdir)
+    # @pytest.mark.parametrize(
+    #     "fixture", 
+    #     [
+    #         FIXTURES_HOLDER_1,
+    #         FIXTURES_HOLDER_2
+    #     ]
+    # ) 
+    # @mock.patch.object(ExtractUserEdits, "__init__", return_value=None)
+    # def transfer_user_edits_to_core_test(self, mock_1, tmpdir, sqlalchemy_engine, fixture):
+    #     obj = self.create_obj_with_sqlalchemy_engine(obj_name=ExtractUserEdits, sqlalchemy_engine=sqlalchemy_engine)
+    #     obj.update_configs = UPDATE_CONFIGS_1
+    #     self.populate_files_and_db_tables(data=fixture, obj=obj, temp_dir=tmpdir)
         
-        obj.transfer_user_edits_to_core()
+    #     obj.transfer_user_edits_to_core()
         
-        for item in fixture.file_output:
-            result, msg = self.assert_df_values(
-                                directory=getattr(obj, item['directory']), 
-                                table_name=item['table'], 
-                                expected=item['result']
-                            )
-            assert result, msg
+    #     for item in fixture.file_output:
+    #         result, msg = self.assert_df_values(
+    #                             directory=getattr(obj, item['directory']), 
+    #                             table_name=item['table'], 
+    #                             expected=item['result']
+    #                         )
+    #         assert result, msg
             
