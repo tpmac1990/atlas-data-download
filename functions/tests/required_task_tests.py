@@ -7,7 +7,7 @@ from .required_task_data import *
 
 
 # pytest -s functions/tests/required_task_tests.py
-# order: fixture, patch, monkeypatch, paramatrize
+# order: fixture, patch, monkeypatch, paramatrize, tmpdir
 # mock path is where it is used, not where it is homed
 
 
