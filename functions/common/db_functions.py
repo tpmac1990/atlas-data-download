@@ -48,6 +48,10 @@ def drop_all_db_tables(configs, _exclude=[]):
     """ drop all db tables in the database except for those in exclude """
     try:
         db_conn = connect_psycopg2(configs)
+    except:
+        # databse doesn't exist, so no need to delete
+        return
+    try:
         db_conn.autocommit = True
         db_cursor = db_conn.cursor()
         # returns a query for the tables to drop
@@ -61,6 +65,6 @@ def drop_all_db_tables(configs, _exclude=[]):
     finally:
         if (db_conn):
             db_cursor.close()
-            db_conn.close()
+            db_conn.close()          
     
                                                                                       
