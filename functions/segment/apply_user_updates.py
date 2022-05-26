@@ -56,6 +56,7 @@ class ExtractUserEdits:
             complete_script__restore()
             raise
 
+        self.sqlalchemy_con.close()
         logger(message="Total user edits extraction run time: %s" %(timer.time_past()), category=4)
 
 
@@ -244,44 +245,40 @@ class ExtractUserEdits:
         ''' Copy the Change tables from the db and concatenate the user additions to the core file '''
         logger(message="Updating the core Change files with the latest db updates", category=2)
 
-        update_configs = self.update_configs 
-        access_configs = self.access_configs 
-        core_dir = self.core_dir 
-        edit_dir = self.edit_dir
-        sqlalchemy_con = self.sqlalchemy_con
-
         for table in ['OccurrenceChange','TenementChange','HolderChange']:
             logger(message=f"Working on: '{table}'", category=4)
-            # get the date of the last user entry. This is the date the db search will filter from 
-            core_path = os.path.join(core_dir,"%s.csv"%(table))
-            if file_exist(core_path):
-                core_df = pd.read_csv(core_path)
-                if len(core_df.index) > 0:
-                    temp_df = core_df.copy()
-                    # temp_df['date_created'] = temp_df['date_created'].apply(lambda x: format_date_r(x))
-                    last_date = temp_df[['date_created']].max()
-                    f_date = last_date[0]
-                else:
-                    f_date = '2000-02-01'
-            else:
-                core_df = pd.DataFrame()
-                f_date = '2000-02-01'
+            self._transfer_changes_to_core_table(table)
+            
+    
+    def _transfer_changes_to_core_table(self, table):
+        core_dir = self.core_dir 
+        sqlalchemy_con = self.sqlalchemy_con
+        
+        # get the date of the last user entry. This is the date the db search will filter from 
+        core_path = os.path.join(core_dir,"%s.csv"%(table))
+        # random date in the past
+        f_date = '2000-02-01' 
+        # empty df incase core_df doesn't exist yet
+        core_df = pd.DataFrame() 
+        if file_exist(core_path):
+            core_df = pd.read_csv(core_path)
+            if len(core_df.index) > 0:
+                temp_df = core_df.copy()
+                last_date = temp_df[['date_created']].max()
+                f_date = last_date[0]           
 
-
-            # Get the latest rows from the Change tables by filtering rows after the last date in the core file. I was not able to query for user = 'user', so i used pandas as below
-            sql = "SELECT * FROM gp_%s WHERE CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
-            # drop id column and convert all None to Nan
-            df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
-            df = df[df['user'] != 'ss']
-            # convert all types to string so there are no differences between types when dropping duplicates, then replace 'nan'
-            df = df.astype(str).replace('nan', np.nan, regex=True)
-            core_df = core_df.astype(str).replace('nan', np.nan, regex=True)
-            # if the core_df is empty then create core with the db df, otherwise concat the db table with the core file. If there are duplicates, the first will be kept
-            #  and the others deleted
-            final_core_df = df if core_df.empty else pd.concat((core_df,df)).drop_duplicates(ignore_index=True)
-            # only create file if the df is not empty. An empty df might cause issues later when trying to find the max _id value that would't exist
-            if not final_core_df.empty:
-                final_core_df.to_csv(core_path,index=False)
-
-        sqlalchemy_con.close()
-
+        # Get the latest rows from the Change tables by filtering rows after the last date in the core file. I was not able to query for user = 'user', so i used pandas as below
+        sql = "SELECT * FROM gp_%s WHERE CAST(date_created as date) >= '%s'"%(table.lower(),f_date)
+        # drop id column and convert all None to Nan
+        df = pd.read_sql(sql, sqlalchemy_con).fillna(value=np.nan)
+        df = df[df['user'] != 'ss']
+        # convert all types to string so there are no differences between types when dropping duplicates, then replace 'nan'
+        df = df.astype(str).replace('nan', np.nan, regex=True)
+        core_df = core_df.astype(str).replace('nan', np.nan, regex=True)
+        # if the core_df is empty then create core with the db df, otherwise concat the db table with the core file. If there are duplicates, the first will be kept
+        #  and the others deleted
+        final_core_df = df if core_df.empty else pd.concat((core_df,df)).drop_duplicates(ignore_index=True)
+        # only create file if the df is not empty. An empty df might cause issues later when trying to find the max _id value that would't exist
+        if not final_core_df.empty:
+            final_core_df.to_csv(core_path,index=False)
+                
