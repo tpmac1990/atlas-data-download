@@ -43,8 +43,16 @@ OCCORIGINALID = 'OccOriginalID'
 TENORIGINALID = 'TenOriginalID'
 LISTED = 'Listed'
 HOLDER = 'Holder'
-# used for tests when table name is irrelevant
-TEST_TABLE = 'TestTable'
+TEST_TABLE = 'TestTable' # used for tests when table name is irrelevant
+HOLDER_LISTED = 'holder_listed'
+PARENT = 'Parent'
+
+OCCURRENCE_CHANGE = 'OccurrenceChange'
+TENEMENT_CHANGE = 'TenementChange'
+HOLDER_CHANGE = 'HolderChange'
+
+# fields
+ID = 'id'
 
 
 # default db tables
@@ -59,4 +67,25 @@ CLASS = 'class'
 MODULE = 'module'
 PACKAGE = 'package'
 SESSION = 'session'
+
+
+
+
+# tests
+RESULT = 'result'
+MSG = 'msg'
+
+
+# test data
+DIRECTORIES = 'directories'
+CORE_CSV = 'core_csv'
+EDIT_CSV = 'edit_csv'
+DATABASE = 'database'
+TABLES = 'tables'
+COLUMNS = 'columns'
+UNITS = 'units'
+IN_PUT = 'input'
+OUTPUT = 'output'
+TREE = 'tree'
+STORE = 'store'
 
