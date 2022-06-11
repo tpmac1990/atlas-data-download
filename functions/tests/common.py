@@ -4,6 +4,7 @@ import numpy as np
 from functions.setup import SetUp
 from functions.common.constants import *
 
+from functions.segment.db_update import sqlalchemy_engine, connect_psycopg2
 
 DB_DUMPS_DIR = os.path.join(SetUp.scripts_dir, "functions", "tests", "db_dumps")
 
@@ -21,66 +22,16 @@ class DataframeTest:
         obj = obj_name()
         obj.sqlalchemy_con = sqlalchemy_engine
         return obj
-
-
-    # @staticmethod
-    # def add_test_dfs_to_db(tables_data_list, con):
-    #     """inserts list of dataframes in to the database. makes sure dependent tables are inserted last"""
-    #     for table_group in tables_data_list:
-    #         TABLE_DF = table_group[0]
-    #         db_table_name = "gp_{0}".format(table_group[1].lower())
-            
-    #         df = TABLE_DF()
-    #         if '_' in table_group[1]:
-    #             df['id'] = np.arange(1, len(df) + 1)
-
-    #         df.to_sql(db_table_name, con=con, index=False)
-
-
-    # @staticmethod
-    # def add_test_dfs_as_csv_to_folders(tables_data_list, obj, temp_dir):
-    #     """
-    #     This converts a list of dataframes to csv and inserts it into a temp directory
-
-    #     tables_data_list: [(CORE_TABLE_1_DF, 'output.core', 'my_cool_table.csv', 'core_dir'),]
-    #         [0]: dataframe to be converted to csv
-    #         [1]: {main_dir}.{sub_dir} to be created and which will home the csv file
-    #         [2]: table name without .csv extension
-    #         [3]: attribute name which holds the path to the directory which holds the csv file
-            
-    #     to add a directory without a file, leave the df and file_name as None:
-    #         [None, OUTPUT_EDIT, None, EDIT_DIR]
-
-    #     IMPORTANT: order dataframes are created here does not matter as they are not being inserted
-    #     into the database
-    #     """
-
-    #     for table_group in tables_data_list:
-    #         TABLE_DF = table_group[0]
-    #         split_dir = table_group[1].split(".")
-    #         main_dir_name = split_dir[0]
-    #         sub_dir_name = split_dir[1]
-    #         attr_name = table_group[3]
-    #         file_name = "{0}.csv".format(table_group[2].lower()) if table_group[2] else None
-        
-    #         main_dir = os.path.join(temp_dir, main_dir_name)
-    #         if not os.path.isdir(main_dir):
-    #             temp_dir.mkdir(main_dir_name)
-
-    #         if not hasattr(obj, attr_name):
-    #             sub_dir = os.path.join(main_dir, sub_dir_name)
-    #             if not os.path.isdir(sub_dir):
-    #                 os.mkdir(sub_dir)
-    #             setattr(obj, attr_name, sub_dir)
-
-    #         if file_name:
-    #             path = os.path.join(main_dir, sub_dir_name, file_name)
-
-    #             TABLE_DF().to_csv(path, index=False)
-
-    #     return obj
-
     
+    @staticmethod
+    def create_obj_with_connections(obj_name, sqlalchemy_engine, psycopg_conn):
+        obj = obj_name()
+        obj.con = sqlalchemy_engine
+        obj.sqlalchemy_con = sqlalchemy_engine
+        obj.conn = psycopg_conn
+        return obj
+
+
     def populate_files_and_db_tables(self, data, obj, temp_dir=None):
         """ 
         create and add data to csv files and postgres database tables. Also assign 
@@ -89,6 +40,11 @@ class DataframeTest:
             directories: dictionary of directories to assign as attribute to the obj. key name matches inputs key name
                 tree: directory tree to be created
                 store: attribute name to store the path in on the obj
+            paths: dictionary used to assign a path as an attribute of a class object
+                key: key is the key to the directory in directories which is the directory of the file
+                value:
+                    file_name: the file_name and its extension to be stored
+                    store: the attribute name the path will be stored in the object class as
             tables: dictionry of tables that have data required to be loaded to file and or database for the required test
                 columns: field names of the table
                 inputs: 
@@ -101,7 +57,10 @@ class DataframeTest:
         example:              
         {
             'directories': {
-                    'core_csv': {'tree': 'output.core', 'store': 'core_dir'},
+                'core_csv': {'tree': 'output.core', 'store': 'core_dir'},
+            },
+            'paths': {
+                'core_csv': [{'file_name': 'file_name.extension', 'store': 'attribute_name'}]
             },
             'tables': {
                 'TestTable': {
@@ -117,38 +76,41 @@ class DataframeTest:
             }
         }
         """
-        directories = data['directories']
+        directories = data[DIRECTORIES]
         self.create_directories(directories, temp_dir, obj)
-        tables = data['tables']
+        if PATHS in data:
+            self.create_paths(data['paths'], directories, obj)
+        tables = data[TABLES]
         for table_name in tables:
             table_data = tables[table_name]
-            input_data = table_data['inputs']
-            columns = table_data['columns']
-            for input_table in input_data:
-                if input_table == 'database':
-                    self.add_test_data_to_db(
-                        table_name=table_name, 
-                        columns=columns,
-                        data=input_data[input_table],
-                        obj=obj
-                        )
+            units_data = table_data[UNITS]
+            columns = table_data[COLUMNS]
+            for unit in units_data:
+                unit_data = units_data[unit]
+                if IN_PUT in unit_data:
+                    input_data = unit_data[IN_PUT]
+                    if unit == DATABASE:
+                        self.add_test_data_to_db(
+                            table_name=table_name, 
+                            columns=columns,
+                            data=input_data,
+                            obj=obj
+                            )
                     
-                else:
-                    self.add_test_data_to_file(
-                        directory=directories[input_table],
-                        # key=input_table,
-                        # temp_dir=temp_dir,
-                        obj=obj,
-                        table_name=table_name,
-                        data=input_data[input_table],
-                        columns=columns
-                    )
+                    else:
+                        self.add_test_data_to_file(
+                            directory=directories[unit],
+                            obj=obj,
+                            table_name=table_name,
+                            data=input_data,
+                            columns=columns
+                        )
                     
     @staticmethod
     def create_directories(directories, temp_dir, obj):
         """ create the directories in the tmpdir and add them as attributes to the obj """
         for directory in directories:
-            tree = directories[directory]['tree']
+            tree = directories[directory][TREE]
             split_tree = tree.split('.')
             main_dir_name = split_tree[0]
             sub_dir_name = split_tree[1]
@@ -161,10 +123,23 @@ class DataframeTest:
             if not os.path.isdir(sub_dir):
                 os.mkdir(sub_dir)
                 
-            store = directories[directory]['store']
+            store = directories[directory][STORE]
             if not hasattr(obj, store):
                 setattr(obj, store, sub_dir)
-                        
+        obj
+                
+    @staticmethod
+    def create_paths(paths, directories, obj):
+        for key in paths:
+            dir_attr_name = directories[key][STORE]
+            directory = getattr(obj, dir_attr_name)
+            for group in paths[key]:
+                file_name = group[FILE_NAME]
+                store = group[STORE]
+                path = os.path.join(directory, file_name)
+                setattr(obj, store, path)
+        return obj
+                            
                         
     @staticmethod
     def add_test_data_to_db(table_name, columns, data, obj):
@@ -172,48 +147,19 @@ class DataframeTest:
         db_table_name = "gp_{0}".format(table_name.lower())
         df = pd.DataFrame(columns=columns, data=data)
         if '_' in table_name:
-            df['id'] = np.arange(1, len(df) + 1)
-        df.to_sql(db_table_name, con=obj.sqlalchemy_con, index=False)    
+            df[ID] = np.arange(1, len(df) + 1)
+        con = obj.sqlalchemy_con if hasattr(obj, 'sqlalchemy_con') else obj.con
+        df.to_sql(db_table_name, con=con, index=False)    
        
     @staticmethod
     def add_test_data_to_file(directory, obj, table_name, data, columns):
         """ add test data to file and add _dir attributes to obj """
-        # # tree = directory['tree']
-        # # split_tree = tree.split('.')
-        # # main_dir_name = split_tree[0]
-        # # sub_dir_name = split_tree[1]
-
-        # # main_dir = os.path.join(temp_dir, main_dir_name)
-        # # if not os.path.isdir(main_dir):
-        # #     temp_dir.mkdir(main_dir_name)
-
-        # # sub_dir = os.path.join(main_dir, sub_dir_name)
-        # # if not os.path.isdir(sub_dir):
-        # #     os.mkdir(sub_dir)
-        
-        # store = directory['store']
-        # # if not hasattr(obj, store):
-        # #     setattr(obj, store, sub_dir)
         sub_dir = getattr(obj, directory['store'])
                 
         file_name = "{0}.csv".format(table_name)
         path = os.path.join(sub_dir, file_name)
         df = pd.DataFrame(columns=columns, data=data)
         df.to_csv(path, index=False)
-            
-            
-        
-        # if len(data.to_csv) > 0:
-        #     if temp_dir:
-        #         self.add_test_dfs_as_csv_to_folders(tables_data_list=data.to_csv, obj=obj, temp_dir=temp_dir)
-        #     else:
-        #         raise ValueError('temp_dir was not provided to create the csv files')
-        
-        # if len(data.to_db) > 0:
-        #     if obj.sqlalchemy_con:
-        #         self.add_test_dfs_to_db(tables_data_list=data.to_db, con=obj.sqlalchemy_con)
-        #     else:
-        #         raise ValueError('sqlalchemy connection required to insert the dataframes in to the database')
     
     
     @staticmethod
@@ -251,40 +197,8 @@ class DataframeTest:
         else:
             outcome = False
             msg = '\n{0}\nTable: {1}, Key: {2}\n{0}\n{3} \n!= \n{4}'.format('-'*50, table_name, key, result, expected)
-        return {'result': outcome, 'msg': msg}
-        
-
-    # def assert_df_values(self, directory=None, table_name=None, return_df=False, df=[], fields='__all__', expected=[]):
-    #     """ 
-    #     return True if the list of values of given fields are equal to the expected values. Incase of an error, the two dfs
-    #         are returned so the user can see where the difference lies on failure
-    #     directory: directory holding the csv file. not required if df is supplied.
-    #     table_name: name of the csv file without the .csv extension. not required if df is supplied.
-    #     return_df: if True then return the df created from the csv file. Useful so the df doesn't need to be re-created 
-    #         for subsequent tests.
-    #     df: dataframe. default is a empty list for length can be tested to determine if if exists or not.
-    #     fields: allows single or multiple fields
-    #         single field: 'field_1'
-    #         multiple fields: ['field_1', 'field_2']
-    #     expected: list of values expected to be returned e.g. 
-    #         single field: ['value 1', 'value 2'] 
-    #         multiple fields: [['row1_col1_val', row1_col2_val], ['row2_col1_val', row2_col2_val]]
+        return {RESULT: outcome, MSG: msg}
             
-    #     a file which should not be created can be tested by passing in expected=None
-    #     """
-    #     if len(df) == 0:
-    #         try:
-    #             df = self.get_csv_file_as_df(directory=directory, table_name=table_name)
-    #         except FileNotFoundError:
-    #             if expected == None:
-    #                 return True, ''
-    #             raise
-    #     if fields == '__all__':
-    #         result = df.values.tolist()
-    #     else:
-    #         result = df[fields].values.tolist()
-    #     return self.return_assert_data(result, expected, df, return_df)
-    
         
 
     def assert_output_values(self, obj, data):
@@ -306,33 +220,36 @@ class DataframeTest:
         a file which should not be created can be tested by passing in expected=None
         """
         assertions = []
-        directories = data['directories']
-        tables = data['tables']
+        directories = data[DIRECTORIES]
+        tables = data[TABLES]
         for table in tables:
-            output_data = tables[table]['outputs']
-            columns = tables[table]['columns']
-            for output_table in output_data:
-                if output_table == 'database':
-                    outcome = self.compare_test_data_from_db(
-                        table_name=table, 
-                        columns=columns,
-                        expected=output_data[output_table],
-                        obj=obj.sqlalchemy_con,
-                        key=output_table,
+            units_data = tables[table][UNITS]
+            columns = tables[table][COLUMNS]
+            for unit in units_data:
+                unit_data = units_data[unit]
+                if OUTPUT in unit_data:
+                    output_data = unit_data[OUTPUT]
+                    if unit == DATABASE:
+                        outcome = self.compare_test_data_from_db(
+                            table_name=table, 
+                            columns=columns,
+                            expected=output_data,
+                            sqlalchemy_con=obj.sqlalchemy_con,
+                            key=unit,
                         )
                     
-                else:
-                    outcome = self.compare_test_data_from_file(
-                        directory=directories[output_table],
-                        table_name=table,
-                        expected=output_data[output_table],
-                        obj=obj,
-                        key=output_table,
-                    )
-                assertions.append(outcome)
-                    
+                    else:
+                        outcome = self.compare_test_data_from_file(
+                            directory=directories[unit],
+                            table_name=table,
+                            expected=output_data,
+                            obj=obj,
+                            key=unit,
+                        )
+                    assertions.append(outcome)
         return assertions
-    
+        
+        
     
     def compare_test_data_from_db(self, table_name, columns, expected, sqlalchemy_con, key):
         """ compare the ouput database table data with the expected results """
@@ -340,8 +257,8 @@ class DataframeTest:
         command = f"SELECT * FROM {table_name}"
         df = pd.read_sql(command, sqlalchemy_con)
         # drop id column as it is auto-managed elsewhere
-        if 'id' in df.columns:
-            df.drop(columns=['id'],inplace=True)
+        if ID in df.columns:
+            df.drop(columns=[ID],inplace=True)
         result = df.values.tolist()
         return self.return_assert_data(result, expected, table_name, key)
             
@@ -352,41 +269,18 @@ class DataframeTest:
             df = pd.read_csv(path, engine='python')
         except FileNotFoundError:
             if expected == None:
-                return True, ''
+                return {RESULT: True, MSG: ''}
             raise
         result = df.values.tolist()
         return self.return_assert_data(result, expected, table_name, key)
-        
+               
     
-    
-        
-        # if len(df) == 0:
-        #     try:
-        #         df = self.get_csv_file_as_df(directory=directory, table_name=table_name)
-        #     except FileNotFoundError:
-        #         if expected == None:
-        #             return True, ''
-        #         raise
-        # if fields == '__all__':
-        #     result = df.values.tolist()
-        # else:
-        #     result = df[fields].values.tolist()
-        # return self.return_assert_data(result, expected, df, return_df)
-        
-        
-        
-    def make_3_row_df_from_file(self, file_name, directory=SetUp.output_dir, sub_dir='core', rows=3, fields=[]):
+    def make_3_mmrow_df_from_file(self, file_name, directory=SetUp.output_dir, sub_dir='core', rows=3, fields=[]):
         """ 
-        returns pd.DataFrame() string that is ready to be pasted in to the _data file. Fields can
+        returns columns and data lists ready to be inserted into a fixture in the _data file. Fields can
         the be edited. e.g.
-        return pd.DataFrame(
-                columns=['field_1', 'field_2', 'field_3'],
-                data=[
-                    ['field_1_row_1', 'field_2_row_1', 'field_3_row_1'],
-                    ['field_1_row_2', 'field_2_row_2', 'field_3_row_2'],
-                    ['field_1_row_3', 'field_2_row_3', 'field_3_row_3'],
-                ]
-        )
+            columns=['field_1', 'field_2', 'field_3'],
+            data=[['field_1_row_1', 'field_2_row_1', 'field_3_row_1'],['field_1_row_2', 'field_2_row_2', 'field_3_row_2']]
         """
         path = os.path.join(directory, sub_dir, '{}.csv'.format(file_name))
         df = pd.read_csv(path, engine='python')
@@ -406,3 +300,50 @@ class DataframeTest:
         string += "\n)\n{0}".format('-'*100)
         
         return string
+    
+        
+    def create_fixture_ready_data_from_file(self, file_name, directory=SetUp.output_dir, sub_dir='core', rows=3, fields=[]):
+        """ 
+        returns pd.DataFrame() string that is ready to be pasted in to the _data file and 
+        columns & data lists ready to be pasted into the fixtures object. Fields can
+        the be edited. e.g.
+        return pd.DataFrame(
+                columns=['field_1', 'field_2', 'field_3'],
+                data=[
+                    ['field_1_row_1', 'field_2_row_1', 'field_3_row_1'],
+                    ['field_1_row_2', 'field_2_row_2', 'field_3_row_2'],
+                ]
+        )
+        columns=['field_1', 'field_2', 'field_3']
+           data=[['field_1_row_1', 'field_2_row_1', 'field_3_row_1'],['field_1_row_2', 'field_2_row_2', 'field_3_row_2']]
+        """
+        if sub_dir:
+            path = os.path.join(directory, sub_dir, '{}.csv'.format(file_name))
+        else:
+            path = os.path.join(directory, '{}.csv'.format(file_name))
+        df = pd.read_csv(path, engine='python')
+        if len(fields) > 0:
+            df = df[fields]
+        df = df.iloc[0:rows]
+        values = df.values.tolist()
+        # create the 'ready df string'
+        df_string = "\n{0} Dataframe data {0}\nreturn pd.DataFrame(\n\tcolumns=".format('-'*40)
+        df_string += str(list(df.columns))
+        df_string += ",\n\tdata=["
+        for val in values:
+            df_string += "\n\t\t{0},".format(str(val))
+        if len(values) > 0:
+            df_string += "\n\t]"
+        else:
+            df_string += "]"
+        df_string += "\n)\n"
+        
+        # create the 'fixture ready string'
+        fix_string = "{0} Fixture data {0}\ncolumns=".format('-'*40)
+        fix_string += str(list(df.columns))
+        fix_string += "\n   data=["
+        for val in values:
+            fix_string += "{0},".format(str(val))
+        fix_string += "]\n{0}".format('-'*100)
+        
+        return df_string + fix_string

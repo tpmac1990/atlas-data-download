@@ -39,3 +39,7 @@ output print functions: pytest -s
 ### create database dump
 pg_dump --port=5432 --username=postgres --host=localhost --dbname=atlas > atlas_dump.sql
 
+
+### testing
+all tests passing at:
+pytest -s functions/tests/

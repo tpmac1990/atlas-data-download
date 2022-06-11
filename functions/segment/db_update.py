@@ -964,7 +964,8 @@ def clear_db_table_rows_in_lst(conn, table, field, lst):
     cur = conn.cursor()
     lst_count = len(lst)
     if lst_count == 1:
-        command = "DELETE FROM %s WHERE %s = CAST(%s AS varchar)"%(table,field,lst[0])
+        # command = "DELETE FROM %s WHERE %s = CAST(%s AS varchar)"%(table,field,lst[0])
+        command = "DELETE FROM %s WHERE %s = %s"%(table,field,lst[0])
     else:
         command = "DELETE FROM %s WHERE %s IN %s"%(table,field,tuple(lst))
     

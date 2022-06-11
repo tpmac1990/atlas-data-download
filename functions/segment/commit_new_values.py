@@ -9,6 +9,7 @@ import ctypes
 import csv
 import psycopg2
 import sqlalchemy
+from cachetools import cached, TTLCache
 
 from functions.common.timer import Timer
 from functions.common.directory_files import get_json
@@ -19,7 +20,7 @@ from functions.logging.logger import logger
 from functions.common.constants import *
 
 
-
+cache = TTLCache(maxsize=100, ttl=120)
 class UpdateMissingData:
 
     def __init__(self):
@@ -27,6 +28,7 @@ class UpdateMissingData:
 
         self.core_dir = os.path.join(SetUp.output_dir,'core')
         self.update_dir = os.path.join(SetUp.output_dir,'update')
+        self.convert_dir = SetUp.convert_dir
 
         access_configs = get_json(os.path.join(SetUp.configs_dir,'db_access_configs.json'))
         self.configs = get_json(os.path.join(SetUp.configs_dir,'commit_updates.json'))
@@ -38,19 +40,6 @@ class UpdateMissingData:
 
         self.manual_update_path = os.path.join(self.update_dir,'manual_update_required.csv')
         self.missing_all_path = os.path.join(self.update_dir,'missing_all.csv')
-        manual_update_df = pd.read_csv(self.manual_update_path)
-        manual_update_df = manual_update_df[['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH']]
-        missing_all_df = pd.read_csv(self.missing_all_path)
-
-        # save the remaining rows from the 'manual_update_required' that are yet to have the correct value assigned
-        self.re_reduced_df = manual_update_df[manual_update_df['LIKELY_MATCH'].isnull()]
-        self.re_full_df = missing_all_df.merge(self.re_reduced_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH'])
-
-        # filter for rows that have had a matching updating value added to LIKELY_MATCH
-        self.manual_update_df = manual_update_df[~manual_update_df['LIKELY_MATCH'].isnull()]
-        self.missing_all_df = missing_all_df.merge(self.manual_update_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH']).drop_duplicates()
-        
-
 
 
     def apply_missing_data_updates(self):
@@ -68,20 +57,20 @@ class UpdateMissingData:
         logger(message="Apply Missing Data Updates", category=1)
 
         try:
-            configs = self.configs
+            
+            # find all the values that haven't had a LIKELY_MATCH value applied
+            re_reduced_df, re_full_df = self.get_remaining_manual_updates()
 
             # commit changes to the database
-            for x in configs:
-                logger(message=f"Working on field '{x}'", category=4)
-                self.commit_fields_updated_data(x,configs[x])
+            self.commit_changes_to_db()
 
             # overwrite the update files with the remaining rows that had no new value to apply, the user will then be able to update the value at a later date
-            self.re_reduced_df.to_csv(self.manual_update_path,index=False)
-            self.re_full_df.to_csv(self.missing_all_path,index=False)
+            re_reduced_df.to_csv(self.manual_update_path,index=False)
+            re_full_df.to_csv(self.missing_all_path,index=False)
 
             self.con.close()
             self.conn.close()
-            complete_script__restore()
+            # complete_script__restore() # I think this should be deleted. Doesn't make sense
 
         except:
             complete_script__restore()
@@ -92,8 +81,37 @@ class UpdateMissingData:
         logger(message='Committed missing values to database and files: %s' %(timer.time_past()), category=4)
         print('Manual data updates complete')
         sys.exit(1)
+        
+    @cached(cache)
+    def create_missing_and_update_dfs(self):
+        raw_manual_update_df = pd.read_csv(self.manual_update_path)
+        required_field_manual_update_df = raw_manual_update_df[['STATE','GROUP','FIELD','ORIGINAL','LIKELY_MATCH']]
+        raw_missing_all_df = pd.read_csv(self.missing_all_path)
+        return required_field_manual_update_df, raw_missing_all_df
+
+    def get_remaining_manual_updates(self):
+        """ gets the LIKELY_MATCH values that are still null. These will be ignore for now """
+        required_field_manual_update_df, raw_missing_all_df = self.create_missing_and_update_dfs()
+        # save the remaining rows from the 'manual_update_required' that are yet to have the correct value assigned
+        re_reduced_df = required_field_manual_update_df[required_field_manual_update_df['LIKELY_MATCH'].isnull()]
+        re_full_df = raw_missing_all_df.merge(re_reduced_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH'])
+        return re_reduced_df, re_full_df
+
+    def get_required_manual_updates_and_missing_dfs(self):
+        """ manual_update_df: LIKELY_MATCH is not null so we can apply the value to the tables """
+        required_field_manual_update_df, raw_missing_all_df = self.create_missing_and_update_dfs()
+        # filter for rows that have had a matching updating value added to LIKELY_MATCH
+        manual_update_df = required_field_manual_update_df[~required_field_manual_update_df['LIKELY_MATCH'].isnull()]
+        missing_all_df = raw_missing_all_df.merge(manual_update_df,left_on=['STATE','GROUP','FIELD','VALUE'],right_on=['STATE','GROUP','FIELD','ORIGINAL'],how='inner').drop(columns=['ORIGINAL','LIKELY_MATCH']).drop_duplicates()
+        return manual_update_df, missing_all_df
 
 
+    def commit_changes_to_db(self):
+        configs = self.configs
+        for x in configs:
+            logger(message=f"Working on field '{x}'", category=4)
+            self.commit_fields_updated_data(field=x,configs=configs[x])
+        
 
     def commit_fields_updated_data(self,field,configs):
         '''
@@ -133,8 +151,8 @@ class UpdateMissingData:
 
         con = self.con
         conn = self.conn
-        manual_update_df = self.manual_update_df
-        missing_all_df = self.missing_all_df
+        
+        manual_update_df, missing_all_df = self.get_required_manual_updates_and_missing_dfs()
 
         # get the reduced missing values for this field
         reduced_miss_df = manual_update_df[manual_update_df['FIELD'] == field]
@@ -144,9 +162,9 @@ class UpdateMissingData:
             return
 
         config = configs['update_core']
-        raw_path = get_path(SetUp.convert_dir,config['raw_file'])
-        id_path = get_path(self.core_dir,config['id_file']['name'])
-        ind_path = get_path(self.core_dir,config['ind_file'])
+        raw_path = get_path(self.convert_dir, config['raw_file'])
+        id_path = get_path(self.core_dir, config['id_file']['name'])
+        ind_path = get_path(self.core_dir, config['ind_file'])
 
         raw_df = open_file_as_df(raw_path)
         id_df = open_file_as_df(id_path)
@@ -154,6 +172,7 @@ class UpdateMissingData:
 
         # filter the missing df that includes the 'ind' values for the target field
         miss_df = missing_all_df.query('FIELD == "%s"'%(field))
+        
         # merge the recorded missing value with formatted value manually given to it
         miss_left_on = config['miss_merge']['left_on']
         miss_right_on = config['miss_merge']['right_on']
@@ -164,12 +183,11 @@ class UpdateMissingData:
         left_on = config['id_file']['left_on']
         index = config['id_file']['index']
         remove_temp = config['remove_temp']
-
+        self
         # df of the reduced_miss_df rows that exist in the id_df
         existing_ids_df = reduced_miss_df.merge(id_df,left_on=left_on,right_on=right_on,how='left')
         # filter for only the rows that don't exist in the id_df. These will be added to the id_df and assigned an _id which will be used in the ind_df later. 
         to_add_df = existing_ids_df[existing_ids_df[index].isnull()][['LIKELY_MATCH']].drop_duplicates().rename(columns={'LIKELY_MATCH':right_on})
-
         # single column of values to remove from the id_df. required for holder where the temp unformatted names are removed and the new fromatted names are added
         if remove_temp:
             # only the 'LIKELY MATCH' values that don't exist in the id_df need to be removed. A previous error was the result of removing all 'ORIGINAL' names, even the names that didn't change and this
@@ -179,9 +197,8 @@ class UpdateMissingData:
         else:
             to_remove_df = pd.DataFrame([],columns=[right_on])
 
-
         id_df, to_add_df, remove_id_df = add_missing_rows_to_id_df(id_df,to_add_df,to_remove_df,config['df_build'])
-
+        
         # match the missing values with their _id value from the id_df
         ind_merge_df = old_to_new_merge_df.merge(id_df,left_on=left_on,right_on=right_on,how='left')[['IND',index]]
         columns = config['db_update']['columns']
@@ -221,13 +238,20 @@ class UpdateMissingData:
             # merge additions to the final ind_df
             ind_df = pd.concat((ind_df,ind_merge_df))
 
-
+        # getting or creating the new value in holder and then replacing _id values in holder
+        # create separate method
         elif db_add_style == 'holder':
-            # print(id_df[id_df['name'] == 'Burtorn Silver Pty Ltd'])
             # get the unformatted and formatted values
             old_new_name_df = reduced_miss_df[['ORIGINAL','LIKELY_MATCH']]
-            # match the old names with their id's. these have been deleted from the id_df so they are retrieved from the 'remove_id_df'
-            old_ids_df = old_new_name_df.merge(remove_id_df,left_on='ORIGINAL',right_on='name',how='left')
+            # 
+            if not remove_id_df.empty:
+                # match the old names with their id's. these have been deleted from the id_df so they are retrieved from the 'remove_id_df'
+                old_ids_df = old_new_name_df.merge(remove_id_df,left_on='ORIGINAL',right_on='name',how='left')
+            else:
+                old_ids_df = old_new_name_df.merge(id_df,left_on='ORIGINAL',right_on='name',how='left')
+                remove_id_df = old_ids_df
+                # breakpoint()
+                
             # match the new names with their ids
             name_to_id_df = reduced_miss_df.merge(id_df,left_on='LIKELY_MATCH',right_on='name',how='left')
             # join the df's so the the old id's are matched with the new ids
@@ -245,7 +269,6 @@ class UpdateMissingData:
             ind_df = pd.concat((remain_ind_df,ind_merge_df))
 
 
-
         # save the files and commit to the db
         # save raw_df
         if raw_update:
@@ -255,6 +278,7 @@ class UpdateMissingData:
             # remove ind_df rows
             clear_db_rows(conn, config['ind_file'], '_id', index_lst)
             # remove and add new id_df rows
+            # breakpoint()
             clear_db_rows(conn, config['id_file']['name'], '_id', remove_id_df['_id'].to_list())
 
         # append new id_df rows to the db and save to csv. This is for files like OccName where new names need to be added to give them an id
@@ -293,13 +317,12 @@ def add_missing_rows_to_id_df(id_df,to_add_df,to_remove_df,configs):
     ''' if it is permitted then add the new values to the id_df so the next time the data is updated this value will have an _id.
         return the to_add_df as well as this will be inserted into the db table
     ''' 
-    # print(to_add_df[to_add_df['name'] == 'Burtorn Silver Pty Ltd'])
     if configs and not to_add_df.empty:
         # filter out the remove values and return them in their own df. if 'to_remove_df' is empty then it will return an empty df and id_df will be unchanged. only used for holder where the temp names need to be removed
         col_name = to_remove_df.columns[0]
         remove_id_df = id_df[id_df[col_name].isin(to_remove_df[col_name])]
         id_df = id_df[~id_df[col_name].isin(to_remove_df[col_name])]
-        next_id = id_df['_id'].max() + 1
+        next_id = id_df['_id'].max() + 1 if len(id_df['_id']) else 1
         to_add_df['_id'] = np.arange(next_id, len(to_add_df) + next_id)
         dic = insert_date_in_date_fields(configs)
         for i in dic:
@@ -308,6 +331,7 @@ def add_missing_rows_to_id_df(id_df,to_add_df,to_remove_df,configs):
     else:
         # return an empty df to prevent error
         remove_id_df = pd.DataFrame()
+    
     return id_df, to_add_df, remove_id_df
 
 

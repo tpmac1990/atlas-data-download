@@ -46,6 +46,12 @@ HOLDER = 'Holder'
 TEST_TABLE = 'TestTable' # used for tests when table name is irrelevant
 HOLDER_LISTED = 'holder_listed'
 PARENT = 'Parent'
+TENHOLDER = 'TenHolder'
+
+COMPANIES_R = 'Companies_R'
+
+MANUAL_UPDATE_REQUIRED = 'manual_update_required'
+MISSING_ALL = 'missing_all'
 
 OCCURRENCE_CHANGE = 'OccurrenceChange'
 TENEMENT_CHANGE = 'TenementChange'
@@ -80,6 +86,8 @@ MSG = 'msg'
 DIRECTORIES = 'directories'
 CORE_CSV = 'core_csv'
 EDIT_CSV = 'edit_csv'
+UPDA_CSV = 'update_csv'
+CONV_CSV = 'convert_csv'
 DATABASE = 'database'
 TABLES = 'tables'
 COLUMNS = 'columns'
@@ -88,4 +96,6 @@ IN_PUT = 'input'
 OUTPUT = 'output'
 TREE = 'tree'
 STORE = 'store'
+FILE_NAME = 'file_name'
+PATHS = 'paths'
 

@@ -2,6 +2,7 @@ import pytest
 import sqlalchemy
 from functions.common.constants import *
 from functions.common.database_commands import drop_and_restore_db, pg_dump, drop_db
+from functions.common.db_functions import connect_psycopg2
 from .common import DB_DUMPS_DIR, DB_CONFIGS
 from functions.common.db_functions import drop_all_db_tables
 
@@ -19,6 +20,10 @@ def create_db():
 @pytest.fixture(autouse=True, scope=FUNCTION)
 def sqlalchemy_engine():
     return sqlalchemy.create_engine(f'postgresql://{POSTGRES}:{PASSWORD}@{LOCALHOST}/{TEST_DB}').connect()
+
+@pytest.fixture(autouse=True, scope=FUNCTION)
+def psycopg_conn():
+    return connect_psycopg2(DB_CONFIGS)
 
 
 @pytest.fixture(autouse=True, scope=FUNCTION)

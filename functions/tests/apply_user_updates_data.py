@@ -1,4 +1,3 @@
-import pandas as pd
 from functions.common.constants import *
 
 # NAME = {
